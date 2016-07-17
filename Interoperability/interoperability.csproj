@@ -48,8 +48,33 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BSE.Windows.Forms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b85b9027b614afef, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ExtLibs\BSE.Windows.Forms\bin\Release\BSE.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="GeoUtility, Version=3.1.7.5, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ExtLibs\GeoUtility\bin\Release\GeoUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ExtLibs\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="MissionPlanner.Controls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x86\Release\MissionPlanner.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ExtLibs\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ExtLibs\OpenTK.GLControl.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.WebRequest" />
@@ -61,30 +86,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Davis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Davis.Designer.cs">
+      <DependentUpon>Davis.cs</DependentUpon>
+    </Compile>
     <Compile Include="interoperability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\missionplanner\ExtLibs\GMap.NET.Core\GMap.NET.Core.csproj">
+    <ProjectReference Include="..\ExtLibs\GMap.NET.Core\GMap.NET.Core.csproj">
       <Project>{d0c39d9d-bed0-418b-9a5e-713176caf40c}</Project>
       <Name>GMap.NET.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\missionplanner\ExtLibs\GMap.NET.WindowsForms\GMap.NET.WindowsForms.csproj">
+    <ProjectReference Include="..\ExtLibs\GMap.NET.WindowsForms\GMap.NET.WindowsForms.csproj">
       <Project>{e06def77-f933-42fb-afd7-db2d0d8d6a98}</Project>
       <Name>GMap.NET.WindowsForms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\missionplanner\ExtLibs\Mavlink\MAVLink.csproj">
+    <ProjectReference Include="..\ExtLibs\Mavlink\MAVLink.csproj">
       <Project>{20296734-5f3c-4593-a0d5-dd20b440b13a}</Project>
       <Name>MAVLink</Name>
     </ProjectReference>
-    <ProjectReference Include="..\missionplanner\ExtLibs\Utilities\MissionPlanner.Utilities.csproj">
+    <ProjectReference Include="..\ExtLibs\Utilities\MissionPlanner.Utilities.csproj">
       <Project>{1378a66c-38e4-46f5-a05f-dc04ef7d4d16}</Project>
       <Name>MissionPlanner.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\missionplanner\MissionPlanner.csproj">
+    <ProjectReference Include="..\MissionPlanner.csproj">
       <Project>{a2e22272-95fe-47b6-b050-9ae7e2055bf5}</Project>
       <Name>MissionPlanner</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Davis.resx">
+      <DependentUpon>Davis.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

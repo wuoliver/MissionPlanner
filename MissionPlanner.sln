@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionPlanner", "MissionPlanner.csproj", "{A2E22272-95FE-47B6-B050-9AE7E2055BF5}"
 EndProject
@@ -69,6 +69,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibVLC.NET", "ExtLibs\LibVLC.NET\LibVLC.NET.csproj", "{BB06DFF7-4F41-4B9D-A3C3-3B6D2B8702B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SikRadio", "SikRadio\SikRadio.csproj", "{B8943726-04B0-4477-BFDA-E156A0CD98A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "interoperability", "Interoperability\interoperability.csproj", "{EE4813F0-6608-486C-99D6-A7297A1AF965}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -364,6 +366,18 @@ Global
 		{B8943726-04B0-4477-BFDA-E156A0CD98A4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B8943726-04B0-4477-BFDA-E156A0CD98A4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B8943726-04B0-4477-BFDA-E156A0CD98A4}.Release|x86.ActiveCfg = Release|Any CPU
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|x86.ActiveCfg = Debug|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Debug|x86.Build.0 = Debug|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|Mixed Platforms.Build.0 = Release|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|x86.ActiveCfg = Release|x86
+		{EE4813F0-6608-486C-99D6-A7297A1AF965}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -393,9 +407,6 @@ Global
 		{ABA78B2E-77C3-4377-8568-9542AC227971} = {7E264F12-9EC3-4CDC-A187-6879C2B2BFCF}
 		{B5211B56-CA30-4B2A-843B-832849F18CEA} = {9B3AC501-5FCB-4A2A-A628-BE0985DB2BD4}
 		{BB06DFF7-4F41-4B9D-A3C3-3B6D2B8702B6} = {7E264F12-9EC3-4CDC-A187-6879C2B2BFCF}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = MissionPlanner.csproj
