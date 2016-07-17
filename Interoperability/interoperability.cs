@@ -46,8 +46,6 @@ namespace Interoperability
         String username = "testuser";
         String password = "testpass";        
 
-        double pollfreq = 40; // This is temporary
-
         DateTime nextrun;
 
         Davis davis;
@@ -93,16 +91,16 @@ namespace Interoperability
                 +           "*                                   UTAT UAV                                  *\n"
                 +           "*                            Interoperability 0.0.1                           *\n"
                 +           "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
-            Console.WriteLine("Loop rate is " + pollfreq + " Hz.");
 
+            // Start interface
             davis = new Davis();
             davis.Show();
 
-            c = 0;
+            Console.WriteLine("Loop rate is " + davis.getPollRate() + " Hz.");
 
+            c = 0;
             nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
 
-            // Fuck everything
             Thread bg = new Thread(new ThreadStart(this.troll));
             bg.Start();
 
@@ -152,9 +150,9 @@ namespace Interoperability
                      * another way to do this of which I am unaware.
                      */
 
-                    for (;;)
+                    while (true)
                     {
-                        if (t.ElapsedMilliseconds > (1000 / pollfreq)) //(DateTime.Now >= nextrun)
+                        if (t.ElapsedMilliseconds > (1000 / davis.getPollRate())) //(DateTime.Now >= nextrun)
                         {
                             // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
                             csl = this.Host.cs;
@@ -171,9 +169,9 @@ namespace Interoperability
                                 oldalt = csl.altasl;
                                 oldhng = csl.yaw;
                             }
-                            if (count % pollfreq == 0)
+                            if (count % davis.getPollRate() == 0)
                             {
-                                davis.setAvgTelUploadText((averagedata_count / (count / pollfreq)) + "Hz");
+                                davis.setAvgTelUploadText((averagedata_count / (count / davis.getPollRate())) + "Hz");
                                 davis.setUniqueTelUploadText(uniquedata_count + "Hz");
                                 uniquedata_count = 0;
                             }
