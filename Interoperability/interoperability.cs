@@ -42,13 +42,17 @@ namespace Interoperability
         double c = 0;
         int loop_rate_hz = 10;
 
-        String address = "http://192.168.56.101"; //"http://100.65.92.156";
+        //Default credentials if credentials file does not exist
+        String address = "http://192.168.56.101"; 
         String username = "testuser";
         String password = "testpass";        
 
         DateTime nextrun;
+        private Thread bg;
+        bool _shouldStop = false;
 
-        Davis davis;
+        //Instantiate windows forms
+        interoperability.Interoperability davis;
 
         override public string Name
         {
@@ -93,54 +97,152 @@ namespace Interoperability
                 +           "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 
             // Start interface
-            davis = new Davis();
+            davis = new interoperability.Interoperability(this.interoperabilityAction);
             davis.Show();
+
 
             Console.WriteLine("Loop rate is " + davis.getPollRate() + " Hz.");
 
             c = 0;
             nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
 
-            Thread bg = new Thread(new ThreadStart(this.troll));
+            bg = new Thread(new ThreadStart(this.Telemetry_Upload));
             bg.Start();
 
             return (true);
         }
 
-        // Time for some anarchy
-        public async void troll()
+        public void interoperabilityAction(int action)
         {
+            switch (action)
+            {
+                case 0:
+                    Console.WriteLine("Telemetry_Upload Thread Stopped");
+                     _shouldStop = true;
+                    bg = new Thread(new ThreadStart(this.Telemetry_Upload));
+                    bg.Start();
+                    break;
+                case 1:
+                    Console.WriteLine("Thread Restarted");
+                    bg = new Thread(new ThreadStart(this.Telemetry_Upload));
+                    bg.Start();
+                    break;
+                default:
+                    break;
+            }
+            
+        }
 
+        // Time for some anarchy
+        public async void Telemetry_Upload()
+        {
             Stopwatch t = new Stopwatch();
             t.Start();
 
             int count = 0;
             CookieContainer cookies = new CookieContainer();
 
+            //Set up file paths to save default login information 
+            string path = Directory.GetCurrentDirectory() + @"\Interoperability";
+            Directory.CreateDirectory(path);
+            Console.WriteLine("The credentials directory is {0}", path);
+            //Do not change file name. 
+            path += @"\credentials.txt";
+
+            try
+            {
+               
+                if (File.Exists(path))
+                {
+                    //Create new filestream for streamreader to read
+                    using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        Console.WriteLine("Credential File Exists, Opening File");
+                        using (StreamReader sr = new StreamReader(fs))
+                        {
+                            //Assuming nobody messed with the original file, we read each line into their respective variables
+                            String[] credentials = new String[3];
+                            for (int i = 0; i < 3; i++)
+                            {
+                                //Going to do some error checking in the future, in case people mess with file
+                                credentials[i] = sr.ReadLine();
+                            }
+                            address = credentials[0];
+                            username = credentials[1];
+                            password = credentials[2];
+                            Console.WriteLine(address + username + password);
+                            sr.Close();
+                        }
+                        fs.Close();
+                    }
+                }
+                //File does not exist, we create a new file, and write the default server credentials 
+                else
+                {
+                    using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        Console.WriteLine("Credential File Does not Exist, Creating File");
+
+                        using (StreamWriter sw = new StreamWriter(fs))
+                        {
+                            sw.WriteLine(address);
+                            sw.WriteLine(username);
+                            sw.WriteLine(password);
+                            sw.Close();
+                        }
+                        fs.Close();
+                    }
+                }
+            }
+            catch(FileNotFoundException)
+            {
+                Console.WriteLine("we have failed :(");
+                //Should do something...not sure what for now
+            }
+
+
             try
             {
                 using (var client = new HttpClient())
                 {
+                    //bool successful_login = false;
+                    //while (!successful_login)
+                   // {
+                        client.BaseAddress = new Uri(address); // This seems to change every time
 
-                    client.BaseAddress = new Uri(address); // This seems to change every time
+                        // Log in.
+                        Console.WriteLine("---INITIAL LOGIN---");
+                        var v = new Dictionary<string, string>();
+                        v.Add("username", username);
+                        v.Add("password", password);
+                        var auth = new FormUrlEncodedContent(v);
+                        HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
+                        Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+                        Console.WriteLine("---LOGIN FINISHED---");
 
-                    // Log in.
-                    Console.WriteLine("---INITIAL LOGIN---");
-                    var v = new Dictionary<string, string>();
-                    v.Add("username", username);
-                    v.Add("password", password);
-                    var auth = new FormUrlEncodedContent(v);
-                    HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
-                    Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
-                    Console.WriteLine("---LOGIN FINISHED---");
-      
+                        if (resp.Content.ReadAsStringAsync().Result == "Invalid Credentials.")
+                        {
+                            Console.WriteLine("Invalid Credentials");
+                            davis.setAvgTelUploadText("Error, Invalid Credentials.");
+                            davis.setUniqueTelUploadText("Error, Invalid Credentials");
+                            _shouldStop = true;
+                        //successful_login = false;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Credentials Valid");
+                            _shouldStop = false;    
+                        //successful_login = true;
+                        }
+                   // }
+                    //I'm not sure how the cookie is being handled, but it works somehow. Need to ask Jesse how he managed to do it
                     /*** GET COOKIE ***/
 
                     CurrentState csl = this.Host.cs;
 
                     
-                    double lat = csl.lat, lng = csl.lng, alt = csl.altasl, hng = csl.yaw;
-                    double oldlat = 0, oldlng = 0, oldalt = 0, oldhng = 0;
+                    double lat = csl.lat, lng = csl.lng, alt = csl.altasl, yaw = csl.yaw;
+                    double oldlat = 0, oldlng = 0, oldalt = 0, oldyaw = 0;
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
 
@@ -150,51 +252,75 @@ namespace Interoperability
                      * another way to do this of which I am unaware.
                      */
 
-                    while (true)
+                    while (!_shouldStop)
+                    //while(false)
                     {
-                        if (t.ElapsedMilliseconds > (1000 / davis.getPollRate())) //(DateTime.Now >= nextrun)
+                        //Doesn't work, need another way to do this
+                        if (davis.getPollRate() != 0)
                         {
-                            // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
-                            csl = this.Host.cs;
-                            lat = csl.lat;
-                            lng = csl.lng;
-                            alt = csl.altasl;
-                            hng = csl.yaw;
-                            if (lat!= oldlat || lng != oldlng || alt!= oldalt || hng != oldhng)
+                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(davis.getPollRate()))) //(DateTime.Now >= nextrun)
                             {
-                                uniquedata_count++;
-                                averagedata_count++;
-                                oldlat = csl.lat;
-                                oldlng = csl.lng;
-                                oldalt = csl.altasl;
-                                oldhng = csl.yaw;
-                            }
-                            if (count % davis.getPollRate() == 0)
-                            {
-                                davis.setAvgTelUploadText((averagedata_count / (count / davis.getPollRate())) + "Hz");
-                                davis.setUniqueTelUploadText(uniquedata_count + "Hz");
-                                uniquedata_count = 0;
-                            }
+                                // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
+                                csl = this.Host.cs;
+                                lat = csl.lat;
+                                lng = csl.lng;
+                                alt = csl.altasl;
+                                yaw = csl.yaw;
+                                if (lat != oldlat || lng != oldlng || alt != oldalt || yaw != oldyaw)
+                                {
+                                    uniquedata_count++;
+                                    averagedata_count++;
+                                    oldlat = csl.lat;
+                                    oldlng = csl.lng;
+                                    oldalt = csl.altasl;
+                                    oldyaw = csl.yaw;
+                                }
+                                if (count % davis.getPollRate() == 0)
+                                {
+                                    davis.setAvgTelUploadText((averagedata_count / (count / davis.getPollRate())) + "Hz");
+                                    davis.setUniqueTelUploadText(uniquedata_count + "Hz");
+                                    uniquedata_count = 0;
+                                }
 
-                            t.Restart();
-                            Console.WriteLine("RUN " + count);
-                            this.TrollLoop(/*writer,*/client);
-                            count++;
+                                t.Restart();
+                                Console.WriteLine("RUN " + count);
+                                //this.TrollLoop(/*writer,*/client);
+
+                                var vthing = new Dictionary<string, string>();
+
+                                CurrentState cs = this.Host.cs;
+                                // double lat = cs.lat, lng = cs.lng, alt = cs.altasl, yaw = cs.yaw;
+
+                                // var v = new Dictionary<string, string>();
+                                vthing.Add("latitude", lat.ToString("F10"));
+                                vthing.Add("longitude", lng.ToString("F10"));
+                                vthing.Add("altitude_msl", alt.ToString("F10"));
+                                vthing.Add("uas_heading", yaw.ToString("F10"));
+                                //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
+
+                                var telem = new FormUrlEncodedContent(vthing);
+                                HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
+                                Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
+
+                                count++;
+                            }
                         }
                     }
+                    _shouldStop = false;
                 }
             }
-            catch (HttpRequestException hre)
+            catch//(HttpRequestException)
             {
-                // Why doesn't this catch?
-                Console.WriteLine("HttpRequestException: " + hre.GetBaseException()); // What the hell does this
+                //<h1>403 Forbidden</h1> 
+                Console.WriteLine("Error, problem authenticating");
             }
         }
 
         // BE CAREFUL, THIS IS SKETCHY AS FUCK
+        // We also don't need this until later :) 
         public /*virtual int*/ async void TrollLoop(/*StreamWriter writer,*/ HttpClient client) 
         {
-            Console.WriteLine("LOOP TIME -> " + DateTime.Now.ToString());
+            //Console.WriteLine("LOOP TIME -> " + DateTime.Now.ToString());
 
             CurrentState cs = this.Host.cs;
             double lat = cs.lat, lng = cs.lng, alt = cs.altasl, yaw = cs.yaw;

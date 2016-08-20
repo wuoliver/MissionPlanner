@@ -94,6 +94,12 @@
     </Compile>
     <Compile Include="interoperability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExtLibs\GMap.NET.Core\GMap.NET.Core.csproj">
@@ -120,6 +126,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Davis.resx">
       <DependentUpon>Davis.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

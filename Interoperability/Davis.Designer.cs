@@ -1,6 +1,6 @@
 ﻿namespace interoperability
 {
-    partial class Davis
+    partial class Interoperability
     {
         /// <summary>
         /// Required designer variable.
@@ -35,6 +35,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pollRateInput = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.Server_Settings = new System.Windows.Forms.Button();
             this.applyPollRateButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -94,10 +95,11 @@
             this.pollRateInput.Name = "pollRateInput";
             this.pollRateInput.Size = new System.Drawing.Size(156, 20);
             this.pollRateInput.TabIndex = 5;
-            this.pollRateInput.Text = "40";
+            this.pollRateInput.Text = "10";
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.Server_Settings);
             this.panel1.Controls.Add(this.applyPollRateButton);
             this.panel1.Controls.Add(this.pollRateInput);
             this.panel1.Controls.Add(this.label3);
@@ -107,8 +109,18 @@
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(430, 95);
+            this.panel1.Size = new System.Drawing.Size(430, 136);
             this.panel1.TabIndex = 3;
+            // 
+            // Server_Settings
+            // 
+            this.Server_Settings.Location = new System.Drawing.Point(6, 110);
+            this.Server_Settings.Name = "Server_Settings";
+            this.Server_Settings.Size = new System.Drawing.Size(131, 23);
+            this.Server_Settings.TabIndex = 7;
+            this.Server_Settings.Text = "Sever Settings";
+            this.Server_Settings.UseVisualStyleBackColor = true;
+            this.Server_Settings.Click += new System.EventHandler(this.Server_Settings_Click);
             // 
             // applyPollRateButton
             // 
@@ -120,14 +132,14 @@
             this.applyPollRateButton.UseVisualStyleBackColor = true;
             this.applyPollRateButton.Click += new System.EventHandler(this.applyPollRateButton_Click);
             // 
-            // Davis
+            // Interoperability
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(454, 111);
+            this.ClientSize = new System.Drawing.Size(455, 163);
             this.Controls.Add(this.panel1);
             this.MaximizeBox = false;
-            this.Name = "Davis";
+            this.Name = "Interoperability";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Davis";
             this.panel1.ResumeLayout(false);
@@ -146,8 +158,6 @@
         private System.Windows.Forms.TextBox pollRateInput;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button applyPollRateButton;
-
-
-
+        private System.Windows.Forms.Button Server_Settings;
     }
 }

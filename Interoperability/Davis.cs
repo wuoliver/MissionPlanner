@@ -10,13 +10,18 @@ using System.Windows.Forms;
 
 namespace interoperability
 {
-    public partial class Davis : Form
+    public partial class Interoperability : Form
     {
-        protected int pollRate = 40;
+        Action<int> restartInteroperabilityCallback;
+        protected int pollRate = 10;
+        interoperability.Settings settings_gui;
 
-        public Davis()
+        public Interoperability(Action<int> _restartInteroperabilityCallback)
         {
             InitializeComponent();
+            restartInteroperabilityCallback = _restartInteroperabilityCallback;
+
+            pollRateInput.Text = pollRate.ToString();
         }
 
         public int getPollRate()
@@ -24,6 +29,10 @@ namespace interoperability
             return pollRate;
         }
 
+        public Settings getSettings_GUI()
+        {
+            return settings_gui;
+        }
         private const int CP_NOCLOSE_BUTTON = 0x200;
         protected override CreateParams CreateParams
         {
@@ -86,5 +95,16 @@ namespace interoperability
                 this.pollRateInput.Text = pollRate.ToString();
             }
         }
+
+        private void Server_Settings_Click(object sender, EventArgs e)
+        {   
+            if (!Settings.isOpened)
+            {
+                settings_gui = new Settings(restartInteroperabilityCallback);
+                settings_gui.Show();
+            }
+
+        }
+
     }
 }
