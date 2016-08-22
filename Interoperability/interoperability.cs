@@ -12,12 +12,16 @@ using MissionPlanner;
 using MissionPlanner.Utilities;
 using MissionPlanner.GCSViews;
 
+
 using MissionPlanner.Plugin;
 
 // Davis was here
 // One or both of these is for HTTP requests. I forget which one
 using System.Net;
 using System.Net.Http;
+
+//For javascript serializer
+using System.Web.Script.Serialization;
 
 using System.IO; // For logging
 
@@ -37,22 +41,63 @@ using interoperability;
 
 namespace Interoperability
 {
+
+
+    public class Moving_Obstacle
+    {
+        public float altitude_msl { get; set; }
+        public float latitude { get; set; }
+        public float longitude { get; set; }
+        public float sphere_radius { get; set; }
+
+        public void printall()
+        {
+            Console.WriteLine("Altitude_MSL: " + altitude_msl + "\nLatitude: " + latitude + "\nLongitude: " + longitude + "\nSphere_Radius: " + sphere_radius);
+        }
+    }
+
+    public class Stationary_Obstacle
+    {
+        public float cylinder_height { get; set; }
+        public float cylinder_radius { get; set; }
+        public float latitude { get; set; }
+        public float longitude { get; set; }
+
+
+        public void printall()
+        {
+            Console.WriteLine("Cylinder Height: " + cylinder_height + "\nLatitude: " + latitude + "\nLongitude: " + longitude + "\nCylinder radius: " + cylinder_radius);
+        }
+    }
+
+    public class Obstacles
+    {
+        public List<Moving_Obstacle> moving_obstacles;
+        public List<Stationary_Obstacle> stationary_obstacles;
+    }
+
     public class Interoperability : Plugin
     {
         double c = 0;
         int loop_rate_hz = 10;
 
         //Default credentials if credentials file does not exist
-        String address = "http://192.168.56.101"; 
-        String username = "testuser";
-        String password = "testpass";        
+        String Default_address = "http://192.168.56.101";
+        String Default_username = "testuser";
+        String Default_password = "testpass";
 
         DateTime nextrun;
-        private Thread bg;
-        bool _shouldStop = false;
+        private Thread Telemetry_Thread;        //Endabled by default
+        private Thread Obstacle_SDA_Thread;     //Disabled by default
+        bool Telemetry_Upload_shouldStop = false;
+        bool Obstacle_SDA_shouldStop = false;
+
+        bool resetUploadStats = false;
+
+
 
         //Instantiate windows forms
-        interoperability.Interoperability davis;
+        interoperability.Interoperability Interoperability_GUI;
 
         override public string Name
         {
@@ -79,8 +124,8 @@ namespace Interoperability
             }
             set
             {
-                nextrun = value;
-                // nextrun = DateTime.Now;
+                //nextrun = value;
+                nextrun = DateTime.Now;
             }
         }
 
@@ -91,23 +136,23 @@ namespace Interoperability
         override public bool Init()
         {
             // System.Windows.Forms.MessageBox.Show("Pong");
-            Console.Write(  "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
-                +           "*                                   UTAT UAV                                  *\n"
-                +           "*                            Interoperability 0.0.1                           *\n"
-                +           "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
+            Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
+                + "*                                   UTAT UAV                                  *\n"
+                + "*                            Interoperability 0.0.1                           *\n"
+                + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 
             // Start interface
-            davis = new interoperability.Interoperability(this.interoperabilityAction);
-            davis.Show();
+            Interoperability_GUI = new interoperability.Interoperability(this.interoperabilityAction);
+            Interoperability_GUI.Show();
 
 
-            Console.WriteLine("Loop rate is " + davis.getPollRate() + " Hz.");
+            Console.WriteLine("Loop rate is " + Interoperability_GUI.getPollRate() + " Hz.");
 
             c = 0;
             nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
 
-            bg = new Thread(new ThreadStart(this.Telemetry_Upload));
-            bg.Start();
+            Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+            Telemetry_Thread.Start();
 
             return (true);
         }
@@ -116,31 +161,45 @@ namespace Interoperability
         {
             switch (action)
             {
+                //Stop then restart Telemetry_Upload Thread
                 case 0:
-                    Console.WriteLine("Telemetry_Upload Thread Stopped");
-                     _shouldStop = true;
-                    bg = new Thread(new ThreadStart(this.Telemetry_Upload));
-                    bg.Start();
+                    Telemetry_Upload_shouldStop = true;
+                    Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+                    Telemetry_Upload_shouldStop = false;
+                    Telemetry_Thread.Start();
                     break;
+                //Start Obstacle_SDA Thread
+                //Fix so that you can only start 1 thread at a time
                 case 1:
-                    Console.WriteLine("Thread Restarted");
-                    bg = new Thread(new ThreadStart(this.Telemetry_Upload));
-                    bg.Start();
+                        Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+                        Obstacle_SDA_Thread.Start();      
+                    break;
+                //Stop Obstacle_SDA Thread
+                case 2:
+                    Obstacle_SDA_shouldStop = true;
+                    break;
+                case 3:
+                    break;
+                //Reset Telemetry Upload Rate Stats
+                case 4:
+                    resetUploadStats = true;
                     break;
                 default:
                     break;
             }
-            
+
         }
 
-        // Time for some anarchy
         public async void Telemetry_Upload()
         {
+            Console.WriteLine("Telemetry_Upload Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
 
             int count = 0;
             CookieContainer cookies = new CookieContainer();
+
+            string address, username, password;
 
             //Set up file paths to save default login information 
             string path = Directory.GetCurrentDirectory() + @"\Interoperability";
@@ -148,10 +207,10 @@ namespace Interoperability
             Console.WriteLine("The credentials directory is {0}", path);
             //Do not change file name. 
             path += @"\credentials.txt";
-
+            
             try
             {
-               
+
                 if (File.Exists(path))
                 {
                     //Create new filestream for streamreader to read
@@ -170,7 +229,7 @@ namespace Interoperability
                             address = credentials[0];
                             username = credentials[1];
                             password = credentials[2];
-                            Console.WriteLine(address + username + password);
+                            Console.WriteLine("Address: " + address + "\nUsername: " + username + "\nPassword: " + password);
                             sr.Close();
                         }
                         fs.Close();
@@ -185,18 +244,26 @@ namespace Interoperability
 
                         using (StreamWriter sw = new StreamWriter(fs))
                         {
-                            sw.WriteLine(address);
-                            sw.WriteLine(username);
-                            sw.WriteLine(password);
+                            sw.WriteLine(Default_address);
+                            sw.WriteLine(Default_username);
+                            sw.WriteLine(Default_password);
+
+                            address = Default_address;
+                            username = Default_username;
+                            password = Default_password;
                             sw.Close();
                         }
                         fs.Close();
                     }
                 }
             }
-            catch(FileNotFoundException)
+            catch
             {
-                Console.WriteLine("we have failed :(");
+                Console.WriteLine("File opening fail");
+                //Use default credentials for now
+                address = Default_address;
+                username = Default_username;
+                password = Default_password;
                 //Should do something...not sure what for now
             }
 
@@ -207,40 +274,40 @@ namespace Interoperability
                 {
                     //bool successful_login = false;
                     //while (!successful_login)
-                   // {
-                        client.BaseAddress = new Uri(address); // This seems to change every time
+                    // {
+                    client.BaseAddress = new Uri(address); // This seems to change every time
 
-                        // Log in.
-                        Console.WriteLine("---INITIAL LOGIN---");
-                        var v = new Dictionary<string, string>();
-                        v.Add("username", username);
-                        v.Add("password", password);
-                        var auth = new FormUrlEncodedContent(v);
-                        HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
-                        Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
-                        Console.WriteLine("---LOGIN FINISHED---");
+                    // Log in.
+                    Console.WriteLine("---INITIAL LOGIN---");
+                    var v = new Dictionary<string, string>();
+                    v.Add("username", username);
+                    v.Add("password", password);
+                    var auth = new FormUrlEncodedContent(v);
+                    //Get authentication cookie. Cookie is automatically sent after being sent
+                    HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
+                    Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+                    Console.WriteLine("---LOGIN FINISHED---");
 
-                        if (resp.Content.ReadAsStringAsync().Result == "Invalid Credentials.")
-                        {
-                            Console.WriteLine("Invalid Credentials");
-                            davis.setAvgTelUploadText("Error, Invalid Credentials.");
-                            davis.setUniqueTelUploadText("Error, Invalid Credentials");
-                            _shouldStop = true;
-                        //successful_login = false;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Credentials Valid");
-                            _shouldStop = false;    
-                        //successful_login = true;
-                        }
-                   // }
-                    //I'm not sure how the cookie is being handled, but it works somehow. Need to ask Jesse how he managed to do it
-                    /*** GET COOKIE ***/
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Invalid Credentials");
+                        Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
+                        Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
+                        Telemetry_Upload_shouldStop = true;
+
+                    }
+                    else
+                    {
+                        Console.WriteLine("Credentials Valid");
+                        Telemetry_Upload_shouldStop = false;
+
+                    }
+
+
 
                     CurrentState csl = this.Host.cs;
 
-                    
+
                     double lat = csl.lat, lng = csl.lng, alt = csl.altasl, yaw = csl.yaw;
                     double oldlat = 0, oldlng = 0, oldalt = 0, oldyaw = 0;
                     int uniquedata_count = 0;
@@ -252,13 +319,13 @@ namespace Interoperability
                      * another way to do this of which I am unaware.
                      */
 
-                    while (!_shouldStop)
+                    while (!Telemetry_Upload_shouldStop)
                     //while(false)
                     {
                         //Doesn't work, need another way to do this
-                        if (davis.getPollRate() != 0)
+                        if (Interoperability_GUI.getPollRate() != 0)
                         {
-                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(davis.getPollRate()))) //(DateTime.Now >= nextrun)
+                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getPollRate()))) //(DateTime.Now >= nextrun)
                             {
                                 // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
                                 csl = this.Host.cs;
@@ -275,15 +342,22 @@ namespace Interoperability
                                     oldalt = csl.altasl;
                                     oldyaw = csl.yaw;
                                 }
-                                if (count % davis.getPollRate() == 0)
+                                if (count % Interoperability_GUI.getPollRate() == 0)
                                 {
-                                    davis.setAvgTelUploadText((averagedata_count / (count / davis.getPollRate())) + "Hz");
-                                    davis.setUniqueTelUploadText(uniquedata_count + "Hz");
+                                    Interoperability_GUI.setAvgTelUploadText((averagedata_count / (count / Interoperability_GUI.getPollRate())) + "Hz");
+                                    Interoperability_GUI.setUniqueTelUploadText(uniquedata_count + "Hz");
                                     uniquedata_count = 0;
                                 }
+                                if (resetUploadStats)
+                                {
+                                    uniquedata_count = 0;
+                                    averagedata_count = 0;
+                                    resetUploadStats = false;
+                                }
+
 
                                 t.Restart();
-                                Console.WriteLine("RUN " + count);
+                                //Console.WriteLine("RUN " + count);
                                 //this.TrollLoop(/*writer,*/client);
 
                                 var vthing = new Dictionary<string, string>();
@@ -306,19 +380,160 @@ namespace Interoperability
                             }
                         }
                     }
-                    _shouldStop = false;
                 }
             }
+
+            //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
             catch//(HttpRequestException)
             {
                 //<h1>403 Forbidden</h1> 
-                Console.WriteLine("Error, problem authenticating");
+                Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
+                Interoperability_GUI.setUniqueTelUploadText("Error, Unable to Connect to Server");
+                Console.WriteLine("Error, exception thrown in telemtry upload thread");
+            }
+
+
+        }
+
+        //This is where we periodically download the obstacles from the server 
+        public async void Obstacle_SDA()
+        {
+            Stopwatch t = new Stopwatch();
+            t.Start();
+
+            int count = 0;
+            CookieContainer cookies = new CookieContainer();
+
+            string address, username, password;
+
+            //Set up file paths to save default login information 
+            string path = Directory.GetCurrentDirectory() + @"\Interoperability";
+            Directory.CreateDirectory(path);
+            Console.WriteLine("The credentials directory is {0}", path);
+            //Do not change file name. 
+            path += @"\credentials.txt";
+
+            try
+            {
+                //Create new filestream for streamreader to read
+                using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    Console.WriteLine("Credential File Exists, Opening File");
+                    using (StreamReader sr = new StreamReader(fs))
+                    {
+                        //Assuming nobody messed with the original file, we read each line into their respective variables
+                        String[] credentials = new String[3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            //Going to do some error checking in the future, in case people mess with file
+                            credentials[i] = sr.ReadLine();
+                        }
+                        address = credentials[0];
+                        username = credentials[1];
+                        password = credentials[2];
+
+                        address = Default_address;
+                        username = Default_username;
+                        password = Default_password;
+                        sr.Close();
+                    }
+                    fs.Close();
+                }
+            }
+            catch
+            {
+                Console.WriteLine("File opening fail");
+                //Use default credentials for now
+                address = Default_address;
+                username = Default_username;
+                password = Default_password;
+                //Should do something...not sure what for now
+            }
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+
+                    client.BaseAddress = new Uri(address); // This seems to change every time
+
+                    // Log in.
+                    Console.WriteLine("---INITIAL LOGIN---");
+                    var v = new Dictionary<string, string>();
+                    v.Add("username", username);
+                    v.Add("password", password);
+                    var auth = new FormUrlEncodedContent(v);
+                    HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
+                    Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+                    Console.WriteLine("---LOGIN FINISHED---");
+                    //resp.IsSuccessStatusCode;
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Invalid Credentials");
+                        Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
+                        Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
+                        Obstacle_SDA_shouldStop = true;
+                        //successful_login = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Credentials Valid");
+                        Obstacle_SDA_shouldStop = false;
+                        //successful_login = true;
+                    }
+
+
+
+                    while (!Obstacle_SDA_shouldStop)
+                    {
+
+                        HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
+                        Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
+                        count++;
+
+                        // the code that you want to measure comes here
+                        Console.WriteLine("outputting formatted data");
+                        var watch = System.Diagnostics.Stopwatch.StartNew();
+                        Obstacles obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
+
+                        watch.Stop();
+                        var elapsedMs = watch.ElapsedMilliseconds;
+                        Console.WriteLine("Elapsed Miliseconds: " + elapsedMs);
+
+                        Console.WriteLine("\tPRINTING MOVING OBSTACLES");
+                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                        {
+                            obstaclesList.moving_obstacles[i].printall();
+                        }
+                        Console.WriteLine("\tPRINTING STATIONARY OBSTACLES");
+                        for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
+                        {
+                            obstaclesList.stationary_obstacles[i].printall();
+                        }
+
+
+                        Interoperability_GUI.setObstacles(ref obstaclesList);
+
+                        //Need to figure out how to draw polygons on MP map
+                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834281, -79.240994));
+                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834290, -79.240994));
+                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834281, -79.240999));
+                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834261, -79.240991));
+
+                        Obstacle_SDA_shouldStop = false;
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
             }
         }
 
+
         // BE CAREFUL, THIS IS SKETCHY AS FUCK
         // We also don't need this until later :) 
-        public /*virtual int*/ async void TrollLoop(/*StreamWriter writer,*/ HttpClient client) 
+        public /*virtual int*/ async void TrollLoop(/*StreamWriter writer,*/ HttpClient client)
         {
             //Console.WriteLine("LOOP TIME -> " + DateTime.Now.ToString());
 
@@ -328,14 +543,14 @@ namespace Interoperability
             var v = new Dictionary<string, string>();
             v.Add("latitude", lat.ToString("F10"));
             v.Add("longitude", lng.ToString("F10"));
-            v.Add("altitude_msl",alt.ToString("F10"));
+            v.Add("altitude_msl", alt.ToString("F10"));
             v.Add("uas_heading", yaw.ToString("F10"));
             //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
 
             var telem = new FormUrlEncodedContent(v);
             HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
             Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
-            
+
             return;
         }
 
@@ -376,7 +591,7 @@ namespace Interoperability
             Console.WriteLine("The actual loop function worked??");
             return true;
         }
-        
+
 
         /// <summary>
         /// run at a specific hz rate.
@@ -395,32 +610,6 @@ namespace Interoperability
         override public bool Exit()
         {
             return (true);
-        }
-
-        public bool isStupid()
-        {
-            bool oliver = true;
-            if (oliver)
-            {
-                return true;
-            }
-            else
-            {
-                return oliver && true;
-            }
-        }
-
-        public bool isExtraStupid()
-        {
-            return isStupid();
-        }
-
-        public void bogusSort(int[] list)
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                list[i] = isExtraStupid() ? 1 : 0;
-            }
         }
     }
 }
