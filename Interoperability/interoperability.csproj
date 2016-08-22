@@ -47,6 +47,9 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BSE.Windows.Forms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b85b9027b614afef, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -78,6 +81,8 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -86,11 +91,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Davis.cs">
+    <Compile Include="Interoperability_GUI.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Davis.Designer.cs">
-      <DependentUpon>Davis.cs</DependentUpon>
+    <Compile Include="Interoperability_GUI.Designer.cs">
+      <DependentUpon>Interoperability_GUI.cs</DependentUpon>
     </Compile>
     <Compile Include="interoperability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -124,14 +129,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Davis.resx">
-      <DependentUpon>Davis.cs</DependentUpon>
+    <EmbeddedResource Include="Interoperability_GUI.resx">
+      <DependentUpon>Interoperability_GUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Program Files (x86)\Mission Planner\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Debug\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.pdb" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Release\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Release\interoperability.dll" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Release\plugins" /y</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
