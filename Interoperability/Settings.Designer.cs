@@ -1,6 +1,6 @@
-﻿namespace interoperability
+﻿namespace Interoperability_Settings_GUI
 {
-    partial class Settings
+    partial class Settings_GUI
     {
         /// <summary>
         /// Required designer variable.
