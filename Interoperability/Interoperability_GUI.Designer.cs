@@ -1,6 +1,6 @@
-﻿namespace Interoperability_Settings_GUI
+﻿namespace Interoperability_GUI
 {
-    partial class Interoperability
+    partial class Interoperability_GUI
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Interoperability));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Interoperability_GUI));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.uniqueTelUploadText = new System.Windows.Forms.TextBox();
@@ -53,10 +53,14 @@
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
+            this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.label9 = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
             this.Mission_Info_Tab.SuspendLayout();
+            this.Map_Tab.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -118,7 +122,7 @@
             // 
             // Server_Settings
             // 
-            this.Server_Settings.Location = new System.Drawing.Point(676, 12);
+            this.Server_Settings.Location = new System.Drawing.Point(1032, 12);
             this.Server_Settings.Name = "Server_Settings";
             this.Server_Settings.Size = new System.Drawing.Size(131, 23);
             this.Server_Settings.TabIndex = 7;
@@ -140,7 +144,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(279, 22);
+            this.label4.Location = new System.Drawing.Point(218, 18);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(228, 31);
             this.label4.TabIndex = 4;
@@ -150,12 +154,13 @@
             // 
             this.Interoperability_GUI_Tab.Controls.Add(this.Telem_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.SDA_Tab);
+            this.Interoperability_GUI_Tab.Controls.Add(this.Map_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Mission_Info_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 22);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
-            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(799, 461);
+            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(1151, 562);
             this.Interoperability_GUI_Tab.TabIndex = 8;
             // 
             // Telem_Tab
@@ -176,7 +181,7 @@
             this.Telem_Tab.Location = new System.Drawing.Point(4, 22);
             this.Telem_Tab.Name = "Telem_Tab";
             this.Telem_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Telem_Tab.Size = new System.Drawing.Size(791, 435);
+            this.Telem_Tab.Size = new System.Drawing.Size(1143, 536);
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
@@ -230,20 +235,21 @@
             // 
             // SDA_Tab
             // 
+            this.SDA_Tab.Controls.Add(this.label9);
             this.SDA_Tab.Controls.Add(this.SDA_Obstacles);
             this.SDA_Tab.Controls.Add(this.SDA_Test_Button);
             this.SDA_Tab.Controls.Add(this.label5);
             this.SDA_Tab.Location = new System.Drawing.Point(4, 22);
             this.SDA_Tab.Name = "SDA_Tab";
             this.SDA_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.SDA_Tab.Size = new System.Drawing.Size(791, 435);
+            this.SDA_Tab.Size = new System.Drawing.Size(1143, 536);
             this.SDA_Tab.TabIndex = 1;
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
             // 
             // SDA_Obstacles
             // 
-            this.SDA_Obstacles.Location = new System.Drawing.Point(20, 111);
+            this.SDA_Obstacles.Location = new System.Drawing.Point(17, 140);
             this.SDA_Obstacles.Multiline = true;
             this.SDA_Obstacles.Name = "SDA_Obstacles";
             this.SDA_Obstacles.ReadOnly = true;
@@ -277,7 +283,7 @@
             this.Mission_Info_Tab.Controls.Add(this.label8);
             this.Mission_Info_Tab.Location = new System.Drawing.Point(4, 22);
             this.Mission_Info_Tab.Name = "Mission_Info_Tab";
-            this.Mission_Info_Tab.Size = new System.Drawing.Size(791, 435);
+            this.Mission_Info_Tab.Size = new System.Drawing.Size(1143, 536);
             this.Mission_Info_Tab.TabIndex = 3;
             this.Mission_Info_Tab.Text = "Mission Info";
             this.Mission_Info_Tab.UseVisualStyleBackColor = true;
@@ -307,16 +313,62 @@
             this.TargetUpload_Tab.Location = new System.Drawing.Point(4, 22);
             this.TargetUpload_Tab.Name = "TargetUpload_Tab";
             this.TargetUpload_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.TargetUpload_Tab.Size = new System.Drawing.Size(791, 435);
+            this.TargetUpload_Tab.Size = new System.Drawing.Size(1143, 536);
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Map_Tab
+            // 
+            this.Map_Tab.Controls.Add(this.gMapControl1);
+            this.Map_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Map_Tab.Name = "Map_Tab";
+            this.Map_Tab.Size = new System.Drawing.Size(1143, 536);
+            this.Map_Tab.TabIndex = 4;
+            this.Map_Tab.Text = "Map";
+            this.Map_Tab.UseVisualStyleBackColor = true;
+            // 
+            // gMapControl1
+            // 
+            this.gMapControl1.Bearing = 0F;
+            this.gMapControl1.CanDragMap = true;
+            this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
+            this.gMapControl1.GrayScaleMode = false;
+            this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
+            this.gMapControl1.LevelsKeepInMemmory = 5;
+            this.gMapControl1.Location = new System.Drawing.Point(16, 12);
+            this.gMapControl1.MarkersEnabled = true;
+            this.gMapControl1.MaxZoom = 20;
+            this.gMapControl1.MinZoom = 4;
+            this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
+            this.gMapControl1.Name = "gMapControl1";
+            this.gMapControl1.NegativeMode = false;
+            this.gMapControl1.PolygonsEnabled = true;
+            this.gMapControl1.RetryLoadTile = 0;
+            this.gMapControl1.RoutesEnabled = true;
+            this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
+            this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
+            this.gMapControl1.ShowTileGridLines = false;
+            this.gMapControl1.Size = new System.Drawing.Size(1102, 468);
+            this.gMapControl1.TabIndex = 0;
+            this.gMapControl1.Zoom = 0D;
+            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(14, 112);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(124, 13);
+            this.label9.TabIndex = 8;
+            this.label9.Text = "Obstacle Information";
             // 
             // Interoperability
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(823, 495);
+            this.ClientSize = new System.Drawing.Size(1175, 596);
             this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.Interoperability_GUI_Tab);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -331,6 +383,7 @@
             this.SDA_Tab.PerformLayout();
             this.Mission_Info_Tab.ResumeLayout(false);
             this.Mission_Info_Tab.PerformLayout();
+            this.Map_Tab.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -361,5 +414,8 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button Mission_Enable;
+        private System.Windows.Forms.TabPage Map_Tab;
+        private GMap.NET.WindowsForms.GMapControl gMapControl1;
+        private System.Windows.Forms.Label label9;
     }
 }

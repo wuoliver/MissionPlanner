@@ -18,7 +18,7 @@ using Interoperability;
 
 
 
-namespace Interoperability_Settings_GUI
+namespace Interoperability_GUI
 {
     public partial class Settings_GUI : Form
     {

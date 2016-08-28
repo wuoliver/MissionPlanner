@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Xml;
 using GMap.NET;
@@ -153,29 +154,28 @@ namespace Interoperability
 
     public class Interoperability : Plugin
     {
-        double c = 0;
-        int loop_rate_hz = 10;
-
         //Default credentials if credentials file does not exist
         String Default_address = "http://192.168.56.101";
         String Default_username = "testuser";
         String Default_password = "testpass";
 
-        DateTime nextrun;
         private Thread Telemetry_Thread;        //Endabled by default
         private Thread Obstacle_SDA_Thread;     //Disabled by default
         private Thread Mission_Thread;          //Disabled by default
+        private Thread Map_Thread;              //Enabled by default
+
         bool Telemetry_Upload_shouldStop = false;   //Used to start/stop the telemtry thread
         bool Obstacle_SDA_shouldStop = false;       //Used to start/stop the SDA thread
         bool Mission_Download_shouldStop = false;   //Used to start/stop the Misison thread
-        bool resetUploadStats = false;
+        bool resetUploadStats = false;              //Used to reset telemetry upload stats
+        bool Obstacles_Downloaded = false;          //Used to tell the map control thread we can access obstaclesList 
 
-        Interoperability_Settings Settings;
-
+        Obstacles obstaclesList;                    //Instance that holds all SDA Obstacles 
+        Interoperability_Settings Settings;         //Instance that holds all Interoperability Settings
 
 
         //Instantiate windows forms
-        global::Interoperability_Settings_GUI.Interoperability Interoperability_GUI;
+        global::Interoperability_GUI.Interoperability_GUI Interoperability_GUI;
 
         override public string Name
         {
@@ -190,23 +190,7 @@ namespace Interoperability
             get { return ("Jesse, Davis, Oliver"); }
         }
 
-        /// <summary>
-        /// this is the datetime loop will run next and can be set in loop, to override the loophzrate
-        /// </summary>
-        // Commented because it's just easier to use loopratehz
-        override public DateTime NextRun
-        {
-            get
-            {
-                return nextrun;
-            }
-            set
-            {
-                //nextrun = value;
-                nextrun = DateTime.Now;
-            }
-        }
-
+        
         /// <summary>
         /// Run First, checking plugin
         /// </summary>
@@ -221,19 +205,16 @@ namespace Interoperability
 
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
-            //Settings.Save();
             Settings.Load();
 
             // Start interface
-            Interoperability_GUI = new global::Interoperability_Settings_GUI.Interoperability(this.interoperabilityAction, Settings);
+            Interoperability_GUI = new global::Interoperability_GUI.Interoperability_GUI(this.interoperabilityAction, Settings);
             Interoperability_GUI.Show();
 
 
-            Console.WriteLine("Loop rate is " + Interoperability_GUI.getPollRate() + " Hz.");
+            Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
 
-            c = 0;
-            nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
-
+            loopratehz = 10;
 
             //Must have this started, or bad things will happen
             Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
@@ -261,6 +242,8 @@ namespace Interoperability
                 case 1:
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
                     Obstacle_SDA_Thread.Start();
+                    Map_Thread = new Thread(new ThreadStart(this.Map_Control));
+                    Map_Thread.Start();
                     //test_function();
                     break;
                 //Stop Obstacle_SDA Thread
@@ -289,6 +272,8 @@ namespace Interoperability
             MissionPlanner.Utilities.Settings test = this.Host.config;
             test["CMB_rateattitude"] = "1";
             test.Save();
+
+            //this.Host.FDMenuMap.
         }
 
         public void getLogin(ref string address, ref string username, ref string password)
@@ -372,9 +357,9 @@ namespace Interoperability
                     {
                         //Doesn't work, need another way to do this
                         //If person sets speed to 0, then GUI crashes 
-                        if (Interoperability_GUI.getPollRate() != 0)
+                        if (Interoperability_GUI.getTelemPollRate() != 0)
                         {
-                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getPollRate()))) //(DateTime.Now >= nextrun)
+                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getTelemPollRate()))) //(DateTime.Now >= nextrun)
                             {
                                 // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
                                 csl = this.Host.cs;
@@ -391,9 +376,9 @@ namespace Interoperability
                                     oldalt = csl.altasl;
                                     oldyaw = csl.yaw;
                                 }
-                                if (count % Interoperability_GUI.getPollRate() == 0)
+                                if (count % Interoperability_GUI.getTelemPollRate() == 0)
                                 {
-                                    Interoperability_GUI.setAvgTelUploadText((averagedata_count / (count / Interoperability_GUI.getPollRate())) + "Hz");
+                                    Interoperability_GUI.setAvgTelUploadText((averagedata_count / (count / Interoperability_GUI.getTelemPollRate())) + "Hz");
                                     Interoperability_GUI.setUniqueTelUploadText(uniquedata_count + "Hz");
                                     uniquedata_count = 0;
                                 }
@@ -494,19 +479,16 @@ namespace Interoperability
                     {
 
                         HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
-                        Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
+                        //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
                         count++;
 
                         // the code that you want to measure comes here
                         Console.WriteLine("outputting formatted data");
-                        var watch = System.Diagnostics.Stopwatch.StartNew();
-                        Obstacles obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
+                        obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
 
-                        watch.Stop();
-                        var elapsedMs = watch.ElapsedMilliseconds;
-                        Console.WriteLine("Elapsed Miliseconds: " + elapsedMs);
+                        Obstacles_Downloaded = true;
 
-                        Console.WriteLine("\tPRINTING MOVING OBSTACLES");
+                        /*Console.WriteLine("\tPRINTING MOVING OBSTACLES");
                         for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
                         {
                             obstaclesList.moving_obstacles[i].printall();
@@ -515,18 +497,22 @@ namespace Interoperability
                         for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                         {
                             obstaclesList.stationary_obstacles[i].printall();
-                        }
+                        }*/
 
 
                         Interoperability_GUI.setObstacles(obstaclesList);
 
-                        //Need to figure out how to draw polygons on MP map
-                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834281, -79.240994));
-                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834290, -79.240994));
-                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834281, -79.240999));
-                        //this.Host.FPDrawnPolygon.Points.Add(new PointLatLng(43.834261, -79.240991));
+                        /*for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                        {
+                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius,
+                                obstaclesList.moving_obstacles[i].latitude, obstaclesList.moving_obstacles[i].longitude);
+                        }*/
 
-                        Obstacle_SDA_shouldStop = true;
+                        //Interoperability_GUI.addCirclePoly(100000, (float)75.746783, (float)-99.801085);
+
+                        System.Threading.Thread.Sleep(500);
+
+                        Obstacle_SDA_shouldStop = false;
                     }
                 }
             }
@@ -596,9 +582,53 @@ namespace Interoperability
             }
         }
 
+        public /*async*/ void Map_Control()
+        {
+            Stopwatch t = new Stopwatch();
+            t.Start();
+            bool Static_Overlays_Drawn = false;
+            string PolyName;
+
+            
+            //Add static overlays:
+            //Issue because need to wait until obstaclesList has loaded or been instantiated
+            
+            
+            while (true)
+            {
+                if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapPollRate())))
+                {
+                    Interoperability_GUI.MAP_Clear_Overlays();
+                    if (Obstacles_Downloaded)
+                    {
+                        if (!Static_Overlays_Drawn)
+                        {
+                            for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
+                            {
+                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius,
+                                    obstaclesList.stationary_obstacles[i].latitude, obstaclesList.stationary_obstacles[i].longitude);
+                            }
+                            Static_Overlays_Drawn = false;
+                        }
+                        
+                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                        {
+                            //PolyName = "StationaryObject" + i.ToString();
+                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius,
+                                obstaclesList.moving_obstacles[i].latitude, obstaclesList.moving_obstacles[i].longitude, "polygon");
+                        }                     
+                    }
+                    Interoperability_GUI.MAP_Update_Overlay();
+                    t.Restart();
+                }
+            }
+
+        }
+
         // BE CAREFUL, THIS IS SKETCHY AS FUCK
         // We also don't need this until later :) 
-        public /*virtual int*/ async void TrollLoop(/*StreamWriter writer,*/ HttpClient client)
+        public /*virtual int*/
+                async void TrollLoop(/*StreamWriter writer,*/ HttpClient client)
         {
             //Console.WriteLine("LOOP TIME -> " + DateTime.Now.ToString());
 
@@ -629,44 +659,18 @@ namespace Interoperability
 
             // Attempt to login to server?
 
-            return (false);
+            return (true);
         }
 
-        /// <summary>
-        /// for future expansion
-        /// </summary>
-        /// <param name="gui"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        /*public virtual bool SetupUI(int gui = 0, object data = null)
-        {
-            // Figure this out later. Would be useful to indicate on MP that the plugin is doing something
-
-            return true;
-        }*/
 
         /// <summary>
         /// Run at NextRun time - loop is run in a background thread. and is shared with other plugins
         /// </summary>
         /// <returns></returns>
-
         override public bool Loop()
         {
-            // Do nothing, because this is broken.
-            Console.WriteLine("The actual loop function worked??");
+
             return true;
-        }
-
-
-        /// <summary>
-        /// run at a specific hz rate.
-        /// </summary>
-        override public /*virtual*/ float loopratehz
-        {
-            get { return (loop_rate_hz); }
-
-            set { loopratehz = loop_rate_hz; }
-
         }
 
         /// <summary>
@@ -675,6 +679,9 @@ namespace Interoperability
         /// <returns></returns>
         override public bool Exit()
         {
+            Map_Thread.Abort();
+            Telemetry_Thread.Abort();
+            Obstacle_SDA_Thread.Abort();
             return (true);
         }
     }

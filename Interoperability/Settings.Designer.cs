@@ -1,4 +1,4 @@
-﻿namespace Interoperability_Settings_GUI
+﻿namespace Interoperability_GUI
 {
     partial class Settings_GUI
     {
