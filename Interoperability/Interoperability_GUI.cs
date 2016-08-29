@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,8 @@ namespace Interoperability_GUI
     {
         Action<int> restartInteroperabilityCallback;
         protected int telemPollRate = 10;
-        protected int mapPollRate = 60;
+        protected int mapRefreshRate = 20;
+        protected int sdaPollRate = 10;
         global::Interoperability_GUI.Settings_GUI settings_gui;
         Interoperability_Settings Settings;
 
@@ -27,6 +29,7 @@ namespace Interoperability_GUI
         GMapOverlay Static_Overlay;
         GMapOverlay Stationary_Obstacle_Overlay;
         GMapOverlay polyOverlay;
+        GMapOverlay Plane_Overlay;
 
 
         public Interoperability_GUI(Action<int> _restartInteroperabilityCallback, Interoperability_Settings _Settings)
@@ -41,6 +44,7 @@ namespace Interoperability_GUI
 
             Static_Overlay = new GMapOverlay("Static_Overlays");
             Stationary_Obstacle_Overlay = new GMapOverlay("Stationary_Obstacles");
+            Plane_Overlay = new GMapOverlay("Plane_Overlay");
             polyOverlay = new GMapOverlay("Polygon");
         }
 
@@ -49,9 +53,13 @@ namespace Interoperability_GUI
             return telemPollRate;
         }
 
-        public int getMapPollRate()
+        public int getMapRefreshRate()
         {
-            return mapPollRate;
+            return mapRefreshRate;
+        }
+        public int getsdaPollRate()
+        {
+            return sdaPollRate;
         }
 
         public Settings_GUI getSettings_GUI()
@@ -183,18 +191,29 @@ namespace Interoperability_GUI
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
         }
 
-
-        public void MAP_addStaticPoly(List<PointLatLng> points, string name, Color Border_Color, Color Fill_Color, int width, int alpha)
+        //Used to add polygons to define things such as: 
+        // -Mission Area
+        // -Search Area
+        public void MAP_addStaticPoly(List<Waypoint> points, string name, Color Border_Color, Color Fill_Color, int width, int alpha)
         {
+            List<PointLatLng> _points = new List<PointLatLng>();
+            for (int i = 0; i < points.Count(); i++)
+            {
+                _points.Add(new PointLatLng(points[i].latitude, points[i].longitude));
+            }
+
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                GMapPolygon Static_Polygon = new GMapPolygon(points, name);
+                GMapPolygon Static_Polygon = new GMapPolygon(_points, name);
+                Static_Polygon.Stroke = new Pen(Border_Color, width);
+                Static_Polygon.Fill = new SolidBrush(Color.FromArgb(alpha, Fill_Color));
                 Static_Overlay.Polygons.Add(Static_Polygon);
-                gMapControl1.Overlays.Add(Static_Overlay);
+                //gMapControl1.Overlays.Add(Static_Overlay);
                 //gMapControl1.UpdatePolygonLocalPosition(polygon);
             });
         }
 
+        //Adds polygons for the stationary obstacles
         public void MAP_addSObstaclePoly(double radius, double Lat, double Lon)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
@@ -204,9 +223,13 @@ namespace Interoperability_GUI
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
 
+                //GMapMarker thing = new GMapMarker();
+                //thing.
+                marker
+
                 Stationary_Obstacle_Overlay.Polygons.Add(polygon);
-                gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
-                gMapControl1.UpdatePolygonLocalPosition(polygon);
+                //gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
+                //gMapControl1.UpdatePolygonLocalPosition(polygon);
             });
 
         }
@@ -214,7 +237,7 @@ namespace Interoperability_GUI
 
         public List<PointLatLng> getCirclePoly(double radius, double Lat, double Lon)
         {
-            int numPoints = 20;
+            int numPoints = 200;
             double tempY, tempX;
             double X, Y;
             List<PointLatLng> Points = new List<PointLatLng>();
@@ -252,6 +275,15 @@ namespace Interoperability_GUI
 
         }
 
+        public void MAP_updatePlaneLoc(PointLatLng Location, float Heading)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
+                Plane_Overlay.Markers.Add(marker);
+            });
+        }
+
         public void MAP_Update_Overlay()
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
@@ -260,6 +292,8 @@ namespace Interoperability_GUI
                 gMapControl1.Overlays.Add(polyOverlay);
                 gMapControl1.Overlays.Add(Static_Overlay);
                 gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
+                gMapControl1.Overlays.Add(Plane_Overlay);
+                gMapControl1.Invalidate();
             });
         }
         public void MAP_Clear_Overlays()
@@ -269,6 +303,7 @@ namespace Interoperability_GUI
                 polyOverlay.Clear();
                 Static_Overlay.Clear();
                 Stationary_Obstacle_Overlay.Clear();
+                Plane_Overlay.Clear();
             });
         }
 
@@ -341,6 +376,113 @@ namespace Interoperability_GUI
         private static double DegToRad(double deg)
         {
             return deg * DEG2RAD;
+        }
+    }
+
+
+
+    public class GMapMarkerPlane : GMapMarker
+    {
+        const float rad2deg = (float)(180 / Math.PI);
+        const float deg2rad = (float)(1.0 / rad2deg);
+
+        private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
+
+        float heading = 0;
+        //float cog = -1;
+        //float target = -1;
+        //float nav_bearing = -1;
+        //float radius = -1;
+
+        /*public GMapMarkerPlane(PointLatLng p, float heading, float cog, float nav_bearing, float target, float radius)
+            : base(p)
+        {
+            this.heading = heading;
+            this.cog = cog;
+            this.target = target;
+            this.nav_bearing = nav_bearing;
+            this.radius = radius;
+            Size = icon.Size;
+        }*/
+
+        public GMapMarkerPlane(PointLatLng p, float heading)
+            : base(p)
+        {
+            this.heading = heading;
+            Size = icon.Size;
+        }
+
+        public override void OnRender(Graphics g)
+        {
+            Matrix temp = g.Transform;
+            g.TranslateTransform(LocalPosition.X, LocalPosition.Y);
+
+            g.RotateTransform(-Overlay.Control.Bearing);
+
+            int length = 500;
+            // anti NaN
+            try
+            {
+                g.DrawLine(new Pen(Color.Red, 2), 0.0f, 0.0f, (float)Math.Cos((heading - 90) * deg2rad) * length,
+                    (float)Math.Sin((heading - 90) * deg2rad) * length);
+            }
+            catch
+            {
+            }
+            /*g.DrawLine(new Pen(Color.Green, 2), 0.0f, 0.0f, (float)Math.Cos((nav_bearing - 90) * deg2rad) * length,
+                (float)Math.Sin((nav_bearing - 90) * deg2rad) * length);
+            g.DrawLine(new Pen(Color.Black, 2), 0.0f, 0.0f, (float)Math.Cos((cog - 90) * deg2rad) * length,
+                (float)Math.Sin((cog - 90) * deg2rad) * length);
+            g.DrawLine(new Pen(Color.Orange, 2), 0.0f, 0.0f, (float)Math.Cos((target - 90) * deg2rad) * length,
+                (float)Math.Sin((target - 90) * deg2rad) * length);*/
+            // anti NaN
+           /* try
+            {
+                float desired_lead_dist = 100;
+
+                double width =
+                    (Overlay.Control.MapProvider.Projection.GetDistance(Overlay.Control.FromLocalToLatLng(0, 0),
+                        Overlay.Control.FromLocalToLatLng(Overlay.Control.Width, 0)) * 1000.0);
+                double m2pixelwidth = Overlay.Control.Width / width;
+
+                float alpha = ((desired_lead_dist * (float)m2pixelwidth) / radius) * rad2deg;
+
+                if (radius < -1)
+                {
+                    // fixme 
+
+                    float p1 = (float)Math.Cos((cog) * deg2rad) * radius + radius;
+
+                    float p2 = (float)Math.Sin((cog) * deg2rad) * radius + radius;
+
+                    g.DrawArc(new Pen(Color.HotPink, 2), p1, p2, Math.Abs(radius) * 2, Math.Abs(radius) * 2, cog, alpha);
+                }
+
+                else if (radius > 1)
+                {
+                    // correct
+
+                    float p1 = (float)Math.Cos((cog - 180) * deg2rad) * radius + radius;
+
+                    float p2 = (float)Math.Sin((cog - 180) * deg2rad) * radius + radius;
+
+                    g.DrawArc(new Pen(Color.HotPink, 2), -p1, -p2, radius * 2, radius * 2, cog - 180, alpha);
+                }
+            }
+            catch
+            {
+            }
+            */
+            try
+            {
+                g.RotateTransform(heading);
+            }
+            catch
+            {
+            }
+            g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2);
+
+            g.Transform = temp;
         }
     }
 }

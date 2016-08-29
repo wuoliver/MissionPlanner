@@ -47,9 +47,11 @@ namespace Interoperability
     //SDA Classes 
     public class Moving_Obstacle
     {
+        //Altitude in feet
         public float altitude_msl { get; set; }
         public float latitude { get; set; }
         public float longitude { get; set; }
+        //radius in feet
         public float sphere_radius { get; set; }
 
         public void printall()
@@ -60,8 +62,9 @@ namespace Interoperability
     }
 
     public class Stationary_Obstacle
-    {
+    {   //In feet
         public float cylinder_height { get; set; }
+        //In feet
         public float cylinder_radius { get; set; }
         public float latitude { get; set; }
         public float longitude { get; set; }
@@ -86,6 +89,28 @@ namespace Interoperability
         public float latitude { get; set; }
         public float longitude { get; set; }
         public int order { get; set; }
+        public Waypoint(float _latitude, float _longitude)
+        {
+            latitude = _latitude;
+            longitude = _longitude;
+        }
+        public Waypoint(double _latitude, double _longitude)
+        {
+            latitude = (float)_latitude;
+            longitude = (float)_longitude;
+        }
+
+        public Waypoint(float _altitude_msl, float _latitude, float _longitude)
+        {
+            latitude = _latitude;
+            longitude = _longitude;
+        }
+
+        public Waypoint(float _altitude_msl, float _latitude, float _longitude, int order)
+        {
+            latitude = _latitude;
+            longitude = _longitude;
+        }
     }
 
     public class GPS_Position
@@ -461,8 +486,8 @@ namespace Interoperability
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine("Invalid Credentials");
-                        Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
-                        Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
+                        //Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
+                        //Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
                         Obstacle_SDA_shouldStop = true;
                         //successful_login = false;
                     }
@@ -473,46 +498,39 @@ namespace Interoperability
                         //successful_login = true;
                     }
 
-
-
                     while (!Obstacle_SDA_shouldStop)
                     {
-
-                        HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
-                        //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
-                        count++;
-
-                        // the code that you want to measure comes here
-                        Console.WriteLine("outputting formatted data");
-                        obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
-
-                        Obstacles_Downloaded = true;
-
-                        /*Console.WriteLine("\tPRINTING MOVING OBSTACLES");
-                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                        if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getsdaPollRate())))
                         {
-                            obstaclesList.moving_obstacles[i].printall();
+
+                            HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
+                            //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
+                            count++;
+
+                            // the code that you want to measure comes here
+                            Console.WriteLine("outputting formatted data");
+                            obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
+
+                            Obstacles_Downloaded = true;
+
+                            /*Console.WriteLine("\tPRINTING MOVING OBSTACLES");
+                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                            {
+                                obstaclesList.moving_obstacles[i].printall();
+                            }
+                            Console.WriteLine("\tPRINTING STATIONARY OBSTACLES");
+                            for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
+                            {
+                                obstaclesList.stationary_obstacles[i].printall();
+                            }*/
+
+                            Interoperability_GUI.setObstacles(obstaclesList);
+
+                            System.Threading.Thread.Sleep(100);
+
+                            t.Restart();
+                            Obstacle_SDA_shouldStop = false;
                         }
-                        Console.WriteLine("\tPRINTING STATIONARY OBSTACLES");
-                        for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
-                        {
-                            obstaclesList.stationary_obstacles[i].printall();
-                        }*/
-
-
-                        Interoperability_GUI.setObstacles(obstaclesList);
-
-                        /*for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                        {
-                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius,
-                                obstaclesList.moving_obstacles[i].latitude, obstaclesList.moving_obstacles[i].longitude);
-                        }*/
-
-                        //Interoperability_GUI.addCirclePoly(100000, (float)75.746783, (float)-99.801085);
-
-                        System.Threading.Thread.Sleep(500);
-
-                        Obstacle_SDA_shouldStop = false;
                     }
                 }
             }
@@ -589,14 +607,37 @@ namespace Interoperability
             bool Static_Overlays_Drawn = false;
             string PolyName;
 
-            
+
             //Add static overlays:
             //Issue because need to wait until obstaclesList has loaded or been instantiated
-            
-            
+
+            //For testing right now. Will update when server has misison functionality added
+            List<Waypoint> Op_Area = new List<Waypoint>();
+            Op_Area.Add(new Waypoint(38.1462694, -76.4277778));
+            Op_Area.Add(new Waypoint(38.151625,  -76.4286833));
+            Op_Area.Add(new Waypoint(38.1518889, -76.4314667));
+            Op_Area.Add(new Waypoint(38.1505944, -76.4353611));
+            Op_Area.Add(new Waypoint(38.1475667, -76.4323417));
+            Op_Area.Add(new Waypoint(38.1446667, -76.4329472));
+            Op_Area.Add(new Waypoint(38.1432556, -76.4347667));
+            Op_Area.Add(new Waypoint(38.1404639, -76.4326361));
+            Op_Area.Add(new Waypoint(38.1407194, -76.4260139));
+            Op_Area.Add(new Waypoint(38.1437611, -76.4212056));
+            Op_Area.Add(new Waypoint(38.1473472, -76.4232111));
+            Op_Area.Add(new Waypoint(38.1461306, -76.4266528));
+
+            List<Waypoint> Search_Area = new List<Waypoint>();
+            Search_Area.Add(new Waypoint(38.1457306, -76.4295972));
+            Search_Area.Add(new Waypoint(38.1431861, -76.4338917));
+            Search_Area.Add(new Waypoint(38.1410028, -76.4322333));
+            Search_Area.Add(new Waypoint(38.1411917, -76.4269806));
+            Search_Area.Add(new Waypoint(38.1422194, -76.4261111));
+
+
             while (true)
             {
-                if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapPollRate())))
+                //Console.WriteLine("Elapsed Miliseconds: " + t.ElapsedMilliseconds);
+                if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapRefreshRate())))
                 {
                     Interoperability_GUI.MAP_Clear_Overlays();
                     if (Obstacles_Downloaded)
@@ -605,7 +646,7 @@ namespace Interoperability
                         {
                             for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                             {
-                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius,
+                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius* 0.3048,
                                     obstaclesList.stationary_obstacles[i].latitude, obstaclesList.stationary_obstacles[i].longitude);
                             }
                             Static_Overlays_Drawn = false;
@@ -614,17 +655,21 @@ namespace Interoperability
                         for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
                         {
                             //PolyName = "StationaryObject" + i.ToString();
-                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius,
+                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
                                 obstaclesList.moving_obstacles[i].latitude, obstaclesList.moving_obstacles[i].longitude, "polygon");
-                        }                     
+                        }
+
+                        Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Operation_Area", Color.Red, Color.Transparent, 3, 50);
+                        Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.yaw);
                     }
                     Interoperability_GUI.MAP_Update_Overlay();
                     t.Restart();
                 }
             }
-
+             
         }
-
+         
         // BE CAREFUL, THIS IS SKETCHY AS FUCK
         // We also don't need this until later :) 
         public /*virtual int*/
