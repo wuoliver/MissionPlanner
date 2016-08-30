@@ -188,7 +188,8 @@ namespace Interoperability_GUI
             gMapControl1.Position = new PointLatLng(38.145228, -76.427938); //AUVSI 
             gMapControl1.Zoom = 15;
             gMapControl1.MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance;
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
+            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
+            //GMap.NET.GMaps.Instance.
         }
 
         //Used to add polygons to define things such as: 
@@ -225,7 +226,7 @@ namespace Interoperability_GUI
 
                 //GMapMarker thing = new GMapMarker();
                 //thing.
-                marker
+                //marker;
 
                 Stationary_Obstacle_Overlay.Polygons.Add(polygon);
                 //gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
@@ -264,6 +265,9 @@ namespace Interoperability_GUI
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
                 polyOverlay.Polygons.Add(polygon);
+                
+                //GMarkerGoogle Test = new GmarkerGoogle();
+                //Test.Tag
                 //gMapControl1.Overlays.Add(polyOverlay);
 
 
@@ -275,11 +279,14 @@ namespace Interoperability_GUI
 
         }
 
-        public void MAP_updatePlaneLoc(PointLatLng Location, float Heading)
+        public void MAP_updatePlaneLoc(PointLatLng Location, float altitude, float Heading)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
+                //Show the altitude always
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = altitude.ToString("0");
                 Plane_Overlay.Markers.Add(marker);
             });
         }
@@ -379,15 +386,52 @@ namespace Interoperability_GUI
         }
     }
 
+    //Marker so we can add payload images to the map
+    public class GMapMarkerImage : GMapMarker
+    {
+        const float rad2deg = (float)(180 / Math.PI);
+        const float deg2rad = (float)(1.0 / rad2deg);
 
+        //private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
+        private readonly Bitmap icon; // icon = new Bitmap(path)
+        float heading = 0;
+        float altitude = 0;
+
+        public GMapMarkerImage(PointLatLng p, float heading, float altitude, string path)
+            : base(p)
+        {
+            this.heading = heading;
+            this.altitude = altitude;
+            icon = new Bitmap(path);
+            Size = icon.Size;
+        }
+
+        public override void OnRender(Graphics g)
+        {
+            Matrix temp = g.Transform;
+            g.TranslateTransform(LocalPosition.X, LocalPosition.Y);
+
+            g.RotateTransform(-Overlay.Control.Bearing);         
+            try
+            {
+                g.RotateTransform(heading);
+            }
+            catch
+            {
+            }
+            g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2);
+
+            g.Transform = temp;
+        }
+    }
 
     public class GMapMarkerPlane : GMapMarker
     {
         const float rad2deg = (float)(180 / Math.PI);
         const float deg2rad = (float)(1.0 / rad2deg);
 
-        private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
-
+        private readonly Bitmap icon =  global::MissionPlanner.Properties.Resources.planeicon;
+        //private readonly Bitmap icon = new Bitmap(@"C:\Trapezoid.bmp");
         float heading = 0;
         //float cog = -1;
         //float target = -1;

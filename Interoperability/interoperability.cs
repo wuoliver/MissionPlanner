@@ -661,7 +661,7 @@ namespace Interoperability
 
                         Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Operation_Area", Color.Red, Color.Transparent, 3, 50);
                         Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
-                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.yaw);
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw);
                     }
                     Interoperability_GUI.MAP_Update_Overlay();
                     t.Restart();
