@@ -1104,7 +1104,7 @@ namespace MissionPlanner.GCSViews
                     }
 
                     // update map
-                    if (tracklast.AddSeconds(1.0) < DateTime.Now)
+                    if (tracklast.AddSeconds(0.05) < DateTime.Now)
                     {
                         // show disable joystick button
                         if (MainV2.joystick != null && MainV2.joystick.enabled)
