@@ -14,65 +14,37 @@ using System.Threading;
 using System.Net;
 using System.Net.Http;
 
+using Interoperability;
 
 
-namespace interoperability
+
+namespace Interoperability_GUI
 {
-    public partial class Settings : Form
+    public partial class Settings_GUI : Form
     {
         string IP_ADDRESS_TEXT = "http://192.168.56.101";
         string USERNAME = "testuser";
         string PASSWORD = "testpass";
 
         Action<int> restartInteroperabilityCallback;
+        Interoperability_Settings Settings;
 
         public static bool isOpened = false;
 
-        public Settings(Action<int> _restartInteroperabilityCallback)
+        public Settings_GUI(Action<int> _restartInteroperabilityCallback, Interoperability_Settings _Settings)
         {
             isOpened = true;
             InitializeComponent();
             restartInteroperabilityCallback = _restartInteroperabilityCallback;
+            Settings = _Settings;
 
-            //Set up file paths to save default login information 
-            string path = Directory.GetCurrentDirectory() + @"\Interoperability\credentials.txt";
-           
-            try
-            {
+            IP_ADDRESS_TEXT = Settings["address"];
+            USERNAME = Settings["username"];
+            PASSWORD = Settings["password"];
 
-                if (File.Exists(path))
-                {
-                    //Create new filestream for streamreader to read
-                    using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None))
-                    {
-                        using (StreamReader sr = new StreamReader(fs))
-                        {
-                            String[] credentials = new String[3];
-                            for (int i = 0; i < 3; i++)
-                            {
-                                //Going to do some error checking in the future, in case people mess with file
-                                credentials[i] = sr.ReadLine();
-                            }
-                            IP_ADDRESS_TEXT = credentials[0];
-                            USERNAME = credentials[1];
-                            PASSWORD = credentials[2];
-
-                            IP_ADDR_BOX.Text = IP_ADDRESS_TEXT;
-                            USERNAME_BOX.Text = USERNAME;
-                            PASSWORD_BOX.Text = PASSWORD;
-                            fs.Close();
-                        }
-                        fs.Close();
-                    }
-                }
-                
-            }
-            catch (FileNotFoundException)
-            {
-                Console.WriteLine("we have failed :(");
-                //Should do something...not sure what for now
-            }
-
+            IP_ADDR_BOX.Text = IP_ADDRESS_TEXT;
+            USERNAME_BOX.Text = USERNAME;
+            PASSWORD_BOX.Text = PASSWORD;
         }
 
         private void IP_ADDR_BOX_TextChanged(object sender, EventArgs e)
@@ -88,7 +60,7 @@ namespace interoperability
 
         private void Settings_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Settings.isOpened = false;
+            Settings_GUI.isOpened = false;
         }
 
         private void USERNAME_BOX_TextChanged(object sender, EventArgs e)
@@ -109,33 +81,10 @@ namespace interoperability
 
         private void Save_Click(object sender, EventArgs e)
         {
-            //Set up file paths to save default login information 
-            string path = Directory.GetCurrentDirectory() + @"\Interoperability\credentials.txt";
-
-
-            Console.WriteLine("The current directory is {0}", path);
-            //Directory.CreateDirectory(path);
-            try
-            {
-                using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-                {
-                    Console.WriteLine("Saving New Credentials to File");
-                    using (StreamReader sr = new StreamReader(fs))
-                    {
-                        using (StreamWriter sw = new StreamWriter(fs))
-                        {
-                            sw.WriteLine(IP_ADDRESS_TEXT);
-                            sw.WriteLine(USERNAME);
-                            sw.WriteLine(PASSWORD);
-                        }
-                    }
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                Console.WriteLine("we have failed :(");
-                //Should do something...not sure what for now
-            }
+            Settings["address"] = IP_ADDRESS_TEXT;
+            Settings["username"] = USERNAME;
+            Settings["password"] =  PASSWORD;
+            Settings.Save();
 
             //restarts the interoperability thread, allowing for changes to be made
             restartInteroperabilityCallback(0);
