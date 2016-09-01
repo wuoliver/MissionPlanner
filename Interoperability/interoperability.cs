@@ -208,7 +208,7 @@ namespace Interoperability
         }
         override public string Version
         {
-            get { return ("0.2.1"); }
+            get { return ("0.3.1"); }
         }
         override public string Author
         {
@@ -225,16 +225,21 @@ namespace Interoperability
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
-                + "*                            Interoperability 0.0.1                           *\n"
+                + "*                            Interoperability 0.3.1                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 
+            Console.WriteLine("1");
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
+            Console.WriteLine("2");
             Settings.Load();
+            Console.WriteLine("3");
 
             // Start interface
             Interoperability_GUI = new global::Interoperability_GUI.Interoperability_GUI(this.interoperabilityAction, Settings);
+            Console.WriteLine("4");
             Interoperability_GUI.Show();
+            Console.WriteLine("5");
 
 
             Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
@@ -246,7 +251,7 @@ namespace Interoperability
             Telemetry_Thread.Start();
 
 
-
+            Console.WriteLine("End of init()");
 
             return (true);
         }
@@ -856,32 +861,36 @@ namespace Interoperability
 
         public void Load()
         {
-            using (XmlTextReader xmlreader = new XmlTextReader(GetFullPath()))
+            if (File.Exists(GetFullPath()))
             {
-                while (xmlreader.Read())
+                using (XmlTextReader xmlreader = new XmlTextReader(GetFullPath()))
                 {
-                    if (xmlreader.NodeType == XmlNodeType.Element)
+                    while (xmlreader.Read())
                     {
-                        try
+                        if (xmlreader.NodeType == XmlNodeType.Element)
                         {
-                            switch (xmlreader.Name)
+                            try
                             {
-                                case "Config":
-                                    break;
-                                case "xml":
-                                    break;
-                                default:
-                                    config[xmlreader.Name] = xmlreader.ReadString();
-                                    break;
+                                switch (xmlreader.Name)
+                                {
+                                    case "Config":
+                                        break;
+                                    case "xml":
+                                        break;
+                                    default:
+                                        config[xmlreader.Name] = xmlreader.ReadString();
+                                        break;
+                                }
                             }
-                        }
-                        // silent fail on bad entry
-                        catch (Exception)
-                        {
+                            // silent fail on bad entry
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
                 }
             }
+            
         }
 
         public void Save()

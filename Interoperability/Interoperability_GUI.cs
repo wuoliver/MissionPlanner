@@ -34,6 +34,8 @@ namespace Interoperability_GUI
 
         public Interoperability_GUI(Action<int> _restartInteroperabilityCallback, Interoperability_Settings _Settings)
         {
+            Console.WriteLine("Created GUI");
+
             InitializeComponent();
             restartInteroperabilityCallback = _restartInteroperabilityCallback;
 
@@ -161,7 +163,6 @@ namespace Interoperability_GUI
                 settings_gui = new Settings_GUI(restartInteroperabilityCallback, Settings);
                 settings_gui.Show();
             }
-
         }
 
         private void Reset_Stats_Click(object sender, EventArgs e)
