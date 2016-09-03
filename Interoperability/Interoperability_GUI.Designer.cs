@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Interoperability_GUI));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,27 +41,36 @@
             this.label4 = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab = new System.Windows.Forms.TabControl();
             this.Telem_Tab = new System.Windows.Forms.TabPage();
+            this.Start_Stop_Button = new System.Windows.Forms.Button();
             this.TelemServerResp = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.Total_Telem_Rate = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.Reset_Stats = new System.Windows.Forms.Button();
             this.SDA_Tab = new System.Windows.Forms.TabPage();
+            this.label9 = new System.Windows.Forms.Label();
             this.SDA_Obstacles = new System.Windows.Forms.TextBox();
             this.SDA_Test_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
+            this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.Map_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Mission_Info_Tab = new System.Windows.Forms.TabPage();
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
-            this.Map_Tab = new System.Windows.Forms.TabPage();
-            this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
-            this.label9 = new System.Windows.Forms.Label();
+            this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showSearchAreaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showObstaclesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showWaypointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
-            this.Mission_Info_Tab.SuspendLayout();
             this.Map_Tab.SuspendLayout();
+            this.Map_ContextMenuStrip.SuspendLayout();
+            this.Mission_Info_Tab.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -165,6 +175,7 @@
             // 
             // Telem_Tab
             // 
+            this.Telem_Tab.Controls.Add(this.Start_Stop_Button);
             this.Telem_Tab.Controls.Add(this.TelemServerResp);
             this.Telem_Tab.Controls.Add(this.label7);
             this.Telem_Tab.Controls.Add(this.Total_Telem_Rate);
@@ -185,6 +196,16 @@
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Start_Stop_Button
+            // 
+            this.Start_Stop_Button.Location = new System.Drawing.Point(209, 247);
+            this.Start_Stop_Button.Name = "Start_Stop_Button";
+            this.Start_Stop_Button.Size = new System.Drawing.Size(75, 23);
+            this.Start_Stop_Button.TabIndex = 12;
+            this.Start_Stop_Button.Text = "Start";
+            this.Start_Stop_Button.UseVisualStyleBackColor = true;
+            this.Start_Stop_Button.Click += new System.EventHandler(this.Start_Stop_Button_Click);
             // 
             // TelemServerResp
             // 
@@ -247,6 +268,16 @@
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(14, 112);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(124, 13);
+            this.label9.TabIndex = 8;
+            this.label9.Text = "Obstacle Information";
+            // 
             // SDA_Obstacles
             // 
             this.SDA_Obstacles.Location = new System.Drawing.Point(17, 140);
@@ -276,6 +307,50 @@
             this.label5.Size = new System.Drawing.Size(305, 31);
             this.label5.TabIndex = 5;
             this.label5.Text = "Sense Detect and Avoid";
+            // 
+            // Map_Tab
+            // 
+            this.Map_Tab.Controls.Add(this.gMapControl1);
+            this.Map_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Map_Tab.Name = "Map_Tab";
+            this.Map_Tab.Size = new System.Drawing.Size(1143, 536);
+            this.Map_Tab.TabIndex = 4;
+            this.Map_Tab.Text = "Map";
+            this.Map_Tab.UseVisualStyleBackColor = true;
+            // 
+            // gMapControl1
+            // 
+            this.gMapControl1.Bearing = 0F;
+            this.gMapControl1.CanDragMap = true;
+            this.gMapControl1.ContextMenuStrip = this.Map_ContextMenuStrip;
+            this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
+            this.gMapControl1.GrayScaleMode = false;
+            this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
+            this.gMapControl1.LevelsKeepInMemmory = 5;
+            this.gMapControl1.Location = new System.Drawing.Point(17, 16);
+            this.gMapControl1.MarkersEnabled = true;
+            this.gMapControl1.MaxZoom = 20;
+            this.gMapControl1.MinZoom = 4;
+            this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
+            this.gMapControl1.Name = "gMapControl1";
+            this.gMapControl1.NegativeMode = false;
+            this.gMapControl1.PolygonsEnabled = true;
+            this.gMapControl1.RetryLoadTile = 0;
+            this.gMapControl1.RoutesEnabled = true;
+            this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
+            this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
+            this.gMapControl1.ShowTileGridLines = false;
+            this.gMapControl1.Size = new System.Drawing.Size(1102, 468);
+            this.gMapControl1.TabIndex = 0;
+            this.gMapControl1.Zoom = 0D;
+            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
+            // 
+            // Map_ContextMenuStrip
+            // 
+            this.Map_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.displayToolStripMenuItem});
+            this.Map_ContextMenuStrip.Name = "contextMenuStrip1";
+            this.Map_ContextMenuStrip.Size = new System.Drawing.Size(113, 26);
             // 
             // Mission_Info_Tab
             // 
@@ -318,62 +393,58 @@
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
             // 
-            // Map_Tab
+            // displayToolStripMenuItem
             // 
-            this.Map_Tab.Controls.Add(this.gMapControl1);
-            this.Map_Tab.Location = new System.Drawing.Point(4, 22);
-            this.Map_Tab.Name = "Map_Tab";
-            this.Map_Tab.Size = new System.Drawing.Size(1143, 536);
-            this.Map_Tab.TabIndex = 4;
-            this.Map_Tab.Text = "Map";
-            this.Map_Tab.UseVisualStyleBackColor = true;
+            this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showGeofenceToolStripMenuItem,
+            this.showSearchAreaToolStripMenuItem,
+            this.showObstaclesToolStripMenuItem,
+            this.showPlaneToolStripMenuItem,
+            this.showWaypointsToolStripMenuItem});
+            this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
+            this.displayToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
+            this.displayToolStripMenuItem.Text = "Display";
             // 
-            // gMapControl1
+            // showGeofenceToolStripMenuItem
             // 
-            this.gMapControl1.Bearing = 0F;
-            this.gMapControl1.CanDragMap = true;
-            this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
-            this.gMapControl1.GrayScaleMode = false;
-            this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
-            this.gMapControl1.LevelsKeepInMemmory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(16, 12);
-            this.gMapControl1.MarkersEnabled = true;
-            this.gMapControl1.MaxZoom = 20;
-            this.gMapControl1.MinZoom = 4;
-            this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
-            this.gMapControl1.Name = "gMapControl1";
-            this.gMapControl1.NegativeMode = false;
-            this.gMapControl1.PolygonsEnabled = true;
-            this.gMapControl1.RetryLoadTile = 0;
-            this.gMapControl1.RoutesEnabled = true;
-            this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
-            this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
-            this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(1102, 468);
-            this.gMapControl1.TabIndex = 0;
-            this.gMapControl1.Zoom = 0D;
-            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
+            this.showGeofenceToolStripMenuItem.Name = "showGeofenceToolStripMenuItem";
+            this.showGeofenceToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showGeofenceToolStripMenuItem.Text = "Show Geofence";
             // 
-            // label9
+            // showSearchAreaToolStripMenuItem
             // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(14, 112);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(124, 13);
-            this.label9.TabIndex = 8;
-            this.label9.Text = "Obstacle Information";
+            this.showSearchAreaToolStripMenuItem.Name = "showSearchAreaToolStripMenuItem";
+            this.showSearchAreaToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showSearchAreaToolStripMenuItem.Text = "Show Search Area";
             // 
-            // Interoperability
+            // showObstaclesToolStripMenuItem
+            // 
+            this.showObstaclesToolStripMenuItem.Name = "showObstaclesToolStripMenuItem";
+            this.showObstaclesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showObstaclesToolStripMenuItem.Text = "Show Obstacles";
+            // 
+            // showPlaneToolStripMenuItem
+            // 
+            this.showPlaneToolStripMenuItem.Name = "showPlaneToolStripMenuItem";
+            this.showPlaneToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showPlaneToolStripMenuItem.Text = "Show UAS Location";
+            // 
+            // showWaypointsToolStripMenuItem
+            // 
+            this.showWaypointsToolStripMenuItem.Name = "showWaypointsToolStripMenuItem";
+            this.showWaypointsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
+            // 
+            // Interoperability_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1175, 596);
+            this.ClientSize = new System.Drawing.Size(1178, 596);
             this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.Interoperability_GUI_Tab);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "Interoperability";
+            this.Name = "Interoperability_GUI";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "UTAT UAV Interoperability Control Panel";
             this.Interoperability_GUI_Tab.ResumeLayout(false);
@@ -381,9 +452,10 @@
             this.Telem_Tab.PerformLayout();
             this.SDA_Tab.ResumeLayout(false);
             this.SDA_Tab.PerformLayout();
+            this.Map_Tab.ResumeLayout(false);
+            this.Map_ContextMenuStrip.ResumeLayout(false);
             this.Mission_Info_Tab.ResumeLayout(false);
             this.Mission_Info_Tab.PerformLayout();
-            this.Map_Tab.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -417,5 +489,13 @@
         private System.Windows.Forms.TabPage Map_Tab;
         private GMap.NET.WindowsForms.GMapControl gMapControl1;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ContextMenuStrip Map_ContextMenuStrip;
+        private System.Windows.Forms.Button Start_Stop_Button;
+        private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showGeofenceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showSearchAreaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showObstaclesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showPlaneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showWaypointsToolStripMenuItem;
     }
 }

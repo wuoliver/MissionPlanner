@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Interoperability_GUI
 {
     public partial class Interoperability_GUI : Form
     {
-        Action<int> restartInteroperabilityCallback;
+        Action<int> InteroperabilityCallback;
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
         protected int sdaPollRate = 10;
@@ -28,16 +29,24 @@ namespace Interoperability_GUI
         //Put on top or something afterwards
         GMapOverlay Static_Overlay;
         GMapOverlay Stationary_Obstacle_Overlay;
-        GMapOverlay polyOverlay;
+        GMapOverlay Moving_Obstacle_Overlay;
         GMapOverlay Plane_Overlay;
+        GMapOverlay WP_Overlay;
+
+        //Container for all possible targets
+        List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
+        List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
 
 
-        public Interoperability_GUI(Action<int> _restartInteroperabilityCallback, Interoperability_Settings _Settings)
+        public Interoperability_GUI(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
             Console.WriteLine("Created GUI");
 
             InitializeComponent();
-            restartInteroperabilityCallback = _restartInteroperabilityCallback;
+            InteroperabilityCallback = _InteroperabilityCallback;
+
+            //this.AutoSize = true;
+            //this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
 
             //Get Settings object, used for server settings
             Settings = _Settings;
@@ -47,7 +56,8 @@ namespace Interoperability_GUI
             Static_Overlay = new GMapOverlay("Static_Overlays");
             Stationary_Obstacle_Overlay = new GMapOverlay("Stationary_Obstacles");
             Plane_Overlay = new GMapOverlay("Plane_Overlay");
-            polyOverlay = new GMapOverlay("Polygon");
+            Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
+            WP_Overlay = new GMapOverlay("Waypoints");
         }
 
         public int getTelemPollRate()
@@ -68,6 +78,8 @@ namespace Interoperability_GUI
         {
             return settings_gui;
         }
+
+
         private const int CP_NOCLOSE_BUTTON = 0x200;
         protected override CreateParams CreateParams
         {
@@ -78,6 +90,7 @@ namespace Interoperability_GUI
                 return myCp;
             }
         }
+
 
         public void setUniqueTelUploadText(string text)
         {
@@ -114,6 +127,12 @@ namespace Interoperability_GUI
                     this.TelemServerResp.Text = resp;
                 });
             }
+        }
+
+        //Function is called when the user clicks a button thing
+        public void AddTarget()
+        {
+
         }
 
         public void setObstacles(Obstacles _Obstacles)
@@ -160,7 +179,7 @@ namespace Interoperability_GUI
         {
             if (!Settings_GUI.isOpened)
             {
-                settings_gui = new Settings_GUI(restartInteroperabilityCallback, Settings);
+                settings_gui = new Settings_GUI(InteroperabilityCallback, Settings);
                 settings_gui.Show();
             }
         }
@@ -168,18 +187,18 @@ namespace Interoperability_GUI
         private void Reset_Stats_Click(object sender, EventArgs e)
         {
             //Restarts the Telemetry Uplaod Stats
-            restartInteroperabilityCallback(4);
+            InteroperabilityCallback(4);
         }
 
         private void SDA_Test_Button_Click(object sender, EventArgs e)
         {
             //Starts the SDA thread
-            restartInteroperabilityCallback(1);
+            InteroperabilityCallback(1);
         }
 
         private void Mission_Enable_Click(object sender, EventArgs e)
         {
-            restartInteroperabilityCallback(3);
+            InteroperabilityCallback(3);
         }
 
         //Function called when the map is loaded
@@ -198,40 +217,37 @@ namespace Interoperability_GUI
         // -Search Area
         public void MAP_addStaticPoly(List<Waypoint> points, string name, Color Border_Color, Color Fill_Color, int width, int alpha)
         {
-            List<PointLatLng> _points = new List<PointLatLng>();
-            for (int i = 0; i < points.Count(); i++)
-            {
-                _points.Add(new PointLatLng(points[i].latitude, points[i].longitude));
-            }
-
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
+                List<PointLatLng> _points = new List<PointLatLng>();
+                for (int i = 0; i < points.Count(); i++)
+                {
+                    _points.Add(new PointLatLng(points[i].latitude, points[i].longitude));
+                }
+
                 GMapPolygon Static_Polygon = new GMapPolygon(_points, name);
                 Static_Polygon.Stroke = new Pen(Border_Color, width);
                 Static_Polygon.Fill = new SolidBrush(Color.FromArgb(alpha, Fill_Color));
                 Static_Overlay.Polygons.Add(Static_Polygon);
-                //gMapControl1.Overlays.Add(Static_Overlay);
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
             });
         }
 
         //Adds polygons for the stationary obstacles
-        public void MAP_addSObstaclePoly(double radius, double Lat, double Lon)
+        public void MAP_addSObstaclePoly(double radius, double altitude, double Lat, double Lon)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-
+                //Add obstacle
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "polygon");
                 polygon.Stroke = new Pen(Color.Red, 2);
-                polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
-
-                //GMapMarker thing = new GMapMarker();
-                //thing.
-                //marker;
-
+                polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));           
                 Stationary_Obstacle_Overlay.Polygons.Add(polygon);
-                //gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
+
+                //Add altitude
+                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = altitude.ToString("0");
+                Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
@@ -255,40 +271,61 @@ namespace Interoperability_GUI
             return Points;
         }
 
-        public void MAP_addCirclePoly(double radius, double Lat, double Lon, string name)
+        public void MAP_addMObstaclePoly(double radius, double altitude, double Lat, double Lon, string name)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                //polyOverlay = new GMapOverlay("polygons");
-
                 //gMapControl1.Overlays.Clear(); 
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "name");
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
-                polyOverlay.Polygons.Add(polygon);
-                
-                //GMarkerGoogle Test = new GmarkerGoogle();
-                //Test.Tag
-                //gMapControl1.Overlays.Add(polyOverlay);
+                Moving_Obstacle_Overlay.Polygons.Add(polygon);
 
-
-                //gMapControl1.Overlays[0].Id;
-
-
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
+                //Show the altitude of the obstacle
+                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1,1));
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = altitude.ToString("0");
+                Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
-
-        public void MAP_updatePlaneLoc(PointLatLng Location, float altitude, float Heading)
+     
+        public void MAP_updatePlaneLoc(PointLatLng location, float altitude, float heading, float cog, float nav_bearing, float target, float radius )
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
+                //GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
+                GMapMarkerPlane marker = new GMapMarkerPlane(location, heading, cog, nav_bearing, target, radius);
                 //Show the altitude always
                 marker.ToolTipMode = MarkerTooltipMode.Always;
                 marker.ToolTipText = altitude.ToString("0");
                 Plane_Overlay.Markers.Add(marker);
+            });
+        }
+
+        public void MAP_updateWP(List<PointLatLng> waypoints)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                for(int i = 0; i < waypoints.Count(); i++)
+                {
+                    WP_Overlay.Markers.Add(new GMapMarkerWP(waypoints[i], i.ToString("0")));
+                }
+            });
+        }
+
+        public void MAP_updateWPRoute(List<PointLatLng> waypoints)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                for (int i = 0; i < waypoints.Count() - 1; i++)
+                {
+                    List<PointLatLng> list = new List<PointLatLng>();
+                    list.Add(waypoints[i]);
+                    list.Add(waypoints[i + 1]);
+
+                    WP_Overlay.Routes.Add(new GMapRoute(list, "route") { Stroke = new System.Drawing.Pen(System.Drawing.Color.Yellow, 4) });
+                }
             });
         }
 
@@ -297,22 +334,41 @@ namespace Interoperability_GUI
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 gMapControl1.Overlays.Clear();
-                gMapControl1.Overlays.Add(polyOverlay);
+                gMapControl1.Overlays.Add(Moving_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Static_Overlay);
                 gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Plane_Overlay);
+                gMapControl1.Overlays.Add(WP_Overlay);
                 gMapControl1.Invalidate();
             });
         }
+
         public void MAP_Clear_Overlays()
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                polyOverlay.Clear();
+                Moving_Obstacle_Overlay.Clear();
                 Static_Overlay.Clear();
                 Stationary_Obstacle_Overlay.Clear();
                 Plane_Overlay.Clear();
+                WP_Overlay.Clear();
             });
+        }
+
+        private void Start_Stop_Button_Click(object sender, EventArgs e)
+        {
+            if(Start_Stop_Button.Text == "Start")
+            {
+                //Start
+                InteroperabilityCallback(0);
+                Start_Stop_Button.Text = "Stop";
+            }
+            else
+            {
+                //Stop
+                InteroperabilityCallback(5);
+                Start_Stop_Button.Text = "Start";
+            }
         }
 
     }
@@ -388,6 +444,7 @@ namespace Interoperability_GUI
     }
 
     //Marker so we can add payload images to the map
+    [Serializable]
     public class GMapMarkerImage : GMapMarker
     {
         const float rad2deg = (float)(180 / Math.PI);
@@ -425,21 +482,21 @@ namespace Interoperability_GUI
             g.Transform = temp;
         }
     }
-
+    //Marker to show the current location of the plane
+    [Serializable]
     public class GMapMarkerPlane : GMapMarker
     {
         const float rad2deg = (float)(180 / Math.PI);
         const float deg2rad = (float)(1.0 / rad2deg);
 
         private readonly Bitmap icon =  global::MissionPlanner.Properties.Resources.planeicon;
-        //private readonly Bitmap icon = new Bitmap(@"C:\Trapezoid.bmp");
         float heading = 0;
-        //float cog = -1;
-        //float target = -1;
-        //float nav_bearing = -1;
-        //float radius = -1;
+        float cog = -1;
+        float target = -1;
+        float nav_bearing = -1;
+        float radius = -1;
 
-        /*public GMapMarkerPlane(PointLatLng p, float heading, float cog, float nav_bearing, float target, float radius)
+        public GMapMarkerPlane(PointLatLng p, float heading, float cog, float nav_bearing, float target, float radius)
             : base(p)
         {
             this.heading = heading;
@@ -448,7 +505,7 @@ namespace Interoperability_GUI
             this.nav_bearing = nav_bearing;
             this.radius = radius;
             Size = icon.Size;
-        }*/
+        }
 
         public GMapMarkerPlane(PointLatLng p, float heading)
             : base(p)
@@ -474,14 +531,14 @@ namespace Interoperability_GUI
             catch
             {
             }
-            /*g.DrawLine(new Pen(Color.Green, 2), 0.0f, 0.0f, (float)Math.Cos((nav_bearing - 90) * deg2rad) * length,
+            g.DrawLine(new Pen(Color.Green, 2), 0.0f, 0.0f, (float)Math.Cos((nav_bearing - 90) * deg2rad) * length,
                 (float)Math.Sin((nav_bearing - 90) * deg2rad) * length);
             g.DrawLine(new Pen(Color.Black, 2), 0.0f, 0.0f, (float)Math.Cos((cog - 90) * deg2rad) * length,
                 (float)Math.Sin((cog - 90) * deg2rad) * length);
             g.DrawLine(new Pen(Color.Orange, 2), 0.0f, 0.0f, (float)Math.Cos((target - 90) * deg2rad) * length,
-                (float)Math.Sin((target - 90) * deg2rad) * length);*/
+                (float)Math.Sin((target - 90) * deg2rad) * length);
             // anti NaN
-           /* try
+            try
             {
                 float desired_lead_dist = 100;
 
@@ -517,7 +574,7 @@ namespace Interoperability_GUI
             catch
             {
             }
-            */
+            
             try
             {
                 g.RotateTransform(heading);
@@ -528,6 +585,57 @@ namespace Interoperability_GUI
             g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2);
 
             g.Transform = temp;
+        }
+    }
+
+    //Marker to show waypoints 
+    [Serializable]
+    public class GMapMarkerWP : GMarkerGoogle
+    {
+        string wpno = "";
+        public bool selected = false;
+        SizeF txtsize = SizeF.Empty;
+        static Dictionary<string, Bitmap> fontBitmaps = new Dictionary<string, Bitmap>();
+        static Font font;
+
+        public GMapMarkerWP(PointLatLng p, string wpno)
+            : base(p, GMarkerGoogleType.green)
+        {
+            this.wpno = wpno;
+            if (font == null)
+                font = SystemFonts.DefaultFont;
+
+            if (!fontBitmaps.ContainsKey(wpno))
+            {
+                Bitmap temp = new Bitmap(100, 40, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(temp))
+                {
+                    txtsize = g.MeasureString(wpno, font);
+
+                    g.DrawString(wpno, font, Brushes.Black, new PointF(0, 0));
+                }
+                fontBitmaps[wpno] = temp;
+            }
+        }
+
+        public override void OnRender(Graphics g)
+        {
+            if (selected)
+            {
+                g.FillEllipse(Brushes.Red, new Rectangle(this.LocalPosition, this.Size));
+                g.DrawArc(Pens.Red, new Rectangle(this.LocalPosition, this.Size), 0, 360);
+            }
+
+            base.OnRender(g);
+
+            var midw = LocalPosition.X + 10;
+            var midh = LocalPosition.Y + 3;
+
+            if (txtsize.Width > 15)
+                midw -= 4;
+
+            if (Overlay.Control.Zoom > 16 || IsMouseOver)
+                g.DrawImageUnscaled(fontBitmaps[wpno], midw, midh);
         }
     }
 }
