@@ -147,7 +147,7 @@
             this.error_label.Text = "EXAMPLE ERROR CODE";
             this.error_label.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // Settings
+            // Settings_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -163,8 +163,9 @@
             this.Controls.Add(this.IP_ADDR_LABEL);
             this.Controls.Add(this.IP_ADDR_BOX);
             this.Controls.Add(this.Save);
-            this.Name = "Settings";
+            this.Name = "Settings_GUI";
             this.Text = "Settings";
+            this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Settings_FormClosed);
             this.Load += new System.EventHandler(this.Settings_Load);
             this.ResumeLayout(false);

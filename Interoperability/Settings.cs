@@ -86,8 +86,8 @@ namespace Interoperability_GUI
             Settings["password"] =  PASSWORD;
             Settings.Save();
 
-            //restarts the interoperability thread, allowing for changes to be made
-            restartInteroperabilityCallback(0);
+            //Restarts all the threads relying on HTTP to update credentials
+            restartInteroperabilityCallback(6);
             isOpened = false;
             this.Close();
         }

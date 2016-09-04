@@ -272,10 +272,9 @@ namespace Interoperability
                     Telemetry_Thread.Start();
                     break;
                 //Start Obstacle_SDA Thread
-                //Fix so that you can only start 1 thread at a time
                 case 1:
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
-                    Obstacle_SDA_shouldStop = true;
+                    Obstacle_SDA_shouldStop = false;
                     Obstacle_SDA_Thread.Start();
 
                     Map_Thread = new Thread(new ThreadStart(this.Map_Control));
@@ -287,17 +286,49 @@ namespace Interoperability
                 case 2:
                     Obstacle_SDA_shouldStop = true;
                     break;
+                //Start mission download thread
                 case 3:
                     Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+                    Mission_Download_shouldStop = false;
                     Mission_Thread.Start();
                     break;
                 //Reset Telemetry Upload Rate Stats
                 case 4:
                     resetUploadStats = true;
+                    if (!Telemetry_Upload_isAlive)
+                    {
+                        Interoperability_GUI.setAvgTelUploadText("0Hz");
+                        Interoperability_GUI.setUniqueTelUploadText("0Hz");
+                        Interoperability_GUI.setTotalTelemUpload(0);
+                    }
                     break;
                 //Stop telemtry upload thread
                 case 5:
                     Telemetry_Upload_shouldStop = true;
+                    break;
+                //Restart all running threads that rely on server credentials
+                case 6:
+                    if (Telemetry_Upload_isAlive)
+                    {
+                        Telemetry_Upload_shouldStop = true;
+                        Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+                        Telemetry_Upload_shouldStop = false;
+                        Telemetry_Thread.Start();
+                    }
+                    if (Obstacle_SDA_isAlive)
+                    {
+                        Obstacle_SDA_shouldStop = true;
+                        Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+                        Obstacle_SDA_shouldStop = false;
+                        Obstacle_SDA_Thread.Start();
+                    }
+                    if (Mission_Download_isAlive)
+                    {
+                        Mission_Download_shouldStop = true;
+                        Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+                        Mission_Download_shouldStop = false;
+                        Mission_Thread.Start();
+                    }
                     break;
                 default:
                     break;
@@ -378,6 +409,7 @@ namespace Interoperability
                         Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
                         Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
                         Interoperability_GUI.TelemResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.Telem_Start_Stop_Button_Off();
                         Telemetry_Upload_shouldStop = true;
 
                     }
@@ -385,18 +417,13 @@ namespace Interoperability
                     {
                         Console.WriteLine("Credentials Valid");
                         Telemetry_Upload_shouldStop = false;
-
                     }
-
-
 
                     CurrentState csl = this.Host.cs;
                     double lat = csl.lat, lng = csl.lng, alt = csl.altasl, yaw = csl.yaw;
                     double oldlat = 0, oldlng = 0, oldalt = 0, oldyaw = 0;
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
-
-
 
                     while (!Telemetry_Upload_shouldStop)
                     {
@@ -508,13 +535,15 @@ namespace Interoperability
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine("Invalid Credentials");
-
+                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.SetSDAStart_StopButton_Off();
                         Obstacle_SDA_shouldStop = true;
                         //successful_login = false;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
+                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
                         Obstacle_SDA_shouldStop = false;
                         //successful_login = true;
                     }
@@ -527,7 +556,7 @@ namespace Interoperability
                             HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
                             //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
                             count++;
-
+                             
                             // the code that you want to measure comes here
                             Console.WriteLine("outputting formatted data");
                             obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
@@ -550,7 +579,6 @@ namespace Interoperability
                             System.Threading.Thread.Sleep(100);
 
                             t.Restart();
-                            Obstacle_SDA_shouldStop = false;
                         }
                     }
                 }
@@ -558,9 +586,10 @@ namespace Interoperability
             catch
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
+                Interoperability_GUI.SDAResp("Error, Unable to Connect to Server");
             }
             Obstacle_SDA_isAlive = false;
-            Console.WriteLine("Telemetry_Upload Thread Stopped");
+            Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
         public async void Mission_Download()
@@ -624,7 +653,7 @@ namespace Interoperability
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
             }
             Mission_Download_isAlive = false;
-            Console.WriteLine("Telemetry_Upload Thread Stopped");
+            Console.WriteLine("Mission_Download Thread Stopped");
         }
 
 
@@ -740,7 +769,7 @@ namespace Interoperability
                 }
             }
             Map_Control_isAlive = false;
-            Console.WriteLine("Telemetry_Upload Thread Stopped");
+            Console.WriteLine("Map_Control Thread Stopped");
         }
 
         // BE CAREFUL, THIS IS SKETCHY AS FUCK

@@ -59,7 +59,7 @@ namespace Interoperability_GUI
 
             //this.AutoSize = true;
             //this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            
+
             //Must be called after settings
             MAP_Settings(ref Settings, ref DrawWP, "DrawWP");
             MAP_Settings(ref Settings, ref DrawObstacles, "DrawObstacles");
@@ -67,10 +67,12 @@ namespace Interoperability_GUI
             MAP_Settings(ref Settings, ref DrawGeofence, "DrawGeofence");
             MAP_Settings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
 
-            InitializeToolStip();
+            InitializeGUI_States();
 
             //Set poll Rate text 
-            pollRateInput.Text = telemPollRate.ToString();
+            Telemetry_pollRateInput.Text = telemPollRate.ToString();
+            SDA_pollrateInput.Text = sdaPollRate.ToString();
+            Map_RefreshRateInput.Text = mapRefreshRate.ToString();
 
             Static_Overlay = new GMapOverlay("Static_Overlays");
             Stationary_Obstacle_Overlay = new GMapOverlay("Stationary_Obstacles");
@@ -91,13 +93,23 @@ namespace Interoperability_GUI
             }
         }
 
-        public void InitializeToolStip()
+        public void InitializeGUI_States()
         {
             showGeofenceToolStripMenuItem.Checked = DrawGeofence;
+            Geofence_Checkbox.Checked = DrawGeofence;
+
             showSearchAreaToolStripMenuItem.Checked = DrawSearchArea;
+            SearchArea_Checkbox.Checked = DrawSearchArea;
+
             showObstaclesToolStripMenuItem.Checked = DrawObstacles;
+            Obstacles_Checkbox.Checked = DrawObstacles;
+
             showPlaneToolStripMenuItem.Checked = DrawPlane;
+            UASLoc_Checkbox.Checked = DrawPlane;
+
             showWaypointsToolStripMenuItem.Checked = DrawWP;
+            Waypoints_Checkbox.Checked = DrawWP;
+
         }
 
         public int getTelemPollRate()
@@ -160,11 +172,22 @@ namespace Interoperability_GUI
 
         public void TelemResp(string resp)
         {
-            if (resp != this.Telem_Tab.Text)
+            if (resp != this.TelemServerResp.Text)
             {
                 this.TelemServerResp.BeginInvoke((MethodInvoker)delegate ()
                 {
                     this.TelemServerResp.Text = resp;
+                });
+            }
+        }
+
+        public void SDAResp(string resp)
+        {
+            if (resp != this.SDA_ServerResponseTextBox.Text)
+            {
+                this.SDA_ServerResponseTextBox.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    this.SDA_ServerResponseTextBox.Text = resp;
                 });
             }
         }
@@ -174,6 +197,8 @@ namespace Interoperability_GUI
         {
 
         }
+
+
 
         public void setObstacles(Obstacles _Obstacles)
         {
@@ -199,6 +224,7 @@ namespace Interoperability_GUI
                     SDA_Obstacles.AppendText("\tLongitude: " + _Obstacles.stationary_obstacles[i].longitude.ToString("N6") + "\n");
                     SDA_Obstacles.AppendText("\n");
                 }
+                
             });
         }
 
@@ -207,11 +233,35 @@ namespace Interoperability_GUI
         {
             try
             {
-                telemPollRate = Int32.Parse(this.pollRateInput.Text);
+                telemPollRate = Int32.Parse(this.Telemetry_pollRateInput.Text);
             }
             catch
             {
-                this.pollRateInput.Text = telemPollRate.ToString();
+                this.Telemetry_pollRateInput.Text = telemPollRate.ToString();
+            }
+        }
+
+        private void SDA_PollRateApply_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                sdaPollRate = Int32.Parse(this.SDA_pollrateInput.Text);
+            }
+            catch
+            {
+                this.SDA_pollrateInput.Text = sdaPollRate.ToString();
+            }
+        }
+
+        private void Map_ApplyRefreshRate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                mapRefreshRate = Int32.Parse(this.Map_RefreshRateInput.Text);
+            }
+            catch
+            {
+                this.Map_RefreshRateInput.Text = mapRefreshRate.ToString();
             }
         }
 
@@ -230,10 +280,28 @@ namespace Interoperability_GUI
             InteroperabilityCallback(4);
         }
 
-        private void SDA_Test_Button_Click(object sender, EventArgs e)
+        private void SDA_Start_Stop_Button_Click(object sender, EventArgs e)
         {
-            //Starts the SDA thread
-            InteroperabilityCallback(1);
+            if (SDA_Start_Stop_Button.Text == "Start SDA Polling")
+            {
+                //Start
+                InteroperabilityCallback(1);
+                SDA_Start_Stop_Button.Text = "Stop SDA Polling";
+            }
+            else
+            {
+                //Stop
+                InteroperabilityCallback(2);
+                SDA_Start_Stop_Button.Text = "Start SDA Polling";
+            }
+        }
+
+        public void SetSDAStart_StopButton_Off()
+        {
+            this.SDA_Start_Stop_Button.BeginInvoke((MethodInvoker)delegate ()
+            {
+                SDA_Start_Stop_Button.Text = "Start SDA Polling";
+            });
         }
 
         private void Mission_Enable_Click(object sender, EventArgs e)
@@ -395,20 +463,28 @@ namespace Interoperability_GUI
             });
         }
 
-        private void Start_Stop_Button_Click(object sender, EventArgs e)
+        private void Telem_Start_Stop_Button_Click(object sender, EventArgs e)
         {
-            if (Start_Stop_Button.Text == "Start")
+            if (Telem_Start_Stop_Button.Text == "Start")
             {
                 //Start
                 InteroperabilityCallback(0);
-                Start_Stop_Button.Text = "Stop";
+                Telem_Start_Stop_Button.Text = "Stop";
             }
             else
             {
                 //Stop
                 InteroperabilityCallback(5);
-                Start_Stop_Button.Text = "Start";
+                Telem_Start_Stop_Button.Text = "Start";
             }
+        }
+
+        public void Telem_Start_Stop_Button_Off()
+        {
+            this.Telem_Start_Stop_Button.BeginInvoke((MethodInvoker)delegate ()
+            {
+                Telem_Start_Stop_Button.Text = "Start";
+            });
         }
 
         public bool getDrawWP()
@@ -437,11 +513,13 @@ namespace Interoperability_GUI
             if (showGeofenceToolStripMenuItem.Checked == true)
             {
                 showGeofenceToolStripMenuItem.Checked = false;
+                Geofence_Checkbox.Checked = false;
                 DrawGeofence = false;
             }
             else
             {
                 showGeofenceToolStripMenuItem.Checked = true;
+                Geofence_Checkbox.Checked = true;
                 DrawGeofence = true;
             }
             Settings["DrawGeofence"] = DrawGeofence.ToString();
@@ -453,11 +531,13 @@ namespace Interoperability_GUI
             if (showSearchAreaToolStripMenuItem.Checked == true)
             {
                 showSearchAreaToolStripMenuItem.Checked = false;
+                SearchArea_Checkbox.Checked = false;
                 DrawSearchArea = false;
             }
             else
             {
                 showSearchAreaToolStripMenuItem.Checked = true;
+                SearchArea_Checkbox.Checked = true;
                 DrawSearchArea = true;
             }
             Settings["DrawSearchArea"] = DrawSearchArea.ToString();
@@ -469,11 +549,13 @@ namespace Interoperability_GUI
             if (showObstaclesToolStripMenuItem.Checked == true)
             {
                 showObstaclesToolStripMenuItem.Checked = false;
+                Obstacles_Checkbox.Checked = false;
                 DrawObstacles = false;
             }
             else
             {
                 showObstaclesToolStripMenuItem.Checked = true;
+                Obstacles_Checkbox.Checked = true;
                 DrawObstacles = true;
             }
             Settings["DrawObstacles"] = DrawObstacles.ToString();
@@ -485,11 +567,13 @@ namespace Interoperability_GUI
             if (showPlaneToolStripMenuItem.Checked == true)
             {
                 showPlaneToolStripMenuItem.Checked = false;
+                UASLoc_Checkbox.Checked = false;
                 DrawPlane = false;
             }
             else
             {
                 showPlaneToolStripMenuItem.Checked = true;
+                UASLoc_Checkbox.Checked = true;
                 DrawPlane = true;
             }
             Settings["DrawPlane"] = DrawPlane.ToString();
@@ -501,17 +585,108 @@ namespace Interoperability_GUI
             if (showWaypointsToolStripMenuItem.Checked == true)
             {
                 showWaypointsToolStripMenuItem.Checked = false;
+                Waypoints_Checkbox.Checked = false;
                 DrawWP = false;
             }
             else
             {
                 showWaypointsToolStripMenuItem.Checked = true;
-                DrawWP  = true;
+                Waypoints_Checkbox.Checked = true;
+                DrawWP = true;
             }
             Settings["DrawWP"] = DrawWP.ToString();
             Settings.Save();
         }
 
+        private void Geofence_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Geofence_Checkbox.Checked)
+            {
+                //Geofence_Checkbox.Checked = false;
+                showGeofenceToolStripMenuItem.Checked = false;
+                DrawGeofence = false;
+            }
+            else
+            {
+                //Geofence_Checkbox.Checked = true;
+                showGeofenceToolStripMenuItem.Checked = true;
+                DrawGeofence = true;
+            }
+            Settings["DrawGeofence"] = DrawGeofence.ToString();
+            Settings.Save();
+        }
+
+        private void SearchArea_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!SearchArea_Checkbox.Checked)
+            {
+                //SearchArea_Checkbox.Checked = false;
+                showSearchAreaToolStripMenuItem.Checked = false;
+                DrawSearchArea = false;
+            }
+            else
+            {
+                //SearchArea_Checkbox.Checked = true;
+                showSearchAreaToolStripMenuItem.Checked = true;
+                DrawSearchArea = true;
+            }
+            Settings["DrawSearchArea"] = DrawSearchArea.ToString();
+            Settings.Save();
+        }
+
+        private void Obstacles_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Obstacles_Checkbox.Checked)
+            {
+                //Obstacles_Checkbox.Checked = false;
+                showObstaclesToolStripMenuItem.Checked = false;
+                DrawObstacles = false;
+            }
+            else
+            {
+                //Obstacles_Checkbox.Checked = true;
+                showObstaclesToolStripMenuItem.Checked = true;
+                DrawObstacles = true;
+            }
+            Settings["DrawObstacles"] = DrawObstacles.ToString();
+            Settings.Save();
+        }
+
+        private void UASLoc_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!UASLoc_Checkbox.Checked)
+            {
+                //UASLoc_Checkbox.Checked = false;
+                showPlaneToolStripMenuItem.Checked = false;
+                DrawPlane = false;
+            }
+            else
+            {
+                //UASLoc_Checkbox.Checked = true;
+                showPlaneToolStripMenuItem.Checked = true;
+                DrawPlane = true;
+            }
+            Settings["DrawPlane"] = DrawPlane.ToString();
+            Settings.Save();
+        }
+
+        private void Waypoints_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Waypoints_Checkbox.Checked)
+            {
+                //Waypoints_Checkbox.Checked = false;
+                showWaypointsToolStripMenuItem.Checked = false;
+                DrawWP = false;
+            }
+            else
+            {
+                //Waypoints_Checkbox.Checked = true;
+                showWaypointsToolStripMenuItem.Checked = true;
+                DrawWP = true;
+            }
+            Settings["DrawWP"] = DrawWP.ToString();
+            Settings.Save();
+        }
     }
 
     public static class MercatorProjection
