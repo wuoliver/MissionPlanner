@@ -249,12 +249,6 @@ namespace Interoperability
 
             loopratehz = 0.25F;
 
-
-            //Must have this started, or bad things will happen
-            //Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
-            // Telemetry_Thread.Start();
-
-
             Console.WriteLine("End of init()");
 
             return (true);
@@ -538,14 +532,12 @@ namespace Interoperability
                         Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
                         Interoperability_GUI.SetSDAStart_StopButton_Off();
                         Obstacle_SDA_shouldStop = true;
-                        //successful_login = false;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
                         Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
                         Obstacle_SDA_shouldStop = false;
-                        //successful_login = true;
                     }
 
                     while (!Obstacle_SDA_shouldStop)
@@ -557,23 +549,10 @@ namespace Interoperability
                             //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
                             count++;
                              
-                            // the code that you want to measure comes here
                             Console.WriteLine("outputting formatted data");
                             obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
 
                             Obstacles_Downloaded = true;
-
-                            /*Console.WriteLine("\tPRINTING MOVING OBSTACLES");
-                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                            {
-                                obstaclesList.moving_obstacles[i].printall();
-                            }
-                            Console.WriteLine("\tPRINTING STATIONARY OBSTACLES");
-                            for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
-                            {
-                                obstaclesList.stationary_obstacles[i].printall();
-                            }*/
-
                             Interoperability_GUI.setObstacles(obstaclesList);
 
                             System.Threading.Thread.Sleep(100);
@@ -713,7 +692,6 @@ namespace Interoperability
 
             while (!Map_Control_shouldStop)
             {
-                //Console.WriteLine("Elapsed Miliseconds: " + t.ElapsedMilliseconds);
                 if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapRefreshRate())))
                 {
                     Interoperability_GUI.MAP_Clear_Overlays();
@@ -730,7 +708,6 @@ namespace Interoperability
 
                             for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
                             {
-                                //PolyName = "StationaryObject" + i.ToString();
                                 Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
                                    obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
                                    obstaclesList.moving_obstacles[i].longitude, "polygon");

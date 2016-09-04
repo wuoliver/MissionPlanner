@@ -57,9 +57,6 @@ namespace Interoperability_GUI
             //Get Settings object, used for server settings
             Settings = _Settings;
 
-            //this.AutoSize = true;
-            //this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
             //Must be called after settings
             MAP_Settings(ref Settings, ref DrawWP, "DrawWP");
             MAP_Settings(ref Settings, ref DrawObstacles, "DrawObstacles");
@@ -276,7 +273,7 @@ namespace Interoperability_GUI
 
         private void Reset_Stats_Click(object sender, EventArgs e)
         {
-            //Restarts the Telemetry Uplaod Stats
+            //Restarts the Telemetry Upload Stats
             InteroperabilityCallback(4);
         }
 
@@ -317,7 +314,6 @@ namespace Interoperability_GUI
             gMapControl1.Zoom = 15;
             gMapControl1.MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance;
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
-            //GMap.NET.GMaps.Instance.
         }
 
         //Used to add polygons to define things such as: 
@@ -383,7 +379,6 @@ namespace Interoperability_GUI
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                //gMapControl1.Overlays.Clear(); 
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "name");
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
@@ -402,7 +397,6 @@ namespace Interoperability_GUI
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                //GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
                 GMapMarkerPlane marker = new GMapMarkerPlane(location, heading, cog, nav_bearing, target, radius);
                 //Show the altitude always
                 marker.ToolTipMode = MarkerTooltipMode.Always;
@@ -620,13 +614,11 @@ namespace Interoperability_GUI
         {
             if (!SearchArea_Checkbox.Checked)
             {
-                //SearchArea_Checkbox.Checked = false;
                 showSearchAreaToolStripMenuItem.Checked = false;
                 DrawSearchArea = false;
             }
             else
             {
-                //SearchArea_Checkbox.Checked = true;
                 showSearchAreaToolStripMenuItem.Checked = true;
                 DrawSearchArea = true;
             }
@@ -638,13 +630,11 @@ namespace Interoperability_GUI
         {
             if (!Obstacles_Checkbox.Checked)
             {
-                //Obstacles_Checkbox.Checked = false;
                 showObstaclesToolStripMenuItem.Checked = false;
                 DrawObstacles = false;
             }
             else
             {
-                //Obstacles_Checkbox.Checked = true;
                 showObstaclesToolStripMenuItem.Checked = true;
                 DrawObstacles = true;
             }
@@ -656,13 +646,11 @@ namespace Interoperability_GUI
         {
             if (!UASLoc_Checkbox.Checked)
             {
-                //UASLoc_Checkbox.Checked = false;
                 showPlaneToolStripMenuItem.Checked = false;
                 DrawPlane = false;
             }
             else
             {
-                //UASLoc_Checkbox.Checked = true;
                 showPlaneToolStripMenuItem.Checked = true;
                 DrawPlane = true;
             }
@@ -674,13 +662,11 @@ namespace Interoperability_GUI
         {
             if (!Waypoints_Checkbox.Checked)
             {
-                //Waypoints_Checkbox.Checked = false;
                 showWaypointsToolStripMenuItem.Checked = false;
                 DrawWP = false;
             }
             else
             {
-                //Waypoints_Checkbox.Checked = true;
                 showWaypointsToolStripMenuItem.Checked = true;
                 DrawWP = true;
             }
