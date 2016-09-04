@@ -33,10 +33,19 @@ namespace Interoperability_GUI
         GMapOverlay Plane_Overlay;
         GMapOverlay WP_Overlay;
 
+
+        //Used for map control thread
+        protected bool DrawWP = true;
+        protected bool DrawObstacles = true;
+        protected bool DrawPlane = true;
+        protected bool DrawGeofence = true;
+        protected bool DrawSearchArea = true;
+
+
+
         //Container for all possible targets
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
-
 
         public Interoperability_GUI(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
@@ -45,11 +54,21 @@ namespace Interoperability_GUI
             InitializeComponent();
             InteroperabilityCallback = _InteroperabilityCallback;
 
-            //this.AutoSize = true;
-            //this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
             //Get Settings object, used for server settings
             Settings = _Settings;
+
+            //this.AutoSize = true;
+            //this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            
+            //Must be called after settings
+            MAP_Settings(ref Settings, ref DrawWP, "DrawWP");
+            MAP_Settings(ref Settings, ref DrawObstacles, "DrawObstacles");
+            MAP_Settings(ref Settings, ref DrawPlane, "DrawPlane");
+            MAP_Settings(ref Settings, ref DrawGeofence, "DrawGeofence");
+            MAP_Settings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+
+            InitializeToolStip();
+
             //Set poll Rate text 
             pollRateInput.Text = telemPollRate.ToString();
 
@@ -58,6 +77,27 @@ namespace Interoperability_GUI
             Plane_Overlay = new GMapOverlay("Plane_Overlay");
             Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
             WP_Overlay = new GMapOverlay("Waypoints");
+        }
+
+        public void MAP_Settings(ref Interoperability_Settings Settings, ref bool value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value.ToString();
+            }
+            else
+            {
+                value = Convert.ToBoolean(Settings[key]);
+            }
+        }
+
+        public void InitializeToolStip()
+        {
+            showGeofenceToolStripMenuItem.Checked = DrawGeofence;
+            showSearchAreaToolStripMenuItem.Checked = DrawSearchArea;
+            showObstaclesToolStripMenuItem.Checked = DrawObstacles;
+            showPlaneToolStripMenuItem.Checked = DrawPlane;
+            showWaypointsToolStripMenuItem.Checked = DrawWP;
         }
 
         public int getTelemPollRate()
@@ -240,7 +280,7 @@ namespace Interoperability_GUI
                 //Add obstacle
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "polygon");
                 polygon.Stroke = new Pen(Color.Red, 2);
-                polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));           
+                polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
                 Stationary_Obstacle_Overlay.Polygons.Add(polygon);
 
                 //Add altitude
@@ -282,15 +322,15 @@ namespace Interoperability_GUI
                 Moving_Obstacle_Overlay.Polygons.Add(polygon);
 
                 //Show the altitude of the obstacle
-                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1,1));
+                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
                 marker.ToolTipMode = MarkerTooltipMode.Always;
                 marker.ToolTipText = altitude.ToString("0");
                 Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
-     
-        public void MAP_updatePlaneLoc(PointLatLng location, float altitude, float heading, float cog, float nav_bearing, float target, float radius )
+
+        public void MAP_updatePlaneLoc(PointLatLng location, float altitude, float heading, float cog, float nav_bearing, float target, float radius)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
@@ -307,7 +347,7 @@ namespace Interoperability_GUI
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                for(int i = 0; i < waypoints.Count(); i++)
+                for (int i = 0; i < waypoints.Count(); i++)
                 {
                     WP_Overlay.Markers.Add(new GMapMarkerWP(waypoints[i], i.ToString("0")));
                 }
@@ -357,7 +397,7 @@ namespace Interoperability_GUI
 
         private void Start_Stop_Button_Click(object sender, EventArgs e)
         {
-            if(Start_Stop_Button.Text == "Start")
+            if (Start_Stop_Button.Text == "Start")
             {
                 //Start
                 InteroperabilityCallback(0);
@@ -369,6 +409,107 @@ namespace Interoperability_GUI
                 InteroperabilityCallback(5);
                 Start_Stop_Button.Text = "Start";
             }
+        }
+
+        public bool getDrawWP()
+        {
+            return DrawWP;
+        }
+        public bool getDrawObstacles()
+        {
+            return DrawObstacles;
+        }
+        public bool getDrawPlane()
+        {
+            return DrawPlane;
+        }
+        public bool getDrawGeofence()
+        {
+            return DrawGeofence;
+        }
+        public bool getDrawSearchArea()
+        {
+            return DrawSearchArea;
+        }
+
+        private void showGeofenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showGeofenceToolStripMenuItem.Checked == true)
+            {
+                showGeofenceToolStripMenuItem.Checked = false;
+                DrawGeofence = false;
+            }
+            else
+            {
+                showGeofenceToolStripMenuItem.Checked = true;
+                DrawGeofence = true;
+            }
+            Settings["DrawGeofence"] = DrawGeofence.ToString();
+            Settings.Save();
+        }
+
+        private void showSearchAreaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showSearchAreaToolStripMenuItem.Checked == true)
+            {
+                showSearchAreaToolStripMenuItem.Checked = false;
+                DrawSearchArea = false;
+            }
+            else
+            {
+                showSearchAreaToolStripMenuItem.Checked = true;
+                DrawSearchArea = true;
+            }
+            Settings["DrawSearchArea"] = DrawSearchArea.ToString();
+            Settings.Save();
+        }
+
+        private void showObstaclesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showObstaclesToolStripMenuItem.Checked == true)
+            {
+                showObstaclesToolStripMenuItem.Checked = false;
+                DrawObstacles = false;
+            }
+            else
+            {
+                showObstaclesToolStripMenuItem.Checked = true;
+                DrawObstacles = true;
+            }
+            Settings["DrawObstacles"] = DrawObstacles.ToString();
+            Settings.Save();
+        }
+
+        private void showPlaneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showPlaneToolStripMenuItem.Checked == true)
+            {
+                showPlaneToolStripMenuItem.Checked = false;
+                DrawPlane = false;
+            }
+            else
+            {
+                showPlaneToolStripMenuItem.Checked = true;
+                DrawPlane = true;
+            }
+            Settings["DrawPlane"] = DrawPlane.ToString();
+            Settings.Save();
+        }
+
+        private void showWaypointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showWaypointsToolStripMenuItem.Checked == true)
+            {
+                showWaypointsToolStripMenuItem.Checked = false;
+                DrawWP = false;
+            }
+            else
+            {
+                showWaypointsToolStripMenuItem.Checked = true;
+                DrawWP  = true;
+            }
+            Settings["DrawWP"] = DrawWP.ToString();
+            Settings.Save();
         }
 
     }
@@ -469,7 +610,7 @@ namespace Interoperability_GUI
             Matrix temp = g.Transform;
             g.TranslateTransform(LocalPosition.X, LocalPosition.Y);
 
-            g.RotateTransform(-Overlay.Control.Bearing);         
+            g.RotateTransform(-Overlay.Control.Bearing);
             try
             {
                 g.RotateTransform(heading);
@@ -489,7 +630,7 @@ namespace Interoperability_GUI
         const float rad2deg = (float)(180 / Math.PI);
         const float deg2rad = (float)(1.0 / rad2deg);
 
-        private readonly Bitmap icon =  global::MissionPlanner.Properties.Resources.planeicon;
+        private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
         float heading = 0;
         float cog = -1;
         float target = -1;
@@ -574,7 +715,7 @@ namespace Interoperability_GUI
             catch
             {
             }
-            
+
             try
             {
                 g.RotateTransform(heading);

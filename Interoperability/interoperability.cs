@@ -277,7 +277,7 @@ namespace Interoperability
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
                     Obstacle_SDA_shouldStop = true;
                     Obstacle_SDA_Thread.Start();
-                    
+
                     Map_Thread = new Thread(new ThreadStart(this.Map_Control));
                     Map_Control_shouldStop = false;
                     Map_Thread.Start();
@@ -396,7 +396,7 @@ namespace Interoperability
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
 
-                    
+
 
                     while (!Telemetry_Upload_shouldStop)
                     {
@@ -627,14 +627,15 @@ namespace Interoperability
             Console.WriteLine("Telemetry_Upload Thread Stopped");
         }
 
+
+
+
         public /*async*/ void Map_Control()
         {
             Map_Control_isAlive = true;
             Console.WriteLine("Map_Control Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
-            bool Static_Overlays_Drawn = false;
-            //string PolyName;
 
             //Add static overlays:
             //Issue because need to wait until obstaclesList has loaded or been instantiated
@@ -689,7 +690,7 @@ namespace Interoperability
                     Interoperability_GUI.MAP_Clear_Overlays();
                     if (Obstacles_Downloaded)
                     {
-                        if (!Static_Overlays_Drawn)
+                        if (Interoperability_GUI.getDrawObstacles())
                         {
                             for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                             {
@@ -697,23 +698,43 @@ namespace Interoperability
                                     obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
                                     obstaclesList.stationary_obstacles[i].longitude);
                             }
-                            Static_Overlays_Drawn = false;
-                        }
 
-                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                        {
-                            //PolyName = "StationaryObject" + i.ToString();
-                            Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
-                               obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
-                               obstaclesList.moving_obstacles[i].longitude, "polygon");
-                        }
+                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                            {
+                                //PolyName = "StationaryObject" + i.ToString();
+                                Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
+                                   obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
+                                   obstaclesList.moving_obstacles[i].longitude, "polygon");
+                            }
+                        }   
                     }
-                    Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Operation_Area", Color.Red, Color.Transparent, 3, 50);
-                    Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
-                    Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
-                        Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
-                    Interoperability_GUI.MAP_updateWP(Waypoints);
-                    Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+
+                    //Draw geofence
+                    if (Interoperability_GUI.getDrawGeofence())
+                    {
+                        Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Geofence", Color.Red, Color.Transparent, 3, 50);
+                    }
+                    //Draw search area
+                    if (Interoperability_GUI.getDrawSearchArea())
+                    {
+                        Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
+                    }
+
+                    //Draw plane location                   
+                    if (Interoperability_GUI.getDrawPlane())
+                    {
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
+                            Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
+                    }
+                    
+                    if (Interoperability_GUI.getDrawWP())
+                    {
+                        //Draw waypoints
+                        Interoperability_GUI.MAP_updateWP(Waypoints);
+                        //Draw lines between waypoints
+                        Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                    }
+
                     Interoperability_GUI.MAP_Update_Overlay();
                     t.Restart();
                 }

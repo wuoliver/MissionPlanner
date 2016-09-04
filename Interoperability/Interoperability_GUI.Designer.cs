@@ -55,16 +55,16 @@
             this.Map_Tab = new System.Windows.Forms.TabPage();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.Map_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.Mission_Info_Tab = new System.Windows.Forms.TabPage();
-            this.Mission_Enable = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
-            this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showSearchAreaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showObstaclesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showWaypointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Mission_Info_Tab = new System.Windows.Forms.TabPage();
+            this.Mission_Enable = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -350,7 +350,54 @@
             this.Map_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.displayToolStripMenuItem});
             this.Map_ContextMenuStrip.Name = "contextMenuStrip1";
-            this.Map_ContextMenuStrip.Size = new System.Drawing.Size(113, 26);
+            this.Map_ContextMenuStrip.Size = new System.Drawing.Size(153, 48);
+            // 
+            // displayToolStripMenuItem
+            // 
+            this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showGeofenceToolStripMenuItem,
+            this.showSearchAreaToolStripMenuItem,
+            this.showObstaclesToolStripMenuItem,
+            this.showPlaneToolStripMenuItem,
+            this.showWaypointsToolStripMenuItem});
+            this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
+            this.displayToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.displayToolStripMenuItem.Text = "Display";
+            // 
+            // showGeofenceToolStripMenuItem
+            // 
+            this.showGeofenceToolStripMenuItem.Name = "showGeofenceToolStripMenuItem";
+            this.showGeofenceToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showGeofenceToolStripMenuItem.Text = "Show Geofence";
+            this.showGeofenceToolStripMenuItem.Click += new System.EventHandler(this.showGeofenceToolStripMenuItem_Click);
+            // 
+            // showSearchAreaToolStripMenuItem
+            // 
+            this.showSearchAreaToolStripMenuItem.Name = "showSearchAreaToolStripMenuItem";
+            this.showSearchAreaToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showSearchAreaToolStripMenuItem.Text = "Show Search Area";
+            this.showSearchAreaToolStripMenuItem.Click += new System.EventHandler(this.showSearchAreaToolStripMenuItem_Click);
+            // 
+            // showObstaclesToolStripMenuItem
+            // 
+            this.showObstaclesToolStripMenuItem.Name = "showObstaclesToolStripMenuItem";
+            this.showObstaclesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showObstaclesToolStripMenuItem.Text = "Show Obstacles";
+            this.showObstaclesToolStripMenuItem.Click += new System.EventHandler(this.showObstaclesToolStripMenuItem_Click);
+            // 
+            // showPlaneToolStripMenuItem
+            // 
+            this.showPlaneToolStripMenuItem.Name = "showPlaneToolStripMenuItem";
+            this.showPlaneToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showPlaneToolStripMenuItem.Text = "Show UAS Location";
+            this.showPlaneToolStripMenuItem.Click += new System.EventHandler(this.showPlaneToolStripMenuItem_Click);
+            // 
+            // showWaypointsToolStripMenuItem
+            // 
+            this.showWaypointsToolStripMenuItem.Name = "showWaypointsToolStripMenuItem";
+            this.showWaypointsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
+            this.showWaypointsToolStripMenuItem.Click += new System.EventHandler(this.showWaypointsToolStripMenuItem_Click);
             // 
             // Mission_Info_Tab
             // 
@@ -392,48 +439,6 @@
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
-            // 
-            // displayToolStripMenuItem
-            // 
-            this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showGeofenceToolStripMenuItem,
-            this.showSearchAreaToolStripMenuItem,
-            this.showObstaclesToolStripMenuItem,
-            this.showPlaneToolStripMenuItem,
-            this.showWaypointsToolStripMenuItem});
-            this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
-            this.displayToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
-            this.displayToolStripMenuItem.Text = "Display";
-            // 
-            // showGeofenceToolStripMenuItem
-            // 
-            this.showGeofenceToolStripMenuItem.Name = "showGeofenceToolStripMenuItem";
-            this.showGeofenceToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showGeofenceToolStripMenuItem.Text = "Show Geofence";
-            // 
-            // showSearchAreaToolStripMenuItem
-            // 
-            this.showSearchAreaToolStripMenuItem.Name = "showSearchAreaToolStripMenuItem";
-            this.showSearchAreaToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showSearchAreaToolStripMenuItem.Text = "Show Search Area";
-            // 
-            // showObstaclesToolStripMenuItem
-            // 
-            this.showObstaclesToolStripMenuItem.Name = "showObstaclesToolStripMenuItem";
-            this.showObstaclesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showObstaclesToolStripMenuItem.Text = "Show Obstacles";
-            // 
-            // showPlaneToolStripMenuItem
-            // 
-            this.showPlaneToolStripMenuItem.Name = "showPlaneToolStripMenuItem";
-            this.showPlaneToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showPlaneToolStripMenuItem.Text = "Show UAS Location";
-            // 
-            // showWaypointsToolStripMenuItem
-            // 
-            this.showWaypointsToolStripMenuItem.Name = "showWaypointsToolStripMenuItem";
-            this.showWaypointsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
             // 
             // Interoperability_GUI
             // 
