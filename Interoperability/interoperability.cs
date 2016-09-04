@@ -244,6 +244,11 @@ namespace Interoperability
             // Start interface
             Interoperability_GUI = new global::Interoperability_GUI.Interoperability_GUI(this.interoperabilityAction, Settings);
             Interoperability_GUI.Show();
+            
+            //Start map thread
+            Map_Thread = new Thread(new ThreadStart(this.Map_Control));
+            Map_Control_shouldStop = false;
+            Map_Thread.Start();
 
             Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
 
@@ -270,11 +275,6 @@ namespace Interoperability
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
                     Obstacle_SDA_shouldStop = false;
                     Obstacle_SDA_Thread.Start();
-
-                    Map_Thread = new Thread(new ThreadStart(this.Map_Control));
-                    Map_Control_shouldStop = false;
-                    Map_Thread.Start();
-                    //test_function();
                     break;
                 //Stop Obstacle_SDA Thread
                 case 2:

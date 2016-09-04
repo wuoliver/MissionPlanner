@@ -23,6 +23,7 @@ namespace Interoperability_GUI
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
         protected int sdaPollRate = 10;
+        protected int UAS_Scale = 2;
         global::Interoperability_GUI.Settings_GUI settings_gui;
         Interoperability_Settings Settings;
 
@@ -40,8 +41,10 @@ namespace Interoperability_GUI
         protected bool DrawPlane = true;
         protected bool DrawGeofence = true;
         protected bool DrawSearchArea = true;
+        protected bool UAS_FixedSize = false;
 
-
+        //GMAP Zoom
+        private int zoom = 0;
 
         //Container for all possible targets
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
@@ -58,11 +61,15 @@ namespace Interoperability_GUI
             Settings = _Settings;
 
             //Must be called after settings
-            MAP_Settings(ref Settings, ref DrawWP, "DrawWP");
-            MAP_Settings(ref Settings, ref DrawObstacles, "DrawObstacles");
-            MAP_Settings(ref Settings, ref DrawPlane, "DrawPlane");
-            MAP_Settings(ref Settings, ref DrawGeofence, "DrawGeofence");
-            MAP_Settings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+            MAP_OverlaySettings(ref Settings, ref DrawWP, "DrawWP");
+            MAP_OverlaySettings(ref Settings, ref DrawObstacles, "DrawObstacles");
+            MAP_OverlaySettings(ref Settings, ref DrawPlane, "DrawPlane");
+            MAP_OverlaySettings(ref Settings, ref DrawGeofence, "DrawGeofence");
+            MAP_OverlaySettings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+            MAP_OverlaySettings(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
+
+
+            MAP_UAS_ScaleSettings(ref Settings, ref UAS_Scale, "UAS_Scale");
 
             InitializeGUI_States();
 
@@ -78,7 +85,18 @@ namespace Interoperability_GUI
             WP_Overlay = new GMapOverlay("Waypoints");
         }
 
-        public void MAP_Settings(ref Interoperability_Settings Settings, ref bool value, string key)
+        public void MAP_UAS_ScaleSettings(ref Interoperability_Settings Settings, ref int value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value.ToString();
+            }
+            else
+            {
+                value = Convert.ToInt32(Settings[key]);
+            }
+        }
+        public void MAP_OverlaySettings(ref Interoperability_Settings Settings, ref bool value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -106,6 +124,9 @@ namespace Interoperability_GUI
 
             showWaypointsToolStripMenuItem.Checked = DrawWP;
             Waypoints_Checkbox.Checked = DrawWP;
+
+            UAS_Trackbar.Value = UAS_Scale;
+            Fixed_UAS_Size_Checkbox.Checked = UAS_FixedSize;
 
         }
 
@@ -291,7 +312,7 @@ namespace Interoperability_GUI
                 InteroperabilityCallback(2);
                 SDA_Start_Stop_Button.Text = "Start SDA Polling";
             }
-        }
+        } 
 
         public void SetSDAStart_StopButton_Off()
         {
@@ -397,7 +418,7 @@ namespace Interoperability_GUI
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                GMapMarkerPlane marker = new GMapMarkerPlane(location, heading, cog, nav_bearing, target, radius);
+                GMapMarkerPlane marker = new GMapMarkerPlane(location, zoom, UAS_Scale, UAS_FixedSize, heading, cog, nav_bearing, target, radius);
                 //Show the altitude always
                 marker.ToolTipMode = MarkerTooltipMode.Always;
                 marker.ToolTipText = altitude.ToString("0");
@@ -436,11 +457,11 @@ namespace Interoperability_GUI
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 gMapControl1.Overlays.Clear();
-                gMapControl1.Overlays.Add(Moving_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Static_Overlay);
+                gMapControl1.Overlays.Add(WP_Overlay);
+                gMapControl1.Overlays.Add(Moving_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Plane_Overlay);
-                gMapControl1.Overlays.Add(WP_Overlay);
                 gMapControl1.Invalidate();
             });
         }
@@ -673,6 +694,25 @@ namespace Interoperability_GUI
             Settings["DrawWP"] = DrawWP.ToString();
             Settings.Save();
         }
+
+        private void gMapControl1_OnMapZoomChanged()
+        {
+            zoom = Convert.ToInt32(gMapControl1.Zoom);
+        }
+
+        private void UAS_Trackbar_Scroll(object sender, EventArgs e)
+        {
+            UAS_Scale = UAS_Trackbar.Value;
+            Settings["UAS_Scale"] = UAS_Scale.ToString();
+            Settings.Save();
+        }
+
+        private void Fixed_UAS_Size_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            UAS_FixedSize = Fixed_UAS_Size_Checkbox.Checked;
+            Settings["UAS_Fixedsize"] = UAS_FixedSize.ToString();
+            Settings.Save();
+        }
     }
 
     public static class MercatorProjection
@@ -791,14 +831,16 @@ namespace Interoperability_GUI
         const float rad2deg = (float)(180 / Math.PI);
         const float deg2rad = (float)(1.0 / rad2deg);
 
-        private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
+        //private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
+        //private readonly Bitmap icon = interoperability.Properties.Resources.UT_X2B;
+        private Bitmap icon;
         float heading = 0;
         float cog = -1;
         float target = -1;
         float nav_bearing = -1;
         float radius = -1;
 
-        public GMapMarkerPlane(PointLatLng p, float heading, float cog, float nav_bearing, float target, float radius)
+        public GMapMarkerPlane(PointLatLng p, int zoom, int scale, bool fixedscale, float heading, float cog, float nav_bearing, float target, float radius)
             : base(p)
         {
             this.heading = heading;
@@ -806,7 +848,31 @@ namespace Interoperability_GUI
             this.target = target;
             this.nav_bearing = nav_bearing;
             this.radius = radius;
+            int gmapscale;
+
+            //int scale = 8 * Convert.ToInt32(gmap.Zoom);
+            if (!fixedscale)
+            {
+                gmapscale = Convert.ToInt32(scale * 1 / (156543.03392 * Math.Cos(p.Lat * Math.PI / 180) / Math.Pow(2, zoom)));
+            }
+            else
+            {
+                gmapscale = scale;
+            }
+
+            //Be careful not to make the image too large, or Size will throw an invalid paramter exception 
+            if (gmapscale == 0)
+            {
+                gmapscale = 1;
+            }
+            if(gmapscale > 1500)
+            {
+                gmapscale = 1500;
+            }
+
+            icon = new Bitmap(interoperability.Properties.Resources.UT_X2B, new Size(gmapscale, gmapscale));
             Size = icon.Size;
+            //Size = new Size(10, 10);
         }
 
         public GMapMarkerPlane(PointLatLng p, float heading)
@@ -885,7 +951,8 @@ namespace Interoperability_GUI
             {
             }
             g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2);
-
+            //g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2, 50, 50);
+            //g.DrawImage(icon, icon.Width / -2, icon.Height / 02, 50, 50);
             g.Transform = temp;
         }
     }

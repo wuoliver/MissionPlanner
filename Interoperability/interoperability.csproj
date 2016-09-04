@@ -149,6 +149,9 @@
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="UT-X2B.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Program Files (x86)\Mission Planner\plugins" /y

@@ -58,6 +58,8 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.UASLoc_Checkbox = new System.Windows.Forms.CheckBox();
             this.Waypoints_Checkbox = new System.Windows.Forms.CheckBox();
@@ -79,10 +81,12 @@
             this.showObstaclesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showWaypointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
             this.Map_Tab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
             this.Map_ContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -376,6 +380,9 @@
             // 
             // Map_Tab
             // 
+            this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
+            this.Map_Tab.Controls.Add(this.label12);
+            this.Map_Tab.Controls.Add(this.UAS_Trackbar);
             this.Map_Tab.Controls.Add(this.checkBox6);
             this.Map_Tab.Controls.Add(this.UASLoc_Checkbox);
             this.Map_Tab.Controls.Add(this.Waypoints_Checkbox);
@@ -395,6 +402,29 @@
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(13, 239);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(72, 13);
+            this.label12.TabIndex = 14;
+            this.label12.Text = "UAS Scale:";
+            // 
+            // UAS_Trackbar
+            // 
+            this.UAS_Trackbar.BackColor = System.Drawing.SystemColors.Window;
+            this.UAS_Trackbar.Location = new System.Drawing.Point(16, 255);
+            this.UAS_Trackbar.Maximum = 300;
+            this.UAS_Trackbar.Minimum = 2;
+            this.UAS_Trackbar.Name = "UAS_Trackbar";
+            this.UAS_Trackbar.Size = new System.Drawing.Size(238, 45);
+            this.UAS_Trackbar.TabIndex = 13;
+            this.UAS_Trackbar.TickFrequency = 8;
+            this.UAS_Trackbar.Value = 2;
+            this.UAS_Trackbar.Scroll += new System.EventHandler(this.UAS_Trackbar_Scroll);
             // 
             // checkBox6
             // 
@@ -558,6 +588,7 @@
             this.gMapControl1.Size = new System.Drawing.Size(839, 536);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 0D;
+            this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             // 
             // Map_ContextMenuStrip
@@ -614,6 +645,17 @@
             this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
             this.showWaypointsToolStripMenuItem.Click += new System.EventHandler(this.showWaypointsToolStripMenuItem_Click);
             // 
+            // Fixed_UAS_Size_Checkbox
+            // 
+            this.Fixed_UAS_Size_Checkbox.AutoSize = true;
+            this.Fixed_UAS_Size_Checkbox.Location = new System.Drawing.Point(138, 238);
+            this.Fixed_UAS_Size_Checkbox.Name = "Fixed_UAS_Size_Checkbox";
+            this.Fixed_UAS_Size_Checkbox.Size = new System.Drawing.Size(116, 17);
+            this.Fixed_UAS_Size_Checkbox.TabIndex = 15;
+            this.Fixed_UAS_Size_Checkbox.Text = "Use fixed UAS size";
+            this.Fixed_UAS_Size_Checkbox.UseVisualStyleBackColor = true;
+            this.Fixed_UAS_Size_Checkbox.CheckedChanged += new System.EventHandler(this.Fixed_UAS_Size_Checkbox_CheckedChanged);
+            // 
             // Interoperability_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -634,6 +676,7 @@
             this.SDA_Tab.PerformLayout();
             this.Map_Tab.ResumeLayout(false);
             this.Map_Tab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
             this.Map_ContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -691,5 +734,8 @@
         private System.Windows.Forms.CheckBox Obstacles_Checkbox;
         private System.Windows.Forms.CheckBox Geofence_Checkbox;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TrackBar UAS_Trackbar;
+        private System.Windows.Forms.CheckBox Fixed_UAS_Size_Checkbox;
     }
 }
