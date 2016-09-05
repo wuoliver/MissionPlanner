@@ -22,9 +22,14 @@ namespace Interoperability_GUI
 {
     public partial class Settings_GUI : Form
     {
-        string IP_ADDRESS_TEXT = "http://192.168.56.101";
-        string USERNAME = "testuser";
-        string PASSWORD = "testpass";
+        private string IP_ADDRESS_TEXT = "http://192.168.56.101";
+        private string USERNAME = "testuser";
+        private string PASSWORD = "testpass";
+
+        private string dist_units = "Metres";
+        private string airspd_units = "Metres per Second";
+        private string geo_cords = "DD.DDDDDD";
+
 
         Action<int> restartInteroperabilityCallback;
         Interoperability_Settings Settings;
@@ -42,15 +47,20 @@ namespace Interoperability_GUI
             USERNAME = Settings["username"];
             PASSWORD = Settings["password"];
 
+            dist_units = Settings["dist_units"];
+            airspd_units = Settings["airspd_units"];
+            geo_cords = Settings["geo_cords"];
+
             IP_ADDR_BOX.Text = IP_ADDRESS_TEXT;
             USERNAME_BOX.Text = USERNAME;
             PASSWORD_BOX.Text = PASSWORD;
+
+            Distance_Units_Combo.Text = dist_units;
+            Airspeed_Units_Combo.Text = airspd_units;
+            Coordinate_System_Combo.Text = geo_cords;
         }
 
-        private void IP_ADDR_BOX_TextChanged(object sender, EventArgs e)
-        {
-            IP_ADDRESS_TEXT = IP_ADDR_BOX.Text;
-        }
+       
 
         private void Settings_Load(object sender, EventArgs e)
         {
@@ -63,15 +73,7 @@ namespace Interoperability_GUI
             Settings_GUI.isOpened = false;
         }
 
-        private void USERNAME_BOX_TextChanged(object sender, EventArgs e)
-        {
-            USERNAME = USERNAME_BOX.Text;
-        }
-
-        private void PASSWORD_BOX_TextChanged(object sender, EventArgs e)
-        {
-            PASSWORD = PASSWORD_BOX.Text;
-        }
+        
 
         private void Cancel_Click(object sender, EventArgs e)
         {
@@ -81,9 +83,12 @@ namespace Interoperability_GUI
 
         private void Save_Click(object sender, EventArgs e)
         {
-            Settings["address"] = IP_ADDRESS_TEXT;
-            Settings["username"] = USERNAME;
-            Settings["password"] =  PASSWORD;
+            Settings["address"] = IP_ADDR_BOX.Text;
+            Settings["username"] = USERNAME_BOX.Text;
+            Settings["password"] = PASSWORD_BOX.Text;
+            Settings["dist_units"] = Distance_Units_Combo.Text;
+            Settings["airspd_units"] = Airspeed_Units_Combo.Text;
+            Settings["geo_cords"] = Coordinate_System_Combo.Text;         
             Settings.Save();
 
             //Restarts all the threads relying on HTTP to update credentials
@@ -128,7 +133,7 @@ namespace Interoperability_GUI
                         Console.WriteLine("Credentials Valid");
                         error_label.Text = "";
                         validation_label.Text = "Success, Credentials Valid";
-                        
+
                     }
                 }
             }
@@ -149,5 +154,6 @@ namespace Interoperability_GUI
             bg.Start();
             bg.Join();
         }
+
     }
 }

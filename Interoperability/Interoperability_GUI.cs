@@ -42,6 +42,7 @@ namespace Interoperability_GUI
         protected bool DrawGeofence = true;
         protected bool DrawSearchArea = true;
         protected bool UAS_FixedSize = false;
+        protected bool MAP_Autopan = false;
 
         //GMAP Zoom
         private int zoom = 0;
@@ -67,11 +68,14 @@ namespace Interoperability_GUI
             MAP_OverlaySettings(ref Settings, ref DrawGeofence, "DrawGeofence");
             MAP_OverlaySettings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
             MAP_OverlaySettings(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
+            MAP_OverlaySettings(ref Settings, ref MAP_Autopan, "MAP_Autopan");
 
 
             MAP_UAS_ScaleSettings(ref Settings, ref UAS_Scale, "UAS_Scale");
 
             InitializeGUI_States();
+
+            Settings.Save();
 
             //Set poll Rate text 
             Telemetry_pollRateInput.Text = telemPollRate.ToString();
@@ -127,6 +131,8 @@ namespace Interoperability_GUI
 
             UAS_Trackbar.Value = UAS_Scale;
             Fixed_UAS_Size_Checkbox.Checked = UAS_FixedSize;
+
+            AutoPan_Checkbox.Checked = MAP_Autopan;
 
         }
 
@@ -358,6 +364,7 @@ namespace Interoperability_GUI
         }
 
         //Adds polygons for the stationary obstacles
+        //All units in meters 
         public void MAP_addSObstaclePoly(double radius, double altitude, double Lat, double Lon)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
@@ -371,13 +378,27 @@ namespace Interoperability_GUI
                 //Add altitude
                 GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
                 marker.ToolTipMode = MarkerTooltipMode.Always;
-                marker.ToolTipText = altitude.ToString("0");
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
+                marker.ToolTipText = altitudetext;
+
                 Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
 
-
+        //All units in meters 
         public List<PointLatLng> getCirclePoly(double radius, double Lat, double Lon)
         {
             int numPoints = 200;
@@ -396,6 +417,7 @@ namespace Interoperability_GUI
             return Points;
         }
 
+        //All units in meters 
         public void MAP_addMObstaclePoly(double radius, double altitude, double Lat, double Lon, string name)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
@@ -408,7 +430,21 @@ namespace Interoperability_GUI
                 //Show the altitude of the obstacle
                 GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
                 marker.ToolTipMode = MarkerTooltipMode.Always;
-                marker.ToolTipText = altitude.ToString("0");
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
+
+                marker.ToolTipText = altitudetext;
                 Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
@@ -421,8 +457,39 @@ namespace Interoperability_GUI
                 GMapMarkerPlane marker = new GMapMarkerPlane(location, zoom, UAS_Scale, UAS_FixedSize, heading, cog, nav_bearing, target, radius);
                 //Show the altitude always
                 marker.ToolTipMode = MarkerTooltipMode.Always;
-                marker.ToolTipText = altitude.ToString("0");
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
+                marker.ToolTipText = altitudetext;
                 Plane_Overlay.Markers.Add(marker);
+            });
+        }
+
+        public void MAP_updateGPSLabel(string label)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                UAS_GPS_Label.Text = label;
+            });
+            //gMapControl1.
+        }
+
+        public void MAP_updateAltLabel(string altitude,string delta_altutide)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                UAS_Altitude_ASL_Label.Text = altitude;
+                UAS_D_Altitude_Label.Text = delta_altutide;
             });
         }
 
@@ -478,6 +545,16 @@ namespace Interoperability_GUI
             });
         }
 
+        public void MAP_ChangeLoc(PointLatLng point)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                gMapControl1.Position = point;
+            });
+        }
+
+        //public void MAP_Update
+
         private void Telem_Start_Stop_Button_Click(object sender, EventArgs e)
         {
             if (Telem_Start_Stop_Button.Text == "Start")
@@ -521,6 +598,11 @@ namespace Interoperability_GUI
         public bool getDrawSearchArea()
         {
             return DrawSearchArea;
+        }
+
+        public bool getAutopan()
+        {
+            return MAP_Autopan;
         }
 
         private void showGeofenceToolStripMenuItem_Click(object sender, EventArgs e)
@@ -713,6 +795,32 @@ namespace Interoperability_GUI
             Settings["UAS_Fixedsize"] = UAS_FixedSize.ToString();
             Settings.Save();
         }
+
+        private void AutoPan_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            MAP_Autopan = AutoPan_Checkbox.Checked;
+            Settings["MAP_Autopan"] = MAP_Autopan.ToString();
+            Settings.Save();
+        }
+
+        private void gMapControl1_OnMapDrag()
+        {
+            MAP_Autopan = false;
+            AutoPan_Checkbox.Checked = false;
+            Settings["MAP_Autopan"] = MAP_Autopan.ToString();
+            Settings.Save();
+        }
+
+        private void gMapControl1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            /*if(e == "t")
+            {
+                InteroperabilityCallback(7);
+            }*/
+            
+        }
+
+        
     }
 
     public static class MercatorProjection

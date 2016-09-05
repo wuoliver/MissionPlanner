@@ -58,6 +58,7 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
@@ -81,7 +82,14 @@
             this.showObstaclesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showWaypointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
+            this.UAS_GPS_Label = new System.Windows.Forms.Label();
+            this.UAS_Altitude_ASL_Label = new System.Windows.Forms.Label();
+            this.AutoPan_Checkbox = new System.Windows.Forms.CheckBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.UAS_D_Altitude_Label = new System.Windows.Forms.Label();
+            this.Interop_Tooltip = new System.Windows.Forms.ToolTip(this.components);
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -154,7 +162,7 @@
             this.Server_Settings.Name = "Server_Settings";
             this.Server_Settings.Size = new System.Drawing.Size(131, 23);
             this.Server_Settings.TabIndex = 7;
-            this.Server_Settings.Text = "Connection Settings";
+            this.Server_Settings.Text = "Settings";
             this.Server_Settings.UseVisualStyleBackColor = true;
             this.Server_Settings.Click += new System.EventHandler(this.Server_Settings_Click);
             // 
@@ -186,10 +194,10 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.SDA_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Map_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
-            this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 22);
+            this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 20);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
-            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(306, 562);
+            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(279, 564);
             this.Interoperability_GUI_Tab.TabIndex = 8;
             // 
             // Telem_Tab
@@ -211,7 +219,7 @@
             this.Telem_Tab.Location = new System.Drawing.Point(4, 22);
             this.Telem_Tab.Name = "Telem_Tab";
             this.Telem_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Telem_Tab.Size = new System.Drawing.Size(298, 536);
+            this.Telem_Tab.Size = new System.Drawing.Size(271, 538);
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
@@ -287,7 +295,7 @@
             this.SDA_Tab.Location = new System.Drawing.Point(4, 22);
             this.SDA_Tab.Name = "SDA_Tab";
             this.SDA_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.SDA_Tab.Size = new System.Drawing.Size(298, 536);
+            this.SDA_Tab.Size = new System.Drawing.Size(271, 538);
             this.SDA_Tab.TabIndex = 1;
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
@@ -398,10 +406,21 @@
             this.Map_Tab.Location = new System.Drawing.Point(4, 22);
             this.Map_Tab.Name = "Map_Tab";
             this.Map_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Map_Tab.Size = new System.Drawing.Size(298, 536);
+            this.Map_Tab.Size = new System.Drawing.Size(271, 538);
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Fixed_UAS_Size_Checkbox
+            // 
+            this.Fixed_UAS_Size_Checkbox.AutoSize = true;
+            this.Fixed_UAS_Size_Checkbox.Location = new System.Drawing.Point(138, 238);
+            this.Fixed_UAS_Size_Checkbox.Name = "Fixed_UAS_Size_Checkbox";
+            this.Fixed_UAS_Size_Checkbox.Size = new System.Drawing.Size(116, 17);
+            this.Fixed_UAS_Size_Checkbox.TabIndex = 15;
+            this.Fixed_UAS_Size_Checkbox.Text = "Use fixed UAS size";
+            this.Fixed_UAS_Size_Checkbox.UseVisualStyleBackColor = true;
+            this.Fixed_UAS_Size_Checkbox.CheckedChanged += new System.EventHandler(this.Fixed_UAS_Size_Checkbox_CheckedChanged);
             // 
             // label12
             // 
@@ -554,7 +573,7 @@
             this.TargetUpload_Tab.Location = new System.Drawing.Point(4, 22);
             this.TargetUpload_Tab.Name = "TargetUpload_Tab";
             this.TargetUpload_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.TargetUpload_Tab.Size = new System.Drawing.Size(298, 536);
+            this.TargetUpload_Tab.Size = new System.Drawing.Size(271, 538);
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
@@ -572,7 +591,7 @@
             this.gMapControl1.GrayScaleMode = false;
             this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
             this.gMapControl1.LevelsKeepInMemmory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(324, 44);
+            this.gMapControl1.Location = new System.Drawing.Point(294, 41);
             this.gMapControl1.MarkersEnabled = true;
             this.gMapControl1.MaxZoom = 25;
             this.gMapControl1.MinZoom = 2;
@@ -585,11 +604,13 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(839, 536);
+            this.gMapControl1.Size = new System.Drawing.Size(869, 526);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 0D;
+            this.gMapControl1.OnMapDrag += new GMap.NET.MapDrag(this.gMapControl1_OnMapDrag);
             this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
+            this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
             // Map_ContextMenuStrip
             // 
@@ -645,22 +666,96 @@
             this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
             this.showWaypointsToolStripMenuItem.Click += new System.EventHandler(this.showWaypointsToolStripMenuItem_Click);
             // 
-            // Fixed_UAS_Size_Checkbox
+            // UAS_GPS_Label
             // 
-            this.Fixed_UAS_Size_Checkbox.AutoSize = true;
-            this.Fixed_UAS_Size_Checkbox.Location = new System.Drawing.Point(138, 238);
-            this.Fixed_UAS_Size_Checkbox.Name = "Fixed_UAS_Size_Checkbox";
-            this.Fixed_UAS_Size_Checkbox.Size = new System.Drawing.Size(116, 17);
-            this.Fixed_UAS_Size_Checkbox.TabIndex = 15;
-            this.Fixed_UAS_Size_Checkbox.Text = "Use fixed UAS size";
-            this.Fixed_UAS_Size_Checkbox.UseVisualStyleBackColor = true;
-            this.Fixed_UAS_Size_Checkbox.CheckedChanged += new System.EventHandler(this.Fixed_UAS_Size_Checkbox_CheckedChanged);
+            this.UAS_GPS_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.UAS_GPS_Label.AutoSize = true;
+            this.UAS_GPS_Label.Location = new System.Drawing.Point(375, 571);
+            this.UAS_GPS_Label.Name = "UAS_GPS_Label";
+            this.UAS_GPS_Label.Size = new System.Drawing.Size(115, 13);
+            this.UAS_GPS_Label.TabIndex = 9;
+            this.UAS_GPS_Label.Text = "00.000000  00.000000";
+            // 
+            // UAS_Altitude_ASL_Label
+            // 
+            this.UAS_Altitude_ASL_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.UAS_Altitude_ASL_Label.AutoSize = true;
+            this.UAS_Altitude_ASL_Label.Location = new System.Drawing.Point(635, 570);
+            this.UAS_Altitude_ASL_Label.Name = "UAS_Altitude_ASL_Label";
+            this.UAS_Altitude_ASL_Label.Size = new System.Drawing.Size(48, 13);
+            this.UAS_Altitude_ASL_Label.TabIndex = 10;
+            this.UAS_Altitude_ASL_Label.Text = "000.00m";
+            // 
+            // AutoPan_Checkbox
+            // 
+            this.AutoPan_Checkbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AutoPan_Checkbox.AutoSize = true;
+            this.AutoPan_Checkbox.Location = new System.Drawing.Point(874, 569);
+            this.AutoPan_Checkbox.Name = "AutoPan_Checkbox";
+            this.AutoPan_Checkbox.Size = new System.Drawing.Size(70, 17);
+            this.AutoPan_Checkbox.TabIndex = 11;
+            this.AutoPan_Checkbox.Text = "Auto Pan";
+            this.AutoPan_Checkbox.UseVisualStyleBackColor = true;
+            this.AutoPan_Checkbox.CheckedChanged += new System.EventHandler(this.AutoPan_Checkbox_CheckedChanged);
+            // 
+            // label13
+            // 
+            this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(297, 570);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(72, 13);
+            this.label13.TabIndex = 12;
+            this.label13.Text = "UAS Cords:";
+            // 
+            // label14
+            // 
+            this.label14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(547, 570);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(82, 13);
+            this.label14.TabIndex = 13;
+            this.label14.Text = "UAS Alt ASL:";
+            this.Interop_Tooltip.SetToolTip(this.label14, "The absolute altitude of the UAS above sea level");
+            // 
+            // label15
+            // 
+            this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(700, 570);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(83, 13);
+            this.label15.TabIndex = 14;
+            this.label15.Text = "UAS Alt AGL:";
+            this.Interop_Tooltip.SetToolTip(this.label15, "The distance between the altitude of the UAS (ASL) \r\nand the elevation of the gro" +
+        "und immediate below the UAS\r\n");
+            // 
+            // UAS_D_Altitude_Label
+            // 
+            this.UAS_D_Altitude_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.UAS_D_Altitude_Label.AutoSize = true;
+            this.UAS_D_Altitude_Label.Location = new System.Drawing.Point(789, 570);
+            this.UAS_D_Altitude_Label.Name = "UAS_D_Altitude_Label";
+            this.UAS_D_Altitude_Label.Size = new System.Drawing.Size(48, 13);
+            this.UAS_D_Altitude_Label.TabIndex = 15;
+            this.UAS_D_Altitude_Label.Text = "000.00m";
             // 
             // Interoperability_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.Controls.Add(this.UAS_D_Altitude_Label);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.AutoPan_Checkbox);
+            this.Controls.Add(this.UAS_Altitude_ASL_Label);
+            this.Controls.Add(this.UAS_GPS_Label);
             this.Controls.Add(this.gMapControl1);
             this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.Interoperability_GUI_Tab);
@@ -737,5 +832,13 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TrackBar UAS_Trackbar;
         private System.Windows.Forms.CheckBox Fixed_UAS_Size_Checkbox;
+        private System.Windows.Forms.Label UAS_GPS_Label;
+        private System.Windows.Forms.Label UAS_Altitude_ASL_Label;
+        private System.Windows.Forms.CheckBox AutoPan_Checkbox;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label UAS_D_Altitude_Label;
+        private System.Windows.Forms.ToolTip Interop_Tooltip;
     }
 }
