@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,34 +19,186 @@ namespace Interoperability_GUI
 {
     public partial class Interoperability_GUI : Form
     {
-        Action<int> restartInteroperabilityCallback;
+        Action<int> InteroperabilityCallback;
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
         protected int sdaPollRate = 10;
+        protected int UAS_Scale = 2;
         global::Interoperability_GUI.Settings_GUI settings_gui;
         Interoperability_Settings Settings;
 
         //Put on top or something afterwards
         GMapOverlay Static_Overlay;
         GMapOverlay Stationary_Obstacle_Overlay;
-        GMapOverlay polyOverlay;
+        GMapOverlay Moving_Obstacle_Overlay;
         GMapOverlay Plane_Overlay;
+        GMapOverlay WP_Overlay;
 
 
-        public Interoperability_GUI(Action<int> _restartInteroperabilityCallback, Interoperability_Settings _Settings)
+        //Used for map control thread
+        protected bool DrawWP = true;
+        protected bool DrawObstacles = true;
+        protected bool DrawPlane = true;
+        protected bool DrawGeofence = true;
+        protected bool DrawSearchArea = true;
+        protected bool UAS_FixedSize = false;
+        protected bool MAP_Autopan = false;
+
+        protected string gui_format = "AUVSI";
+        private List<TabPage> TabList = new List<TabPage>();
+
+        //GMAP Zoom
+        private int zoom = 0;
+
+        //Container for all possible targets
+        List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
+        List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
+
+        public Interoperability_GUI(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
+            Console.WriteLine("Created GUI");
+
             InitializeComponent();
-            restartInteroperabilityCallback = _restartInteroperabilityCallback;
+            InteroperabilityCallback = _InteroperabilityCallback;
 
             //Get Settings object, used for server settings
             Settings = _Settings;
+
+            //Must be called after settings
+            MAP_Settings_Bool(ref Settings, ref DrawWP, "DrawWP");
+            MAP_Settings_Bool(ref Settings, ref DrawObstacles, "DrawObstacles");
+            MAP_Settings_Bool(ref Settings, ref DrawPlane, "DrawPlane");
+            MAP_Settings_Bool(ref Settings, ref DrawGeofence, "DrawGeofence");
+            MAP_Settings_Bool(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+            MAP_Settings_Bool(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
+            MAP_Settings_Bool(ref Settings, ref MAP_Autopan, "MAP_Autopan");
+
+
+            MAP_Settings_Int(ref Settings, ref UAS_Scale, "UAS_Scale");
+            MAP_Settings_String(ref Settings, ref gui_format, "gui_format");
+
+            InitializeGUI_States();
+
+            Settings.Save();
+
             //Set poll Rate text 
-            pollRateInput.Text = telemPollRate.ToString();
+            Telemetry_pollRateInput.Text = telemPollRate.ToString();
+            SDA_pollrateInput.Text = sdaPollRate.ToString();
+            Map_RefreshRateInput.Text = mapRefreshRate.ToString();
 
             Static_Overlay = new GMapOverlay("Static_Overlays");
             Stationary_Obstacle_Overlay = new GMapOverlay("Stationary_Obstacles");
             Plane_Overlay = new GMapOverlay("Plane_Overlay");
-            polyOverlay = new GMapOverlay("Polygon");
+            Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
+            WP_Overlay = new GMapOverlay("Waypoints");
+        }
+
+        public void InteroperabilityGUIAction(int action)
+        {
+            int TabCount;
+            switch (action)
+            {  
+                //Disable USC Elements, Enable AUVSI
+                case 0:
+                    TabCount = Interoperability_GUI_Tab.TabPages.Count;
+                    for (int i=0; i < TabCount; i++)
+                    {
+                        Interoperability_GUI_Tab.TabPages.RemoveAt(0);
+                    }
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[0]); //Telemtry Upload Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    this.Text = "UTAT UAV Interoperability Control Panel (AUVSI)";
+                    break; 
+                //Disable AUVSI Elements, Enable USC 
+                case 1:
+                    TabCount = Interoperability_GUI_Tab.TabPages.Count;
+                    for (int i = 0; i < TabCount; i++)
+                    {
+                        Interoperability_GUI_Tab.TabPages.RemoveAt(0);
+                    }
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[0]); //Telemtry Upload Tab
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    this.Text = "UTAT UAV Interoperability Control Panel (USC)";
+                    break;
+                default:
+                    break; 
+            }
+        }
+        public void MAP_Settings_String(ref Interoperability_Settings Settings, ref string value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value;
+            }
+            else
+            {
+                value = Settings[key];
+            }
+        }
+        public void MAP_Settings_Int(ref Interoperability_Settings Settings, ref int value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value.ToString();
+            }
+            else
+            {
+                value = Convert.ToInt32(Settings[key]);
+            }
+        }
+        public void MAP_Settings_Bool(ref Interoperability_Settings Settings, ref bool value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value.ToString();
+            }
+            else
+            {
+                value = Convert.ToBoolean(Settings[key]);
+            }
+        }
+
+        public void InitializeGUI_States()
+        {
+            showGeofenceToolStripMenuItem.Checked = DrawGeofence;
+            Geofence_Checkbox.Checked = DrawGeofence;
+
+            showSearchAreaToolStripMenuItem.Checked = DrawSearchArea;
+            SearchArea_Checkbox.Checked = DrawSearchArea;
+
+            showObstaclesToolStripMenuItem.Checked = DrawObstacles;
+            Obstacles_Checkbox.Checked = DrawObstacles;
+
+            showPlaneToolStripMenuItem.Checked = DrawPlane;
+            UASLoc_Checkbox.Checked = DrawPlane;
+
+            showWaypointsToolStripMenuItem.Checked = DrawWP;
+            Waypoints_Checkbox.Checked = DrawWP;
+
+            UAS_Trackbar.Value = UAS_Scale;
+            Fixed_UAS_Size_Checkbox.Checked = UAS_FixedSize;
+
+            AutoPan_Checkbox.Checked = MAP_Autopan;
+
+            foreach (TabPage TAB in Interoperability_GUI_Tab.TabPages)
+            {
+                TabList.Add(TAB);
+                Interoperability_GUI_Tab.TabPages.Remove(TAB);
+            }
+
+            if (gui_format == "AUVSI")
+            {
+                InteroperabilityGUIAction(0);
+            }
+            else
+            {
+                InteroperabilityGUIAction(1);
+            }
+
         }
 
         public int getTelemPollRate()
@@ -66,6 +219,8 @@ namespace Interoperability_GUI
         {
             return settings_gui;
         }
+
+
         private const int CP_NOCLOSE_BUTTON = 0x200;
         protected override CreateParams CreateParams
         {
@@ -76,6 +231,7 @@ namespace Interoperability_GUI
                 return myCp;
             }
         }
+
 
         public void setUniqueTelUploadText(string text)
         {
@@ -105,7 +261,7 @@ namespace Interoperability_GUI
 
         public void TelemResp(string resp)
         {
-            if (resp != this.Telem_Tab.Text)
+            if (resp != this.TelemServerResp.Text)
             {
                 this.TelemServerResp.BeginInvoke((MethodInvoker)delegate ()
                 {
@@ -114,12 +270,32 @@ namespace Interoperability_GUI
             }
         }
 
+        public void SDAResp(string resp)
+        {
+            if (resp != this.SDA_ServerResponseTextBox.Text)
+            {
+                this.SDA_ServerResponseTextBox.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    this.SDA_ServerResponseTextBox.Text = resp;
+                });
+            }
+        }
+
+        //Function is called when the user clicks a button thing
+        public void AddTarget()
+        {
+
+        }
+
+
+
         public void setObstacles(Obstacles _Obstacles)
         {
             this.SDA_Obstacles.BeginInvoke((MethodInvoker)delegate ()
             {
                 Console.WriteLine("In setObstacles");
                 SDA_Obstacles.Text = "";
+                //SDA_Obstacles.Text.
                 SDA_Obstacles.AppendText("MOVING OBJECTS\n");
                 for (int i = 0; i < _Obstacles.moving_obstacles.Count(); i++)
                 {
@@ -138,6 +314,7 @@ namespace Interoperability_GUI
                     SDA_Obstacles.AppendText("\tLongitude: " + _Obstacles.stationary_obstacles[i].longitude.ToString("N6") + "\n");
                     SDA_Obstacles.AppendText("\n");
                 }
+                
             });
         }
 
@@ -146,11 +323,35 @@ namespace Interoperability_GUI
         {
             try
             {
-                telemPollRate = Int32.Parse(this.pollRateInput.Text);
+                telemPollRate = Int32.Parse(this.Telemetry_pollRateInput.Text);
             }
             catch
             {
-                this.pollRateInput.Text = telemPollRate.ToString();
+                this.Telemetry_pollRateInput.Text = telemPollRate.ToString();
+            }
+        }
+
+        private void SDA_PollRateApply_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                sdaPollRate = Int32.Parse(this.SDA_pollrateInput.Text);
+            }
+            catch
+            {
+                this.SDA_pollrateInput.Text = sdaPollRate.ToString();
+            }
+        }
+
+        private void Map_ApplyRefreshRate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                mapRefreshRate = Int32.Parse(this.Map_RefreshRateInput.Text);
+            }
+            catch
+            {
+                this.Map_RefreshRateInput.Text = mapRefreshRate.ToString();
             }
         }
 
@@ -158,27 +359,44 @@ namespace Interoperability_GUI
         {
             if (!Settings_GUI.isOpened)
             {
-                settings_gui = new Settings_GUI(restartInteroperabilityCallback, Settings);
+                settings_gui = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
                 settings_gui.Show();
             }
-
         }
 
         private void Reset_Stats_Click(object sender, EventArgs e)
         {
-            //Restarts the Telemetry Uplaod Stats
-            restartInteroperabilityCallback(4);
+            //Restarts the Telemetry Upload Stats
+            InteroperabilityCallback(4);
         }
 
-        private void SDA_Test_Button_Click(object sender, EventArgs e)
+        private void SDA_Start_Stop_Button_Click(object sender, EventArgs e)
         {
-            //Starts the SDA thread
-            restartInteroperabilityCallback(1);
+            if (SDA_Start_Stop_Button.Text == "Start SDA Polling")
+            {
+                //Start
+                InteroperabilityCallback(1);
+                SDA_Start_Stop_Button.Text = "Stop SDA Polling";
+            }
+            else
+            {
+                //Stop
+                InteroperabilityCallback(2);
+                SDA_Start_Stop_Button.Text = "Start SDA Polling";
+            }
+        } 
+
+        public void SetSDAStart_StopButton_Off()
+        {
+            this.SDA_Start_Stop_Button.BeginInvoke((MethodInvoker)delegate ()
+            {
+                SDA_Start_Stop_Button.Text = "Start SDA Polling";
+            });
         }
 
         private void Mission_Enable_Click(object sender, EventArgs e)
         {
-            restartInteroperabilityCallback(3);
+            InteroperabilityCallback(3);
         }
 
         //Function called when the map is loaded
@@ -189,7 +407,6 @@ namespace Interoperability_GUI
             gMapControl1.Zoom = 15;
             gMapControl1.MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance;
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
-            //GMap.NET.GMaps.Instance.
         }
 
         //Used to add polygons to define things such as: 
@@ -197,45 +414,57 @@ namespace Interoperability_GUI
         // -Search Area
         public void MAP_addStaticPoly(List<Waypoint> points, string name, Color Border_Color, Color Fill_Color, int width, int alpha)
         {
-            List<PointLatLng> _points = new List<PointLatLng>();
-            for (int i = 0; i < points.Count(); i++)
-            {
-                _points.Add(new PointLatLng(points[i].latitude, points[i].longitude));
-            }
-
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
+                List<PointLatLng> _points = new List<PointLatLng>();
+                for (int i = 0; i < points.Count(); i++)
+                {
+                    _points.Add(new PointLatLng(points[i].latitude, points[i].longitude));
+                }
+
                 GMapPolygon Static_Polygon = new GMapPolygon(_points, name);
                 Static_Polygon.Stroke = new Pen(Border_Color, width);
                 Static_Polygon.Fill = new SolidBrush(Color.FromArgb(alpha, Fill_Color));
                 Static_Overlay.Polygons.Add(Static_Polygon);
-                //gMapControl1.Overlays.Add(Static_Overlay);
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
             });
         }
 
         //Adds polygons for the stationary obstacles
-        public void MAP_addSObstaclePoly(double radius, double Lat, double Lon)
+        //All units in meters 
+        public void MAP_addSObstaclePoly(double radius, double altitude, double Lat, double Lon)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-
+                //Add obstacle
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "polygon");
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
-
-                //GMapMarker thing = new GMapMarker();
-                //thing.
-                //marker;
-
                 Stationary_Obstacle_Overlay.Polygons.Add(polygon);
-                //gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
+
+                //Add altitude
+                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
+                marker.ToolTipText = altitudetext;
+
+                Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
 
-
+        //All units in meters 
         public List<PointLatLng> getCirclePoly(double radius, double Lat, double Lon)
         {
             int numPoints = 200;
@@ -254,40 +483,105 @@ namespace Interoperability_GUI
             return Points;
         }
 
-        public void MAP_addCirclePoly(double radius, double Lat, double Lon, string name)
+        //All units in meters 
+        public void MAP_addMObstaclePoly(double radius, double altitude, double Lat, double Lon, string name)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                //polyOverlay = new GMapOverlay("polygons");
-
-                //gMapControl1.Overlays.Clear(); 
                 GMapPolygon polygon = new GMapPolygon(getCirclePoly(radius, Lat, Lon), "name");
                 polygon.Stroke = new Pen(Color.Red, 2);
                 polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
-                polyOverlay.Polygons.Add(polygon);
-                
-                //GMarkerGoogle Test = new GmarkerGoogle();
-                //Test.Tag
-                //gMapControl1.Overlays.Add(polyOverlay);
+                Moving_Obstacle_Overlay.Polygons.Add(polygon);
 
+                //Show the altitude of the obstacle
+                GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
 
-                //gMapControl1.Overlays[0].Id;
-
-
-                //gMapControl1.UpdatePolygonLocalPosition(polygon);
+                marker.ToolTipText = altitudetext;
+                Moving_Obstacle_Overlay.Markers.Add(marker);
             });
 
         }
 
-        public void MAP_updatePlaneLoc(PointLatLng Location, float altitude, float Heading)
+        public void MAP_updatePlaneLoc(PointLatLng location, float altitude, float heading, float cog, float nav_bearing, float target, float radius)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                GMapMarkerPlane marker = new GMapMarkerPlane(Location, Heading);
+                GMapMarkerPlane marker = new GMapMarkerPlane(location, zoom, UAS_Scale, UAS_FixedSize, heading, cog, nav_bearing, target, radius);
                 //Show the altitude always
                 marker.ToolTipMode = MarkerTooltipMode.Always;
-                marker.ToolTipText = altitude.ToString("0");
+                string altitudetext = "";
+                switch (Settings["dist_units"])
+                {
+                    case "Meters":
+                        altitudetext = altitude.ToString("0");
+                        break;
+                    case "Feet":
+                        altitudetext = (altitude * 3.28084).ToString("0");
+                        break;
+                    default:
+                        altitudetext = altitude.ToString("0");
+                        break;
+                }
+                marker.ToolTipText = altitudetext;
                 Plane_Overlay.Markers.Add(marker);
+            });
+        }
+
+        public void MAP_updateGPSLabel(string label)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                UAS_GPS_Label.Text = label;
+            });
+            //gMapControl1.
+        }
+
+        public void MAP_updateAltLabel(string altitude,string delta_altutide)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                UAS_Altitude_ASL_Label.Text = altitude;
+                UAS_D_Altitude_Label.Text = delta_altutide;
+            });
+        }
+
+        public void MAP_updateWP(List<PointLatLng> waypoints)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                for (int i = 0; i < waypoints.Count(); i++)
+                {
+                    WP_Overlay.Markers.Add(new GMapMarkerWP(waypoints[i], i.ToString("0")));
+                }
+            });
+        }
+
+        public void MAP_updateWPRoute(List<PointLatLng> waypoints)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                for (int i = 0; i < waypoints.Count() - 1; i++)
+                {
+                    List<PointLatLng> list = new List<PointLatLng>();
+                    list.Add(waypoints[i]);
+                    list.Add(waypoints[i + 1]);
+
+                    WP_Overlay.Routes.Add(new GMapRoute(list, "route") { Stroke = new System.Drawing.Pen(System.Drawing.Color.Yellow, 4) });
+                }
             });
         }
 
@@ -296,22 +590,302 @@ namespace Interoperability_GUI
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 gMapControl1.Overlays.Clear();
-                gMapControl1.Overlays.Add(polyOverlay);
                 gMapControl1.Overlays.Add(Static_Overlay);
+                gMapControl1.Overlays.Add(WP_Overlay);
+                gMapControl1.Overlays.Add(Moving_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Stationary_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(Plane_Overlay);
                 gMapControl1.Invalidate();
             });
         }
+
         public void MAP_Clear_Overlays()
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                polyOverlay.Clear();
+                Moving_Obstacle_Overlay.Clear();
                 Static_Overlay.Clear();
                 Stationary_Obstacle_Overlay.Clear();
                 Plane_Overlay.Clear();
+                WP_Overlay.Clear();
             });
+        }
+
+        public void MAP_ChangeLoc(PointLatLng point)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                gMapControl1.Position = point;
+            });
+        }
+
+        //public void MAP_Update
+
+        private void Telem_Start_Stop_Button_Click(object sender, EventArgs e)
+        {
+            if (Telem_Start_Stop_Button.Text == "Start")
+            {
+                //Start
+                InteroperabilityCallback(0);
+                Telem_Start_Stop_Button.Text = "Stop";
+            }
+            else
+            {
+                //Stop
+                InteroperabilityCallback(5);
+                Telem_Start_Stop_Button.Text = "Start";
+            }
+        }
+
+        public void Telem_Start_Stop_Button_Off()
+        {
+            this.Telem_Start_Stop_Button.BeginInvoke((MethodInvoker)delegate ()
+            {
+                Telem_Start_Stop_Button.Text = "Start";
+            });
+        }
+
+        public bool getDrawWP()
+        {
+            return DrawWP;
+        }
+        public bool getDrawObstacles()
+        {
+            return DrawObstacles;
+        }
+        public bool getDrawPlane()
+        {
+            return DrawPlane;
+        }
+        public bool getDrawGeofence()
+        {
+            return DrawGeofence;
+        }
+        public bool getDrawSearchArea()
+        {
+            return DrawSearchArea;
+        }
+
+        public bool getAutopan()
+        {
+            return MAP_Autopan;
+        }
+
+        private void showGeofenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showGeofenceToolStripMenuItem.Checked == true)
+            {
+                showGeofenceToolStripMenuItem.Checked = false;
+                Geofence_Checkbox.Checked = false;
+                DrawGeofence = false;
+            }
+            else
+            {
+                showGeofenceToolStripMenuItem.Checked = true;
+                Geofence_Checkbox.Checked = true;
+                DrawGeofence = true;
+            }
+            Settings["DrawGeofence"] = DrawGeofence.ToString();
+            Settings.Save();
+        }
+
+        private void showSearchAreaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showSearchAreaToolStripMenuItem.Checked == true)
+            {
+                showSearchAreaToolStripMenuItem.Checked = false;
+                SearchArea_Checkbox.Checked = false;
+                DrawSearchArea = false;
+            }
+            else
+            {
+                showSearchAreaToolStripMenuItem.Checked = true;
+                SearchArea_Checkbox.Checked = true;
+                DrawSearchArea = true;
+            }
+            Settings["DrawSearchArea"] = DrawSearchArea.ToString();
+            Settings.Save();
+        }
+
+        private void showObstaclesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showObstaclesToolStripMenuItem.Checked == true)
+            {
+                showObstaclesToolStripMenuItem.Checked = false;
+                Obstacles_Checkbox.Checked = false;
+                DrawObstacles = false;
+            }
+            else
+            {
+                showObstaclesToolStripMenuItem.Checked = true;
+                Obstacles_Checkbox.Checked = true;
+                DrawObstacles = true;
+            }
+            Settings["DrawObstacles"] = DrawObstacles.ToString();
+            Settings.Save();
+        }
+
+        private void showPlaneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showPlaneToolStripMenuItem.Checked == true)
+            {
+                showPlaneToolStripMenuItem.Checked = false;
+                UASLoc_Checkbox.Checked = false;
+                DrawPlane = false;
+            }
+            else
+            {
+                showPlaneToolStripMenuItem.Checked = true;
+                UASLoc_Checkbox.Checked = true;
+                DrawPlane = true;
+            }
+            Settings["DrawPlane"] = DrawPlane.ToString();
+            Settings.Save();
+        }
+
+        private void showWaypointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (showWaypointsToolStripMenuItem.Checked == true)
+            {
+                showWaypointsToolStripMenuItem.Checked = false;
+                Waypoints_Checkbox.Checked = false;
+                DrawWP = false;
+            }
+            else
+            {
+                showWaypointsToolStripMenuItem.Checked = true;
+                Waypoints_Checkbox.Checked = true;
+                DrawWP = true;
+            }
+            Settings["DrawWP"] = DrawWP.ToString();
+            Settings.Save();
+        }
+
+        private void Geofence_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Geofence_Checkbox.Checked)
+            {
+                //Geofence_Checkbox.Checked = false;
+                showGeofenceToolStripMenuItem.Checked = false;
+                DrawGeofence = false;
+            }
+            else
+            {
+                //Geofence_Checkbox.Checked = true;
+                showGeofenceToolStripMenuItem.Checked = true;
+                DrawGeofence = true;
+            }
+            Settings["DrawGeofence"] = DrawGeofence.ToString();
+            Settings.Save();
+        }
+
+        private void SearchArea_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!SearchArea_Checkbox.Checked)
+            {
+                showSearchAreaToolStripMenuItem.Checked = false;
+                DrawSearchArea = false;
+            }
+            else
+            {
+                showSearchAreaToolStripMenuItem.Checked = true;
+                DrawSearchArea = true;
+            }
+            Settings["DrawSearchArea"] = DrawSearchArea.ToString();
+            Settings.Save();
+        }
+
+        private void Obstacles_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Obstacles_Checkbox.Checked)
+            {
+                showObstaclesToolStripMenuItem.Checked = false;
+                DrawObstacles = false;
+            }
+            else
+            {
+                showObstaclesToolStripMenuItem.Checked = true;
+                DrawObstacles = true;
+            }
+            Settings["DrawObstacles"] = DrawObstacles.ToString();
+            Settings.Save();
+        }
+
+        private void UASLoc_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!UASLoc_Checkbox.Checked)
+            {
+                showPlaneToolStripMenuItem.Checked = false;
+                DrawPlane = false;
+            }
+            else
+            {
+                showPlaneToolStripMenuItem.Checked = true;
+                DrawPlane = true;
+            }
+            Settings["DrawPlane"] = DrawPlane.ToString();
+            Settings.Save();
+        }
+
+        private void Waypoints_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!Waypoints_Checkbox.Checked)
+            {
+                showWaypointsToolStripMenuItem.Checked = false;
+                DrawWP = false;
+            }
+            else
+            {
+                showWaypointsToolStripMenuItem.Checked = true;
+                DrawWP = true;
+            }
+            Settings["DrawWP"] = DrawWP.ToString();
+            Settings.Save();
+        }
+
+        private void gMapControl1_OnMapZoomChanged()
+        {
+            zoom = Convert.ToInt32(gMapControl1.Zoom);
+        }
+
+        private void UAS_Trackbar_Scroll(object sender, EventArgs e)
+        {
+            UAS_Scale = UAS_Trackbar.Value;
+            Settings["UAS_Scale"] = UAS_Scale.ToString();
+            Settings.Save();
+        }
+
+        private void Fixed_UAS_Size_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            UAS_FixedSize = Fixed_UAS_Size_Checkbox.Checked;
+            Settings["UAS_Fixedsize"] = UAS_FixedSize.ToString();
+            Settings.Save();
+        }
+
+        private void AutoPan_Checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            MAP_Autopan = AutoPan_Checkbox.Checked;
+            Settings["MAP_Autopan"] = MAP_Autopan.ToString();
+            Settings.Save();
+        }
+
+        private void gMapControl1_OnMapDrag()
+        {
+            MAP_Autopan = false;
+            AutoPan_Checkbox.Checked = false;
+            Settings["MAP_Autopan"] = MAP_Autopan.ToString();
+            Settings.Save();
+        }
+
+        private void gMapControl1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            /*if(e == "t")
+            {
+                InteroperabilityCallback(7);
+            }*/
+
+            Console.Beep(433, 100);
+            
         }
 
     }
@@ -387,6 +961,7 @@ namespace Interoperability_GUI
     }
 
     //Marker so we can add payload images to the map
+    [Serializable]
     public class GMapMarkerImage : GMapMarker
     {
         const float rad2deg = (float)(180 / Math.PI);
@@ -411,7 +986,7 @@ namespace Interoperability_GUI
             Matrix temp = g.Transform;
             g.TranslateTransform(LocalPosition.X, LocalPosition.Y);
 
-            g.RotateTransform(-Overlay.Control.Bearing);         
+            g.RotateTransform(-Overlay.Control.Bearing);
             try
             {
                 g.RotateTransform(heading);
@@ -424,21 +999,23 @@ namespace Interoperability_GUI
             g.Transform = temp;
         }
     }
-
+    //Marker to show the current location of the plane
+    [Serializable]
     public class GMapMarkerPlane : GMapMarker
     {
         const float rad2deg = (float)(180 / Math.PI);
         const float deg2rad = (float)(1.0 / rad2deg);
 
-        private readonly Bitmap icon =  global::MissionPlanner.Properties.Resources.planeicon;
-        //private readonly Bitmap icon = new Bitmap(@"C:\Trapezoid.bmp");
+        //private readonly Bitmap icon = global::MissionPlanner.Properties.Resources.planeicon;
+        //private readonly Bitmap icon = interoperability.Properties.Resources.UT_X2B;
+        private Bitmap icon;
         float heading = 0;
-        //float cog = -1;
-        //float target = -1;
-        //float nav_bearing = -1;
-        //float radius = -1;
+        float cog = -1;
+        float target = -1;
+        float nav_bearing = -1;
+        float radius = -1;
 
-        /*public GMapMarkerPlane(PointLatLng p, float heading, float cog, float nav_bearing, float target, float radius)
+        public GMapMarkerPlane(PointLatLng p, int zoom, int scale, bool fixedscale, float heading, float cog, float nav_bearing, float target, float radius)
             : base(p)
         {
             this.heading = heading;
@@ -446,8 +1023,32 @@ namespace Interoperability_GUI
             this.target = target;
             this.nav_bearing = nav_bearing;
             this.radius = radius;
+            int gmapscale;
+
+            //int scale = 8 * Convert.ToInt32(gmap.Zoom);
+            if (!fixedscale)
+            {
+                gmapscale = Convert.ToInt32(scale * 1 / (156543.03392 * Math.Cos(p.Lat * Math.PI / 180) / Math.Pow(2, zoom)));
+            }
+            else
+            {
+                gmapscale = scale;
+            }
+
+            //Be careful not to make the image too large, or Size will throw an invalid paramter exception 
+            if (gmapscale == 0)
+            {
+                gmapscale = 1;
+            }
+            if(gmapscale > 1500)
+            {
+                gmapscale = 1500;
+            }
+
+            icon = new Bitmap(interoperability.Properties.Resources.UT_X2B, new Size(gmapscale, gmapscale));
             Size = icon.Size;
-        }*/
+            //Size = new Size(10, 10);
+        }
 
         public GMapMarkerPlane(PointLatLng p, float heading)
             : base(p)
@@ -473,14 +1074,14 @@ namespace Interoperability_GUI
             catch
             {
             }
-            /*g.DrawLine(new Pen(Color.Green, 2), 0.0f, 0.0f, (float)Math.Cos((nav_bearing - 90) * deg2rad) * length,
+            g.DrawLine(new Pen(Color.Green, 2), 0.0f, 0.0f, (float)Math.Cos((nav_bearing - 90) * deg2rad) * length,
                 (float)Math.Sin((nav_bearing - 90) * deg2rad) * length);
             g.DrawLine(new Pen(Color.Black, 2), 0.0f, 0.0f, (float)Math.Cos((cog - 90) * deg2rad) * length,
                 (float)Math.Sin((cog - 90) * deg2rad) * length);
             g.DrawLine(new Pen(Color.Orange, 2), 0.0f, 0.0f, (float)Math.Cos((target - 90) * deg2rad) * length,
-                (float)Math.Sin((target - 90) * deg2rad) * length);*/
+                (float)Math.Sin((target - 90) * deg2rad) * length);
             // anti NaN
-           /* try
+            try
             {
                 float desired_lead_dist = 100;
 
@@ -516,7 +1117,7 @@ namespace Interoperability_GUI
             catch
             {
             }
-            */
+
             try
             {
                 g.RotateTransform(heading);
@@ -525,8 +1126,60 @@ namespace Interoperability_GUI
             {
             }
             g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2);
-
+            //g.DrawImageUnscaled(icon, icon.Width / -2, icon.Height / -2, 50, 50);
+            //g.DrawImage(icon, icon.Width / -2, icon.Height / 02, 50, 50);
             g.Transform = temp;
+        }
+    }
+
+    //Marker to show waypoints 
+    [Serializable]
+    public class GMapMarkerWP : GMarkerGoogle
+    {
+        string wpno = "";
+        public bool selected = false;
+        SizeF txtsize = SizeF.Empty;
+        static Dictionary<string, Bitmap> fontBitmaps = new Dictionary<string, Bitmap>();
+        static Font font;
+
+        public GMapMarkerWP(PointLatLng p, string wpno)
+            : base(p, GMarkerGoogleType.green)
+        {
+            this.wpno = wpno;
+            if (font == null)
+                font = SystemFonts.DefaultFont;
+
+            if (!fontBitmaps.ContainsKey(wpno))
+            {
+                Bitmap temp = new Bitmap(100, 40, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(temp))
+                {
+                    txtsize = g.MeasureString(wpno, font);
+
+                    g.DrawString(wpno, font, Brushes.Black, new PointF(0, 0));
+                }
+                fontBitmaps[wpno] = temp;
+            }
+        }
+
+        public override void OnRender(Graphics g)
+        {
+            if (selected)
+            {
+                g.FillEllipse(Brushes.Red, new Rectangle(this.LocalPosition, this.Size));
+                g.DrawArc(Pens.Red, new Rectangle(this.LocalPosition, this.Size), 0, 360);
+            }
+
+            base.OnRender(g);
+
+            var midw = LocalPosition.X + 10;
+            var midh = LocalPosition.Y + 3;
+
+            if (txtsize.Width > 15)
+                midw -= 4;
+
+            if (Overlay.Control.Zoom > 16 || IsMouseOver)
+                g.DrawImageUnscaled(fontBitmaps[wpno], midw, midh);
         }
     }
 }

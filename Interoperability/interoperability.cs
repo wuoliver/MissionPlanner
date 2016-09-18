@@ -180,23 +180,39 @@ namespace Interoperability
     public class Interoperability : Plugin
     {
         //Default credentials if credentials file does not exist
-        String Default_address = "http://192.168.56.101";
-        String Default_username = "testuser";
-        String Default_password = "testpass";
+        private string address = "http://192.168.56.101";
+        private string username = "testuser";
+        private string password = "testpass";
+
+        private string dist_units = "Metres";
+        private string airspd_units = "Metres per Second";
+        private string geo_cords = "DD.DDDDDD";
+
 
         private Thread Telemetry_Thread;        //Endabled by default
         private Thread Obstacle_SDA_Thread;     //Disabled by default
         private Thread Mission_Thread;          //Disabled by default
-        private Thread Map_Thread;              //Enabled by default
+        private Thread Map_Control_Thread;      //Enabled by default
 
-        bool Telemetry_Upload_shouldStop = false;   //Used to start/stop the telemtry thread
-        bool Obstacle_SDA_shouldStop = false;       //Used to start/stop the SDA thread
-        bool Mission_Download_shouldStop = false;   //Used to start/stop the Misison thread
-        bool resetUploadStats = false;              //Used to reset telemetry upload stats
+        private bool Telemetry_Upload_shouldStop = true;    //Used to start/stop the telemtry thread
+        private bool Obstacle_SDA_shouldStop = true;        //Used to start/stop the SDA thread
+        private bool Mission_Download_shouldStop = true;    //Used to start/stop the misison thread
+        private bool Map_Control_shouldStop = true;         //Used to start/stop the map control thread
+
+        private bool Telemetry_Upload_isAlive = false;
+        private bool Obstacle_SDA_isAlive = false;
+        private bool Mission_Download_isAlive = false;
+        private bool Map_Control_isAlive = false;
+
+
         bool Obstacles_Downloaded = false;          //Used to tell the map control thread we can access obstaclesList 
+        bool resetUploadStats = false;              //Used to reset telemetry upload stats
 
         Obstacles obstaclesList;                    //Instance that holds all SDA Obstacles 
         Interoperability_Settings Settings;         //Instance that holds all Interoperability Settings
+
+
+
 
 
         //Instantiate windows forms
@@ -208,14 +224,14 @@ namespace Interoperability
         }
         override public string Version
         {
-            get { return ("0.2.1"); }
+            get { return ("0.3.1"); }
         }
         override public string Author
         {
             get { return ("Jesse, Davis, Oliver"); }
         }
 
-        
+
         /// <summary>
         /// Run First, checking plugin
         /// </summary>
@@ -225,8 +241,9 @@ namespace Interoperability
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
-                + "*                            Interoperability 0.0.1                           *\n"
+                + "*                            Interoperability 0.3.1                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
+
 
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
@@ -236,17 +253,18 @@ namespace Interoperability
             Interoperability_GUI = new global::Interoperability_GUI.Interoperability_GUI(this.interoperabilityAction, Settings);
             Interoperability_GUI.Show();
 
+            //Start map thread
+            Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+            Map_Control_shouldStop = false;
+            Map_Control_Thread.Start();
 
             Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
 
-            loopratehz = 10;
+            loopratehz = 0.25F;
 
-            //Must have this started, or bad things will happen
-            Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
-            Telemetry_Thread.Start();
+            getSettings();
 
-
-
+            Console.WriteLine("End of init()");
 
             return (true);
         }
@@ -255,33 +273,88 @@ namespace Interoperability
         {
             switch (action)
             {
-                //Stop then restart Telemetry_Upload Thread
+                //Start Telemetry_Upload Thread
                 case 0:
-                    Telemetry_Upload_shouldStop = true;
                     Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
                     Telemetry_Upload_shouldStop = false;
                     Telemetry_Thread.Start();
                     break;
                 //Start Obstacle_SDA Thread
-                //Fix so that you can only start 1 thread at a time
                 case 1:
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+                    Obstacle_SDA_shouldStop = false;
                     Obstacle_SDA_Thread.Start();
-                    Map_Thread = new Thread(new ThreadStart(this.Map_Control));
-                    Map_Thread.Start();
-                    //test_function();
                     break;
                 //Stop Obstacle_SDA Thread
                 case 2:
                     Obstacle_SDA_shouldStop = true;
                     break;
+                //Start mission download thread
                 case 3:
                     Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+                    Mission_Download_shouldStop = false;
                     Mission_Thread.Start();
                     break;
                 //Reset Telemetry Upload Rate Stats
                 case 4:
                     resetUploadStats = true;
+                    if (!Telemetry_Upload_isAlive)
+                    {
+                        Interoperability_GUI.setAvgTelUploadText("0Hz");
+                        Interoperability_GUI.setUniqueTelUploadText("0Hz");
+                        Interoperability_GUI.setTotalTelemUpload(0);
+                    }
+                    break;
+                //Stop telemtry upload thread
+                case 5:
+                    Telemetry_Upload_shouldStop = true;
+                    break;
+                //Restart all running threads that rely on server credentials or unit settings
+                case 6:
+                    getSettings();
+
+                    Map_Control_shouldStop = true;
+                    Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+                    Map_Control_shouldStop = false;
+                    Map_Control_Thread.Start();
+
+                    //If GUI format is not AUVSI, disable all server threads
+                    bool isAUVSI = true;
+                    if(Settings["gui_format"] != "AUVSI")
+                    {
+                        isAUVSI = false;
+                        Telemetry_Upload_shouldStop = true;
+                        Obstacle_SDA_shouldStop = true;
+                        Mission_Download_shouldStop = true;
+                    }
+
+                    if (Telemetry_Upload_isAlive && isAUVSI)
+                    {
+                        Telemetry_Upload_shouldStop = true;
+                        Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+                        Telemetry_Upload_shouldStop = false;
+                        Telemetry_Thread.Start();
+                    }
+                    if (Obstacle_SDA_isAlive && isAUVSI)
+                    {
+                        Obstacle_SDA_shouldStop = true;
+                        Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+                        Obstacle_SDA_shouldStop = false;
+                        Obstacle_SDA_Thread.Start();
+                    }
+                    if (Mission_Download_isAlive && isAUVSI)
+                    {
+                        Mission_Download_shouldStop = true;
+                        Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+                        Mission_Download_shouldStop = false;
+                        Mission_Thread.Start();
+                    }
+                    break;
+                case 7:
+                    
+                    break;
+                case 8:
+
                     break;
                 default:
                     break;
@@ -301,9 +374,22 @@ namespace Interoperability
             //this.Host.FDMenuMap.
         }
 
-        public void getLogin(ref string address, ref string username, ref string password)
+
+        public void getSettings()
         {
-            if (Settings.ContainsKey("address") && Settings.ContainsKey("username") && Settings.ContainsKey("username"))
+            if (Settings.ContainsKey("dist_units") && Settings.ContainsKey("airspd_units") && Settings.ContainsKey("geo_cords"))
+            {
+                dist_units = Settings["dist_units"];
+                airspd_units = Settings["airspd_units"];
+                geo_cords = Settings["geo_cords"];
+            }
+            else
+            {
+                Settings["dist_units"] = dist_units;
+                Settings["airspd_units"] = airspd_units;
+                Settings["geo_cords"] = geo_cords;
+            }
+            if (Settings.ContainsKey("address") && Settings.ContainsKey("username") && Settings.ContainsKey("password"))
             {
                 address = Settings["address"];
                 username = Settings["username"];
@@ -311,19 +397,17 @@ namespace Interoperability
             }
             else
             {
-                Settings["address"] = Default_address;
-                Settings["username"] = Default_username;
-                Settings["password"] = Default_password;
-                address = Default_address;
-                username = Default_username;
-                password = Default_password;
+                Settings["address"] = address;
+                Settings["username"] = username;
+                Settings["password"] = password;
             }
             Settings.Save();
-        }
 
+        }
 
         public async void Telemetry_Upload()
         {
+            Telemetry_Upload_isAlive = true;
             Console.WriteLine("Telemetry_Upload Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -331,14 +415,13 @@ namespace Interoperability
             int count = 0;
             CookieContainer cookies = new CookieContainer();
 
-            string address = "", username = "", password = "";
-
-            getLogin(ref address, ref username, ref password);
-
             try
             {
                 using (var client = new HttpClient())
                 {
+
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 1);
+                    client.Timeout = timeout;
 
                     client.BaseAddress = new Uri(address); // This seems to change every time
 
@@ -359,6 +442,7 @@ namespace Interoperability
                         Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
                         Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
                         Interoperability_GUI.TelemResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.Telem_Start_Stop_Button_Off();
                         Telemetry_Upload_shouldStop = true;
 
                     }
@@ -366,17 +450,13 @@ namespace Interoperability
                     {
                         Console.WriteLine("Credentials Valid");
                         Telemetry_Upload_shouldStop = false;
-
                     }
-
-
 
                     CurrentState csl = this.Host.cs;
                     double lat = csl.lat, lng = csl.lng, alt = csl.altasl, yaw = csl.yaw;
                     double oldlat = 0, oldlng = 0, oldalt = 0, oldyaw = 0;
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
-
 
                     while (!Telemetry_Upload_shouldStop)
                     {
@@ -447,30 +527,31 @@ namespace Interoperability
                 Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
                 Interoperability_GUI.setUniqueTelUploadText("Error, Unable to Connect to Server");
                 Interoperability_GUI.TelemResp("Error, Unable to Connect to Server");
+                Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
             }
-
-
+            Telemetry_Upload_isAlive = false;
+            Console.WriteLine("Telemetry_Upload Thread Stopped");
+            Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
 
         //This is where we periodically download the obstacles from the server 
         public async void Obstacle_SDA()
         {
+            Obstacle_SDA_isAlive = true;
+            Console.WriteLine("Obstacle_SDA Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
 
             int count = 0;
             CookieContainer cookies = new CookieContainer();
 
-            string address = "", username = "", password = "";
-
-            getLogin(ref address, ref username, ref password);
-
             try
             {
                 using (var client = new HttpClient())
                 {
-
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 1);
+                    client.Timeout = timeout;
                     client.BaseAddress = new Uri(address); // This seems to change every time
 
                     // Log in.
@@ -486,16 +567,15 @@ namespace Interoperability
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine("Invalid Credentials");
-                        //Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
-                        //Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
+                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.SetSDAStart_StopButton_Off();
                         Obstacle_SDA_shouldStop = true;
-                        //successful_login = false;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
+                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
                         Obstacle_SDA_shouldStop = false;
-                        //successful_login = true;
                     }
 
                     while (!Obstacle_SDA_shouldStop)
@@ -507,29 +587,15 @@ namespace Interoperability
                             //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
                             count++;
 
-                            // the code that you want to measure comes here
                             Console.WriteLine("outputting formatted data");
                             obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
 
                             Obstacles_Downloaded = true;
-
-                            /*Console.WriteLine("\tPRINTING MOVING OBSTACLES");
-                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                            {
-                                obstaclesList.moving_obstacles[i].printall();
-                            }
-                            Console.WriteLine("\tPRINTING STATIONARY OBSTACLES");
-                            for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
-                            {
-                                obstaclesList.stationary_obstacles[i].printall();
-                            }*/
-
                             Interoperability_GUI.setObstacles(obstaclesList);
 
                             System.Threading.Thread.Sleep(100);
 
                             t.Restart();
-                            Obstacle_SDA_shouldStop = false;
                         }
                     }
                 }
@@ -537,20 +603,24 @@ namespace Interoperability
             catch
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
+                Interoperability_GUI.SDAResp("Error, Unable to Connect to Server");
+                Interoperability_GUI.SetSDAStart_StopButton_Off();
+
             }
+            Obstacle_SDA_isAlive = false;
+            Interoperability_GUI.SetSDAStart_StopButton_Off();
+            Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
         public async void Mission_Download()
         {
+            Mission_Download_isAlive = true;
+            Console.WriteLine("Mission_Download Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
 
             int count = 0;
             CookieContainer cookies = new CookieContainer();
-
-            string address = "", username = "", password = "";
-
-            getLogin(ref address, ref username, ref password);
 
             try
             {
@@ -598,15 +668,17 @@ namespace Interoperability
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
             }
+            Mission_Download_isAlive = false;
+            Console.WriteLine("Mission_Download Thread Stopped");
         }
 
         public /*async*/ void Map_Control()
         {
+            Map_Control_isAlive = true;
+            Console.WriteLine("Map_Control Thread Started");
             Stopwatch t = new Stopwatch();
+            double GroundElevation;
             t.Start();
-            bool Static_Overlays_Drawn = false;
-            string PolyName;
-
 
             //Add static overlays:
             //Issue because need to wait until obstaclesList has loaded or been instantiated
@@ -614,7 +686,7 @@ namespace Interoperability
             //For testing right now. Will update when server has misison functionality added
             List<Waypoint> Op_Area = new List<Waypoint>();
             Op_Area.Add(new Waypoint(38.1462694, -76.4277778));
-            Op_Area.Add(new Waypoint(38.151625,  -76.4286833));
+            Op_Area.Add(new Waypoint(38.151625, -76.4286833));
             Op_Area.Add(new Waypoint(38.1518889, -76.4314667));
             Op_Area.Add(new Waypoint(38.1505944, -76.4353611));
             Op_Area.Add(new Waypoint(38.1475667, -76.4323417));
@@ -633,47 +705,168 @@ namespace Interoperability
             Search_Area.Add(new Waypoint(38.1411917, -76.4269806));
             Search_Area.Add(new Waypoint(38.1422194, -76.4261111));
 
+            List<PointLatLng> Waypoints = new List<PointLatLng>();
+            Waypoints.Add(new PointLatLng(38.147720, -76.429610));
+            Waypoints.Add(new PointLatLng(38.150893, -76.432056));
+            Waypoints.Add(new PointLatLng(38.149559, -76.434159));
+            Waypoints.Add(new PointLatLng(38.145729, -76.430275));
+            Waypoints.Add(new PointLatLng(38.143147, -76.428344));
+            Waypoints.Add(new PointLatLng(38.142168, -76.429482));
+            Waypoints.Add(new PointLatLng(38.144176, -76.431584));
+            Waypoints.Add(new PointLatLng(38.143214, -76.433151));
+            Waypoints.Add(new PointLatLng(38.141898, -76.432593));
+            Waypoints.Add(new PointLatLng(38.143063, -76.429675));
+            Waypoints.Add(new PointLatLng(38.144531, -76.426542));
+            Waypoints.Add(new PointLatLng(38.146471, -76.422379));
+            Waypoints.Add(new PointLatLng(38.144801, -76.421757));
+            Waypoints.Add(new PointLatLng(38.143029, -76.421692));
+            Waypoints.Add(new PointLatLng(38.142084, -76.423817));
+            Waypoints.Add(new PointLatLng(38.142016, -76.425469));
+            Waypoints.Add(new PointLatLng(38.145189, -76.428537));
 
-            while (true)
+
+            while (!Map_Control_shouldStop)
             {
-                //Console.WriteLine("Elapsed Miliseconds: " + t.ElapsedMilliseconds);
                 if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapRefreshRate())))
                 {
                     Interoperability_GUI.MAP_Clear_Overlays();
+
+                    //Draw Obstacles 
                     if (Obstacles_Downloaded)
                     {
-                        if (!Static_Overlays_Drawn)
+                        if (Interoperability_GUI.getDrawObstacles())
                         {
                             for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                             {
-                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius* 0.3048,
-                                    obstaclesList.stationary_obstacles[i].latitude, obstaclesList.stationary_obstacles[i].longitude);
+                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
+                                    obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
+                                    obstaclesList.stationary_obstacles[i].longitude);
                             }
-                            Static_Overlays_Drawn = false;
-                        }
-                        
-                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                        {
-                            //PolyName = "StationaryObject" + i.ToString();
-                            Interoperability_GUI.MAP_addCirclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
-                                obstaclesList.moving_obstacles[i].latitude, obstaclesList.moving_obstacles[i].longitude, "polygon");
-                        }
 
-                        Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Operation_Area", Color.Red, Color.Transparent, 3, 50);
+                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                            {
+                                Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
+                                   obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
+                                   obstaclesList.moving_obstacles[i].longitude, "polygon");
+                            }
+                        }
+                    }
+
+                    //Draw geofence
+                    if (Interoperability_GUI.getDrawGeofence())
+                    {
+                        Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Geofence", Color.Red, Color.Transparent, 3, 50);
+                    }
+                    //Draw search area
+                    if (Interoperability_GUI.getDrawSearchArea())
+                    {
                         Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
-                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw);
+                    }
+
+                    //Draw plane location                   
+                    if (Interoperability_GUI.getDrawPlane())
+                    {
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
+                            Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
+                    }
+
+                    if (Interoperability_GUI.getDrawWP())
+                    {
+                        //Draw waypoints
+                        Interoperability_GUI.MAP_updateWP(Waypoints);
+                        //Draw lines between waypoints
+                        Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                    }
+                    if (Interoperability_GUI.getAutopan())
+                    {
+                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
                     }
                     Interoperability_GUI.MAP_Update_Overlay();
+
+
+                    //Update GPS Location label at bottom of interface
+                    switch (geo_cords)
+                    {
+                        case "DD.DDDDDD":
+                            Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
+                            break;
+                        case "DD MM SS.SS":
+                            Interoperability_GUI.MAP_updateGPSLabel(DDtoDMS(Host.cs.lat, Host.cs.lng));
+                            break;
+                        default:
+                            Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
+                            break;
+                    }
+
+                    GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
+
+                    //Update altitude and delta altitude label at bottom of interface
+                    switch (dist_units)
+                    {
+                        case "Metres":
+                            Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
+                                (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
+                            break;
+                        case "Feet":
+                            Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
+                                (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
+                            break;
+                        default:
+                            break;
+                    }
+                    //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                     t.Restart();
                 }
             }
-             
+            Map_Control_isAlive = false;
+            Console.WriteLine("Map_Control Thread Stopped");
         }
-         
+
+
+        public string DDtoDMS(double lat, double lng)
+        {
+            string DMS;
+
+            double minutes = (lat - Math.Floor(lat)) * 60.0;
+            double seconds = (minutes - Math.Floor(minutes)) * 60.0;
+            double tenths = (seconds - Math.Floor(seconds)) * 10.0;
+            minutes = Math.Floor(minutes);
+            seconds = Math.Floor(seconds);
+            tenths = Math.Floor(tenths);
+
+            if (lat > 0)
+            {
+                DMS = "N";
+            }
+            else
+            {
+                DMS = "S";
+            }
+            DMS += Convert.ToInt32(Math.Abs(lat)).ToString("00") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00") + " ";
+
+            minutes = (lng - Math.Floor(lng)) * 60.0;
+            seconds = (minutes - Math.Floor(minutes)) * 60.0;
+            tenths = (seconds - Math.Floor(seconds)) * 10.0;
+            minutes = Math.Floor(minutes);
+            seconds = Math.Floor(seconds);
+            tenths = Math.Floor(tenths);
+
+            if (lng > 0)
+            {
+                DMS += "E";
+            }
+            else
+            {
+                DMS += "W";
+            }
+
+            DMS += Convert.ToInt32(Math.Abs(lng)).ToString("000") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00");
+            return DMS;
+        }
+
         // BE CAREFUL, THIS IS SKETCHY AS FUCK
         // We also don't need this until later :) 
-        public /*virtual int*/
-                async void TrollLoop(/*StreamWriter writer,*/ HttpClient client)
+        public /*virtual int*/ async void TrollLoop(/*StreamWriter writer,*/ HttpClient client)
         {
             //Console.WriteLine("LOOP TIME -> " + DateTime.Now.ToString());
 
@@ -707,13 +900,25 @@ namespace Interoperability
             return (true);
         }
 
-
         /// <summary>
         /// Run at NextRun time - loop is run in a background thread. and is shared with other plugins
+        /// Ensure threads that unintentially die are revived
         /// </summary>
         /// <returns></returns>
         override public bool Loop()
         {
+            /*if (Telemetry_Upload_shouldStop == false && !Telemetry_Upload_isAlive)
+            {
+                interoperabilityAction(0);
+            }
+            if (Obstacle_SDA_shouldStop == false && !Obstacle_SDA_isAlive)
+            {
+                interoperabilityAction(1);
+            }
+            if (Map_Control_shouldStop == false && !Map_Control_isAlive)
+            {
+                interoperabilityAction(6);
+            }*/
 
             return true;
         }
@@ -724,7 +929,7 @@ namespace Interoperability
         /// <returns></returns>
         override public bool Exit()
         {
-            Map_Thread.Abort();
+            Map_Control_Thread.Abort();
             Telemetry_Thread.Abort();
             Obstacle_SDA_Thread.Abort();
             return (true);
@@ -735,6 +940,7 @@ namespace Interoperability
     public class Interoperability_Settings
     {
         static Interoperability_Settings _instance;
+        private static Mutex Settings_XML_Mutex = new Mutex(); //So we only write settings one at a time;
 
         public static Interoperability_Settings Instance
         {
@@ -856,38 +1062,44 @@ namespace Interoperability
 
         public void Load()
         {
-            using (XmlTextReader xmlreader = new XmlTextReader(GetFullPath()))
+            if (File.Exists(GetFullPath()))
             {
-                while (xmlreader.Read())
+                Settings_XML_Mutex.WaitOne();
+                using (XmlTextReader xmlreader = new XmlTextReader(GetFullPath()))
                 {
-                    if (xmlreader.NodeType == XmlNodeType.Element)
+                    while (xmlreader.Read())
                     {
-                        try
+                        if (xmlreader.NodeType == XmlNodeType.Element)
                         {
-                            switch (xmlreader.Name)
+                            try
                             {
-                                case "Config":
-                                    break;
-                                case "xml":
-                                    break;
-                                default:
-                                    config[xmlreader.Name] = xmlreader.ReadString();
-                                    break;
+                                switch (xmlreader.Name)
+                                {
+                                    case "Config":
+                                        break;
+                                    case "xml":
+                                        break;
+                                    default:
+                                        config[xmlreader.Name] = xmlreader.ReadString();
+                                        break;
+                                }
                             }
-                        }
-                        // silent fail on bad entry
-                        catch (Exception)
-                        {
+                            // silent fail on bad entry
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
                 }
+                Settings_XML_Mutex.ReleaseMutex();
             }
+
         }
 
         public void Save()
         {
             string filename = GetFullPath();
-
+            Settings_XML_Mutex.WaitOne();
             using (XmlTextWriter xmlwriter = new XmlTextWriter(filename, Encoding.UTF8))
             {
                 xmlwriter.Formatting = Formatting.Indented;
@@ -915,6 +1127,7 @@ namespace Interoperability
                 xmlwriter.WriteEndDocument();
                 xmlwriter.Close();
             }
+            Settings_XML_Mutex.ReleaseMutex();
         }
 
         public void Remove(string key)
