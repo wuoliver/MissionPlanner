@@ -44,6 +44,9 @@ namespace Interoperability_GUI
         protected bool UAS_FixedSize = false;
         protected bool MAP_Autopan = false;
 
+        protected string gui_format = "AUVSI";
+        private List<TabPage> TabList = new List<TabPage>();
+
         //GMAP Zoom
         private int zoom = 0;
 
@@ -62,16 +65,17 @@ namespace Interoperability_GUI
             Settings = _Settings;
 
             //Must be called after settings
-            MAP_OverlaySettings(ref Settings, ref DrawWP, "DrawWP");
-            MAP_OverlaySettings(ref Settings, ref DrawObstacles, "DrawObstacles");
-            MAP_OverlaySettings(ref Settings, ref DrawPlane, "DrawPlane");
-            MAP_OverlaySettings(ref Settings, ref DrawGeofence, "DrawGeofence");
-            MAP_OverlaySettings(ref Settings, ref DrawSearchArea, "DrawSearchArea");
-            MAP_OverlaySettings(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
-            MAP_OverlaySettings(ref Settings, ref MAP_Autopan, "MAP_Autopan");
+            MAP_Settings_Bool(ref Settings, ref DrawWP, "DrawWP");
+            MAP_Settings_Bool(ref Settings, ref DrawObstacles, "DrawObstacles");
+            MAP_Settings_Bool(ref Settings, ref DrawPlane, "DrawPlane");
+            MAP_Settings_Bool(ref Settings, ref DrawGeofence, "DrawGeofence");
+            MAP_Settings_Bool(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+            MAP_Settings_Bool(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
+            MAP_Settings_Bool(ref Settings, ref MAP_Autopan, "MAP_Autopan");
 
 
-            MAP_UAS_ScaleSettings(ref Settings, ref UAS_Scale, "UAS_Scale");
+            MAP_Settings_Int(ref Settings, ref UAS_Scale, "UAS_Scale");
+            MAP_Settings_String(ref Settings, ref gui_format, "gui_format");
 
             InitializeGUI_States();
 
@@ -89,7 +93,53 @@ namespace Interoperability_GUI
             WP_Overlay = new GMapOverlay("Waypoints");
         }
 
-        public void MAP_UAS_ScaleSettings(ref Interoperability_Settings Settings, ref int value, string key)
+        public void InteroperabilityGUIAction(int action)
+        {
+            int TabCount;
+            switch (action)
+            {  
+                //Disable USC Elements, Enable AUVSI
+                case 0:
+                    TabCount = Interoperability_GUI_Tab.TabPages.Count;
+                    for (int i=0; i < TabCount; i++)
+                    {
+                        Interoperability_GUI_Tab.TabPages.RemoveAt(0);
+                    }
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[0]); //Telemtry Upload Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    this.Text = "UTAT UAV Interoperability Control Panel (AUVSI)";
+                    break; 
+                //Disable AUVSI Elements, Enable USC 
+                case 1:
+                    TabCount = Interoperability_GUI_Tab.TabPages.Count;
+                    for (int i = 0; i < TabCount; i++)
+                    {
+                        Interoperability_GUI_Tab.TabPages.RemoveAt(0);
+                    }
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[0]); //Telemtry Upload Tab
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
+                    //Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    this.Text = "UTAT UAV Interoperability Control Panel (USC)";
+                    break;
+                default:
+                    break; 
+            }
+        }
+        public void MAP_Settings_String(ref Interoperability_Settings Settings, ref string value, string key)
+        {
+            if (!Settings.ContainsKey(key))
+            {
+                Settings[key] = value;
+            }
+            else
+            {
+                value = Settings[key];
+            }
+        }
+        public void MAP_Settings_Int(ref Interoperability_Settings Settings, ref int value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -100,7 +150,7 @@ namespace Interoperability_GUI
                 value = Convert.ToInt32(Settings[key]);
             }
         }
-        public void MAP_OverlaySettings(ref Interoperability_Settings Settings, ref bool value, string key)
+        public void MAP_Settings_Bool(ref Interoperability_Settings Settings, ref bool value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -133,6 +183,21 @@ namespace Interoperability_GUI
             Fixed_UAS_Size_Checkbox.Checked = UAS_FixedSize;
 
             AutoPan_Checkbox.Checked = MAP_Autopan;
+
+            foreach (TabPage TAB in Interoperability_GUI_Tab.TabPages)
+            {
+                TabList.Add(TAB);
+                Interoperability_GUI_Tab.TabPages.Remove(TAB);
+            }
+
+            if (gui_format == "AUVSI")
+            {
+                InteroperabilityGUIAction(0);
+            }
+            else
+            {
+                InteroperabilityGUIAction(1);
+            }
 
         }
 
@@ -230,6 +295,7 @@ namespace Interoperability_GUI
             {
                 Console.WriteLine("In setObstacles");
                 SDA_Obstacles.Text = "";
+                //SDA_Obstacles.Text.
                 SDA_Obstacles.AppendText("MOVING OBJECTS\n");
                 for (int i = 0; i < _Obstacles.moving_obstacles.Count(); i++)
                 {
@@ -293,7 +359,7 @@ namespace Interoperability_GUI
         {
             if (!Settings_GUI.isOpened)
             {
-                settings_gui = new Settings_GUI(InteroperabilityCallback, Settings);
+                settings_gui = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
                 settings_gui.Show();
             }
         }
@@ -817,10 +883,11 @@ namespace Interoperability_GUI
             {
                 InteroperabilityCallback(7);
             }*/
+
+            Console.Beep(433, 100);
             
         }
 
-        
     }
 
     public static class MercatorProjection

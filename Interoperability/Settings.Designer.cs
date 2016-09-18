@@ -39,7 +39,6 @@
             this.Cancel = new System.Windows.Forms.Button();
             this.Verify = new System.Windows.Forms.Button();
             this.validation_label = new System.Windows.Forms.Label();
-            this.error_label = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -47,11 +46,13 @@
             this.Distance_Units_Combo = new System.Windows.Forms.ComboBox();
             this.Coordinate_System_Combo = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.GUI_FORMAT_BOX = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // Save
             // 
-            this.Save.Location = new System.Drawing.Point(255, 241);
+            this.Save.Location = new System.Drawing.Point(250, 284);
             this.Save.Name = "Save";
             this.Save.Size = new System.Drawing.Size(75, 23);
             this.Save.TabIndex = 0;
@@ -112,7 +113,7 @@
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(15, 241);
+            this.Cancel.Location = new System.Drawing.Point(16, 284);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 7;
@@ -133,24 +134,13 @@
             // validation_label
             // 
             this.validation_label.AutoSize = true;
-            this.validation_label.ForeColor = System.Drawing.Color.DarkOliveGreen;
-            this.validation_label.Location = new System.Drawing.Point(12, 127);
+            this.validation_label.ForeColor = System.Drawing.Color.DarkGreen;
+            this.validation_label.Location = new System.Drawing.Point(13, 122);
             this.validation_label.Name = "validation_label";
-            this.validation_label.Size = new System.Drawing.Size(143, 13);
+            this.validation_label.Size = new System.Drawing.Size(108, 13);
             this.validation_label.TabIndex = 9;
-            this.validation_label.Text = "EXAMPLE SUCCESS CODE";
+            this.validation_label.Text = "Example Status Code";
             this.validation_label.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // error_label
-            // 
-            this.error_label.AutoSize = true;
-            this.error_label.ForeColor = System.Drawing.Color.Red;
-            this.error_label.Location = new System.Drawing.Point(12, 117);
-            this.error_label.Name = "error_label";
-            this.error_label.Size = new System.Drawing.Size(132, 13);
-            this.error_label.TabIndex = 10;
-            this.error_label.Text = "EXAMPLE ERROR CODE";
-            this.error_label.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label1
             // 
@@ -229,11 +219,34 @@
             this.label4.TabIndex = 17;
             this.label4.Text = "Warning: clicking save will reset all open connections ";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(13, 240);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(103, 13);
+            this.label5.TabIndex = 18;
+            this.label5.Text = "Competition GUI:";
+            // 
+            // GUI_FORMAT_BOX
+            // 
+            this.GUI_FORMAT_BOX.FormattingEnabled = true;
+            this.GUI_FORMAT_BOX.Items.AddRange(new object[] {
+            "USC",
+            "AUVSI"});
+            this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(159, 237);
+            this.GUI_FORMAT_BOX.Name = "GUI_FORMAT_BOX";
+            this.GUI_FORMAT_BOX.Size = new System.Drawing.Size(166, 21);
+            this.GUI_FORMAT_BOX.TabIndex = 19;
+            // 
             // Settings_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 276);
+            this.ClientSize = new System.Drawing.Size(342, 320);
+            this.Controls.Add(this.GUI_FORMAT_BOX);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.Coordinate_System_Combo);
             this.Controls.Add(this.Distance_Units_Combo);
@@ -241,7 +254,6 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.error_label);
             this.Controls.Add(this.validation_label);
             this.Controls.Add(this.Verify);
             this.Controls.Add(this.Cancel);
@@ -275,7 +287,6 @@
         private System.Windows.Forms.Button Cancel;
         private System.Windows.Forms.Button Verify;
         private System.Windows.Forms.Label validation_label;
-        private System.Windows.Forms.Label error_label;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
@@ -283,5 +294,7 @@
         private System.Windows.Forms.ComboBox Distance_Units_Combo;
         private System.Windows.Forms.ComboBox Coordinate_System_Combo;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox GUI_FORMAT_BOX;
     }
 }

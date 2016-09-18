@@ -1,0 +1,40 @@
+﻿Features to add to interoperability GUI:
+
+
+AUVSI: 
+
+Ability to export telemtry data into xml/csv with whatever data you want:
+	GPS
+	Altitude
+	Bank/Pitch
+	Battery Level
+	Time
+	Etc..
+
+Import/Export waypoints, search areas, boundaries, obstacles (moving obstacle paths + gps coordinates)
+
+Add points of interest through clicking, or pressing a key on the keyboard
+
+Photo overlap/view map, so we see how much area we can cover based on a lens type, etc...
+
+Image georeferencing based on altitude, camera poperties, and projection 
+
+
+USC: 
+
+Function to place markers at all geese locations, then have an algorithm determine "nest" locations
+
+
+
+All: 
+Have setting to change interface depending on if using for USC or AUVSI			DONE
+AUVSI: 
+	Telemtry Upload
+	Obstacle Download
+	Image Upload
+	Map Controls
+
+USC:
+	Map Controls
+	Geese algorithm 
+

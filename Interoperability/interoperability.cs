@@ -318,21 +318,31 @@ namespace Interoperability
                     Map_Control_shouldStop = false;
                     Map_Control_Thread.Start();
 
-                    if (Telemetry_Upload_isAlive)
+                    //If GUI format is not AUVSI, disable all server threads
+                    bool isAUVSI = true;
+                    if(Settings["gui_format"] != "AUVSI")
+                    {
+                        isAUVSI = false;
+                        Telemetry_Upload_shouldStop = true;
+                        Obstacle_SDA_shouldStop = true;
+                        Mission_Download_shouldStop = true;
+                    }
+
+                    if (Telemetry_Upload_isAlive && isAUVSI)
                     {
                         Telemetry_Upload_shouldStop = true;
                         Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
                         Telemetry_Upload_shouldStop = false;
                         Telemetry_Thread.Start();
                     }
-                    if (Obstacle_SDA_isAlive)
+                    if (Obstacle_SDA_isAlive && isAUVSI)
                     {
                         Obstacle_SDA_shouldStop = true;
                         Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
                         Obstacle_SDA_shouldStop = false;
                         Obstacle_SDA_Thread.Start();
                     }
-                    if (Mission_Download_isAlive)
+                    if (Mission_Download_isAlive && isAUVSI)
                     {
                         Mission_Download_shouldStop = true;
                         Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
@@ -341,6 +351,9 @@ namespace Interoperability
                     }
                     break;
                 case 7:
+                    
+                    break;
+                case 8:
 
                     break;
                 default:
@@ -848,8 +861,6 @@ namespace Interoperability
             }
 
             DMS += Convert.ToInt32(Math.Abs(lng)).ToString("000") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00");
-
-            Console.WriteLine(DMS);
             return DMS;
         }
 

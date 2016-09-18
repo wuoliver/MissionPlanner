@@ -90,6 +90,7 @@
             this.label15 = new System.Windows.Forms.Label();
             this.UAS_D_Altitude_Label = new System.Windows.Forms.Label();
             this.Interop_Tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.label16 = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -388,6 +389,7 @@
             // 
             // Map_Tab
             // 
+            this.Map_Tab.Controls.Add(this.label16);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
@@ -593,7 +595,7 @@
             this.gMapControl1.LevelsKeepInMemmory = 5;
             this.gMapControl1.Location = new System.Drawing.Point(294, 41);
             this.gMapControl1.MarkersEnabled = true;
-            this.gMapControl1.MaxZoom = 25;
+            this.gMapControl1.MaxZoom = 24;
             this.gMapControl1.MinZoom = 2;
             this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
             this.gMapControl1.Name = "gMapControl1";
@@ -744,6 +746,15 @@
             this.UAS_D_Altitude_Label.TabIndex = 15;
             this.UAS_D_Altitude_Label.Text = "000.00m";
             // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(16, 307);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(89, 13);
+            this.label16.TabIndex = 16;
+            this.label16.Text = "Import Waypoints";
+            // 
             // Interoperability_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -840,5 +851,6 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label UAS_D_Altitude_Label;
         private System.Windows.Forms.ToolTip Interop_Tooltip;
+        private System.Windows.Forms.Label label16;
     }
 }
