@@ -10,7 +10,7 @@ Ability to export telemtry data into xml/csv with whatever data you want:
 	Battery Level
 	Time
 	Etc..
-
+	 
 Import/Export waypoints, search areas, boundaries, obstacles (moving obstacle paths + gps coordinates)
 
 Add points of interest through clicking, or pressing a key on the keyboard
