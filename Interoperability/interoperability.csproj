@@ -157,10 +157,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Program Files (x86)\Mission Planner\plugins" /y
-copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Debug\plugins" /y
-copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.pdb" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Release\plugins" /y
-copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\Interoperability\bin\x86\Release\interoperability.dll" "C:\Users\adrom\Documents\GitHub\MissionPlanner\bin\Release\plugins" /y
+    <PostBuildEvent>copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Program Files (x86)\Mission Planner\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.dll" "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\bin\Debug\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\Interoperability\bin\x86\Debug\interoperability.pdb" "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\bin\Release\plugins" /y
+copy "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\Interoperability\bin\x86\Release\interoperability.dll"  "C:\Users\adrom\Documents\GitHub\MissionPlanner\MissionPlanner\bin\Release\plugins" /y
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

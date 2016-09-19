@@ -1,5 +1,6 @@
 ﻿Features to add to interoperability GUI:
 
+Airspeed callouts 
 
 AUVSI: 
 
@@ -23,6 +24,9 @@ Image georeferencing based on altitude, camera poperties, and projection
 USC: 
 
 Function to place markers at all geese locations, then have an algorithm determine "nest" locations
+
+
+Set up HTTP server to return GPS coordinates and plane bank angle when given a timestamp
 
 
 
