@@ -95,6 +95,7 @@
             this.showInteroperabilityControlPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
             this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.Callout_Tab = new System.Windows.Forms.TabPage();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -201,6 +202,7 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.SDA_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Map_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
+            this.Interoperability_GUI_Tab.Controls.Add(this.Callout_Tab);
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 20);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
@@ -802,6 +804,17 @@
             this.InteropGUIButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
             this.InteropGUIButton.ToolTipText = "UTAT Interoperability Control Panel";
             this.InteropGUIButton.Click += new System.EventHandler(this.InteropGUIButton_Click);
+            this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
+            // 
+            // Callout_Tab
+            // 
+            this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Callout_Tab.Name = "Callout_Tab";
+            this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
+            this.Callout_Tab.Size = new System.Drawing.Size(271, 538);
+            this.Callout_Tab.TabIndex = 5;
+            this.Callout_Tab.Text = "Telemtry Callouts";
+            this.Callout_Tab.UseVisualStyleBackColor = true;
             // 
             // Interoperability_GUI_Main
             // 
@@ -911,5 +924,6 @@
         private System.Windows.Forms.ToolStripMenuItem showInteroperabilityControlPanelToolStripMenuItem;
         private System.Windows.Forms.MenuStrip MissionPlannerMenuAddon;
         private System.Windows.Forms.ToolStripMenuItem InteropGUIButton;
+        private System.Windows.Forms.TabPage Callout_Tab;
     }
 }

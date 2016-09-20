@@ -83,6 +83,46 @@ namespace interoperability.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Interop_Icon_Erik {
+            get {
+                object obj = ResourceManager.GetObject("Interop_Icon_Erik", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Interop_Icon_Jesse {
+            get {
+                object obj = ResourceManager.GetObject("Interop_Icon_Jesse", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Interop_Icon_Oliver {
+            get {
+                object obj = ResourceManager.GetObject("Interop_Icon_Oliver", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Interop_Icon_Yih_Tang {
+            get {
+                object obj = ResourceManager.GetObject("Interop_Icon_Yih_Tang", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap UT_X2B {
             get {
                 object obj = ResourceManager.GetObject("UT_X2B", resourceCulture);

@@ -110,6 +110,7 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (AUVSI)";
                     break; 
                 //Disable AUVSI Elements, Enable USC 
@@ -123,6 +124,7 @@ namespace Interoperability_GUI_Forms
                     //Interoperability_GUI_Tab.TabPages.Add(TabList[1]); //SDA Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     //Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (USC)";
                     break;
                 default:
@@ -915,10 +917,24 @@ namespace Interoperability_GUI_Forms
             isOpened = true;
         }
 
+        //not used anymore
         private void InteropGUIButton_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Opening Interoperability Control Panel");
-            InteroperabilityCallback(8);
+            
+        }
+
+        private void InteropGUIButton_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle)
+            {
+                InteroperabilityCallback(9);
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                Console.WriteLine("Opening Interoperability Control Panel");
+                InteroperabilityCallback(8);
+            }
+            
         }
     }
 

@@ -14,6 +14,7 @@ using MissionPlanner;
 using MissionPlanner.Utilities;
 using MissionPlanner.GCSViews;
 
+using System.Speech.Synthesis;
 
 using MissionPlanner.Plugin;
 
@@ -204,6 +205,12 @@ namespace Interoperability
         private bool Mission_Download_isAlive = false;
         private bool Map_Control_isAlive = false;
 
+        private int ImportantCounter = 0;
+        private long ImporantTimeCount = 0;
+        private Stopwatch ImportantTimer = new Stopwatch();
+
+
+        private SpeechSynthesizer Speech = new SpeechSynthesizer();
 
         bool Obstacles_Downloaded = false;          //Used to tell the map control thread we can access obstaclesList 
         bool resetUploadStats = false;              //Used to reset telemetry upload stats
@@ -266,7 +273,10 @@ namespace Interoperability
 
             //Add item to flight data context menu 
             Host.FDMenuMap.Items.Add(Interoperability_GUI.getContextMenu());
-            Host.MainForm.MainMenu.Items.Insert(4, Interoperability_GUI.getMenuStrip());
+            Host.MainForm.MainMenu.Items.Insert(2, Interoperability_GUI.getMenuStrip());
+
+            //Start Important Timer
+            ImportantTimer.Start();
 
             Console.WriteLine("End of init()");
 
@@ -365,7 +375,7 @@ namespace Interoperability
                         //Wait until all threads have stopped
                     }
                     break;
-                //Show the interoperability contorl panel
+                //Show the interoperability control panel
                 case 8:
                     if (!Interoperability_GUI.isOpened)
                     {
@@ -384,6 +394,33 @@ namespace Interoperability
                             Interoperability_GUI.WindowState = FormWindowState.Normal;
                         }          
                     }
+                    break;
+                //Easter egg
+                case 9:
+                    if(ImportantTimer.ElapsedMilliseconds -  ImporantTimeCount > 500)
+                    {
+                        switch (ImportantCounter)
+                        {
+                            case 0:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Oliver;
+                                break;
+                            case 1:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Yih_Tang;
+                                break;
+                            case 2:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Erik;
+                                break;
+                            case 3:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Jesse;
+                                break;
+                            default:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon;
+                                ImportantCounter = -1;
+                                break;
+                        }
+                        ImporantTimeCount = ImportantTimer.ElapsedMilliseconds;
+                        ImportantCounter++;
+                    }                               
                     break;
                 default:
                     break;
