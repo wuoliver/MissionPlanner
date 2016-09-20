@@ -1,6 +1,6 @@
-﻿namespace Interoperability_GUI
+﻿namespace Interoperability_GUI_Forms
 {
-    partial class Interoperability_GUI
+    partial class Interoperability_GUI_Main
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Interoperability_GUI));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Interoperability_GUI_Main));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.uniqueTelUploadText = new System.Windows.Forms.TextBox();
@@ -58,6 +58,7 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.label16 = new System.Windows.Forms.Label();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
@@ -75,7 +76,7 @@
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
-            this.Map_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showSearchAreaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,13 +91,18 @@
             this.label15 = new System.Windows.Forms.Label();
             this.UAS_D_Altitude_Label = new System.Windows.Forms.Label();
             this.Interop_Tooltip = new System.Windows.Forms.ToolTip(this.components);
-            this.label16 = new System.Windows.Forms.Label();
+            this.MissionPlanner_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.showInteroperabilityControlPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
+            this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
-            this.Map_ContextMenuStrip.SuspendLayout();
+            this.InteropMap_ContextMenuStrip.SuspendLayout();
+            this.MissionPlanner_ContextMenuStrip.SuspendLayout();
+            this.MissionPlannerMenuAddon.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -413,6 +419,15 @@
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
             // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(16, 307);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(89, 13);
+            this.label16.TabIndex = 16;
+            this.label16.Text = "Import Waypoints";
+            // 
             // Fixed_UAS_Size_Checkbox
             // 
             this.Fixed_UAS_Size_Checkbox.AutoSize = true;
@@ -588,7 +603,7 @@
             this.gMapControl1.AutoSize = true;
             this.gMapControl1.Bearing = 0F;
             this.gMapControl1.CanDragMap = true;
-            this.gMapControl1.ContextMenuStrip = this.Map_ContextMenuStrip;
+            this.gMapControl1.ContextMenuStrip = this.InteropMap_ContextMenuStrip;
             this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
             this.gMapControl1.GrayScaleMode = false;
             this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
@@ -614,12 +629,12 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
-            // Map_ContextMenuStrip
+            // InteropMap_ContextMenuStrip
             // 
-            this.Map_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.InteropMap_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.displayToolStripMenuItem});
-            this.Map_ContextMenuStrip.Name = "contextMenuStrip1";
-            this.Map_ContextMenuStrip.Size = new System.Drawing.Size(113, 26);
+            this.InteropMap_ContextMenuStrip.Name = "contextMenuStrip1";
+            this.InteropMap_ContextMenuStrip.Size = new System.Drawing.Size(113, 26);
             // 
             // displayToolStripMenuItem
             // 
@@ -746,20 +761,54 @@
             this.UAS_D_Altitude_Label.TabIndex = 15;
             this.UAS_D_Altitude_Label.Text = "000.00m";
             // 
-            // label16
+            // MissionPlanner_ContextMenuStrip
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(16, 307);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(89, 13);
-            this.label16.TabIndex = 16;
-            this.label16.Text = "Import Waypoints";
+            this.MissionPlanner_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showInteroperabilityControlPanelToolStripMenuItem});
+            this.MissionPlanner_ContextMenuStrip.Name = "MissionPlanner_ContextMenuStrip";
+            this.MissionPlanner_ContextMenuStrip.Size = new System.Drawing.Size(262, 26);
             // 
-            // Interoperability_GUI
+            // showInteroperabilityControlPanelToolStripMenuItem
+            // 
+            this.showInteroperabilityControlPanelToolStripMenuItem.Image = global::interoperability.Properties.Resources.icon;
+            this.showInteroperabilityControlPanelToolStripMenuItem.Name = "showInteroperabilityControlPanelToolStripMenuItem";
+            this.showInteroperabilityControlPanelToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
+            this.showInteroperabilityControlPanelToolStripMenuItem.Text = "Show Interoperability Control Panel";
+            this.showInteroperabilityControlPanelToolStripMenuItem.ToolTipText = "Shows the UTAT UAV Interoperability Control Panel";
+            this.showInteroperabilityControlPanelToolStripMenuItem.Click += new System.EventHandler(this.showInteroperabilityControlPanelToolStripMenuItem_Click);
+            // 
+            // MissionPlannerMenuAddon
+            // 
+            this.MissionPlannerMenuAddon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.InteropGUIButton});
+            this.MissionPlannerMenuAddon.Location = new System.Drawing.Point(0, 0);
+            this.MissionPlannerMenuAddon.Name = "MissionPlannerMenuAddon";
+            this.MissionPlannerMenuAddon.Size = new System.Drawing.Size(1178, 67);
+            this.MissionPlannerMenuAddon.TabIndex = 16;
+            this.MissionPlannerMenuAddon.Text = "menuStrip1";
+            this.MissionPlannerMenuAddon.Visible = false;
+            // 
+            // InteropGUIButton
+            // 
+            this.InteropGUIButton.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.InteropGUIButton.ForeColor = System.Drawing.Color.White;
+            this.InteropGUIButton.Image = global::interoperability.Properties.Resources.Interop_Icon;
+            this.InteropGUIButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.InteropGUIButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.InteropGUIButton.Name = "InteropGUIButton";
+            this.InteropGUIButton.Size = new System.Drawing.Size(89, 63);
+            this.InteropGUIButton.Text = "UTAT INTEROP";
+            this.InteropGUIButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.InteropGUIButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
+            this.InteropGUIButton.ToolTipText = "UTAT Interoperability Control Panel";
+            this.InteropGUIButton.Click += new System.EventHandler(this.InteropGUIButton_Click);
+            // 
+            // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.Controls.Add(this.MissionPlannerMenuAddon);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.label14);
@@ -772,9 +821,12 @@
             this.Controls.Add(this.Interoperability_GUI_Tab);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Interoperability_GUI";
+            this.MainMenuStrip = this.MissionPlannerMenuAddon;
+            this.Name = "Interoperability_GUI_Main";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "UTAT UAV Interoperability Control Panel";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Interoperability_GUI_FormClosing);
+            this.Shown += new System.EventHandler(this.Interoperability_GUI_Main_Shown);
             this.Interoperability_GUI_Tab.ResumeLayout(false);
             this.Telem_Tab.ResumeLayout(false);
             this.Telem_Tab.PerformLayout();
@@ -783,7 +835,10 @@
             this.Map_Tab.ResumeLayout(false);
             this.Map_Tab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
-            this.Map_ContextMenuStrip.ResumeLayout(false);
+            this.InteropMap_ContextMenuStrip.ResumeLayout(false);
+            this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
+            this.MissionPlannerMenuAddon.ResumeLayout(false);
+            this.MissionPlannerMenuAddon.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -815,7 +870,7 @@
         private System.Windows.Forms.Button Mission_Enable;
         private GMap.NET.WindowsForms.GMapControl gMapControl1;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.ContextMenuStrip Map_ContextMenuStrip;
+        private System.Windows.Forms.ContextMenuStrip InteropMap_ContextMenuStrip;
         private System.Windows.Forms.Button Telem_Start_Stop_Button;
         private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showGeofenceToolStripMenuItem;
@@ -852,5 +907,9 @@
         private System.Windows.Forms.Label UAS_D_Altitude_Label;
         private System.Windows.Forms.ToolTip Interop_Tooltip;
         private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.ContextMenuStrip MissionPlanner_ContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem showInteroperabilityControlPanelToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip MissionPlannerMenuAddon;
+        private System.Windows.Forms.ToolStripMenuItem InteropGUIButton;
     }
 }

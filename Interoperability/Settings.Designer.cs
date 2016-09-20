@@ -1,4 +1,4 @@
-﻿namespace Interoperability_GUI
+﻿namespace Interoperability_GUI_Forms
 {
     partial class Settings_GUI
     {
@@ -48,11 +48,12 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.GUI_FORMAT_BOX = new System.Windows.Forms.ComboBox();
+            this.ShowGUI_Checkbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Save
             // 
-            this.Save.Location = new System.Drawing.Point(250, 284);
+            this.Save.Location = new System.Drawing.Point(255, 298);
             this.Save.Name = "Save";
             this.Save.Size = new System.Drawing.Size(75, 23);
             this.Save.TabIndex = 0;
@@ -113,7 +114,7 @@
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(16, 284);
+            this.Cancel.Location = new System.Drawing.Point(15, 298);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 7;
@@ -223,7 +224,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(13, 240);
+            this.label5.Location = new System.Drawing.Point(12, 232);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(103, 13);
             this.label5.TabIndex = 18;
@@ -235,16 +236,28 @@
             this.GUI_FORMAT_BOX.Items.AddRange(new object[] {
             "USC",
             "AUVSI"});
-            this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(159, 237);
+            this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(159, 229);
             this.GUI_FORMAT_BOX.Name = "GUI_FORMAT_BOX";
             this.GUI_FORMAT_BOX.Size = new System.Drawing.Size(166, 21);
             this.GUI_FORMAT_BOX.TabIndex = 19;
+            // 
+            // ShowGUI_Checkbox
+            // 
+            this.ShowGUI_Checkbox.AutoSize = true;
+            this.ShowGUI_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ShowGUI_Checkbox.Location = new System.Drawing.Point(16, 266);
+            this.ShowGUI_Checkbox.Name = "ShowGUI_Checkbox";
+            this.ShowGUI_Checkbox.Size = new System.Drawing.Size(200, 17);
+            this.ShowGUI_Checkbox.TabIndex = 21;
+            this.ShowGUI_Checkbox.Text = "Show Control Panel on Startup";
+            this.ShowGUI_Checkbox.UseVisualStyleBackColor = true;
             // 
             // Settings_GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 320);
+            this.ClientSize = new System.Drawing.Size(342, 332);
+            this.Controls.Add(this.ShowGUI_Checkbox);
             this.Controls.Add(this.GUI_FORMAT_BOX);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -296,5 +309,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox GUI_FORMAT_BOX;
+        private System.Windows.Forms.CheckBox ShowGUI_Checkbox;
     }
 }

@@ -15,16 +15,18 @@ using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 
-namespace Interoperability_GUI
+namespace Interoperability_GUI_Forms
 {
-    public partial class Interoperability_GUI : Form
+    public partial class Interoperability_GUI_Main : Form
     {
         Action<int> InteroperabilityCallback;
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
         protected int sdaPollRate = 10;
         protected int UAS_Scale = 2;
-        global::Interoperability_GUI.Settings_GUI settings_gui;
+
+        public bool isOpened = false;
+        global::Interoperability_GUI_Forms.Settings_GUI settings_gui;
         Interoperability_Settings Settings;
 
         //Put on top or something afterwards
@@ -54,10 +56,9 @@ namespace Interoperability_GUI
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
 
-        public Interoperability_GUI(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
+        public Interoperability_GUI_Main(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
             Console.WriteLine("Created GUI");
-
             InitializeComponent();
             InteroperabilityCallback = _InteroperabilityCallback;
 
@@ -200,6 +201,15 @@ namespace Interoperability_GUI
             }
 
         }
+         
+        public ToolStripItem getContextMenu()
+        {
+            return MissionPlanner_ContextMenuStrip.Items[0];
+        }
+        public ToolStripItem getMenuStrip()
+        {
+            return MissionPlannerMenuAddon.Items[0];
+        }
 
         public int getTelemPollRate()
         {
@@ -221,7 +231,7 @@ namespace Interoperability_GUI
         }
 
 
-        private const int CP_NOCLOSE_BUTTON = 0x200;
+        /*private const int CP_NOCLOSE_BUTTON = 0x200;
         protected override CreateParams CreateParams
         {
             get
@@ -231,7 +241,7 @@ namespace Interoperability_GUI
                 return myCp;
             }
         }
-
+        */
 
         public void setUniqueTelUploadText(string text)
         {
@@ -888,6 +898,28 @@ namespace Interoperability_GUI
             
         }
 
+        private void Interoperability_GUI_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            InteroperabilityCallback(7);
+            isOpened = false;
+        }
+
+        private void showInteroperabilityControlPanelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Opening Interoperability Control Panel");
+            InteroperabilityCallback(8);
+        }
+
+        private void Interoperability_GUI_Main_Shown(object sender, EventArgs e)
+        {
+            isOpened = true;
+        }
+
+        private void InteropGUIButton_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Opening Interoperability Control Panel");
+            InteroperabilityCallback(8);
+        }
     }
 
     public static class MercatorProjection

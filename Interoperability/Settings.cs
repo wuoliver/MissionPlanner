@@ -18,7 +18,7 @@ using Interoperability;
 
 
 
-namespace Interoperability_GUI
+namespace Interoperability_GUI_Forms
 {
     public partial class Settings_GUI : Form
     {
@@ -65,6 +65,8 @@ namespace Interoperability_GUI
             Coordinate_System_Combo.Text = geo_cords;
 
             GUI_FORMAT_BOX.Text = gui_format;
+            ShowGUI_Checkbox.Checked = Convert.ToBoolean(Settings["showInteroperability_GUI"]);
+
         }
 
         
@@ -96,6 +98,7 @@ namespace Interoperability_GUI
             Settings["airspd_units"] = Airspeed_Units_Combo.Text;
             Settings["geo_cords"] = Coordinate_System_Combo.Text;
             Settings["gui_format"] = GUI_FORMAT_BOX.Text;
+            Settings["showInteroperability_GUI"] = ShowGUI_Checkbox.Checked.ToString();
             Settings.Save();
 
             //Restarts all the threads relying on HTTP to update credentials

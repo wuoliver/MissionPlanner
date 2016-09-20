@@ -216,7 +216,7 @@ namespace Interoperability
 
 
         //Instantiate windows forms
-        global::Interoperability_GUI.Interoperability_GUI Interoperability_GUI;
+        global::Interoperability_GUI_Forms.Interoperability_GUI_Main Interoperability_GUI;
 
         override public string Name
         {
@@ -224,7 +224,7 @@ namespace Interoperability
         }
         override public string Version
         {
-            get { return ("0.3.1"); }
+            get { return ("0.6.1"); }
         }
         override public string Author
         {
@@ -248,21 +248,25 @@ namespace Interoperability
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
             Settings.Load();
-
+            getSettings(); 
             // Start interface
-            Interoperability_GUI = new global::Interoperability_GUI.Interoperability_GUI(this.interoperabilityAction, Settings);
-            Interoperability_GUI.Show();
+            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
+            if (Convert.ToBoolean(Settings["showInteroperability_GUI"]) == true)
+            {
+                Interoperability_GUI.Show();
+                //Start map thread
+                Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+                Map_Control_shouldStop = false;
+                Map_Control_Thread.Start();
+            }
 
-            //Start map thread
-            Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
-            Map_Control_shouldStop = false;
-            Map_Control_Thread.Start();
-
-            Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
+            //Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
 
             loopratehz = 0.25F;
 
-            getSettings();
+            //Add item to flight data context menu 
+            Host.FDMenuMap.Items.Add(Interoperability_GUI.getContextMenu());
+            Host.MainForm.MainMenu.Items.Insert(4, Interoperability_GUI.getMenuStrip());
 
             Console.WriteLine("End of init()");
 
@@ -350,11 +354,36 @@ namespace Interoperability
                         Mission_Thread.Start();
                     }
                     break;
+                //Stop all threads, when loop until all threads are done
                 case 7:
-                    
+                    Telemetry_Upload_shouldStop = true;
+                    Mission_Download_shouldStop = true;
+                    Obstacle_SDA_shouldStop = true;
+                    Map_Control_shouldStop = true;
+                    while(Mission_Download_isAlive || Obstacle_SDA_isAlive || Telemetry_Upload_isAlive || Map_Control_isAlive)
+                    {
+                        //Wait until all threads have stopped
+                    }
                     break;
+                //Show the interoperability contorl panel
                 case 8:
-
+                    if (!Interoperability_GUI.isOpened)
+                    {
+                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
+                        Interoperability_GUI.Show();
+                        //Start map thread
+                        Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+                        Map_Control_shouldStop = false;
+                        Map_Control_Thread.Start();
+                    }
+                    else
+                    {
+                        Interoperability_GUI.BringToFront();
+                        if(Interoperability_GUI.WindowState == FormWindowState.Minimized)
+                        {
+                            Interoperability_GUI.WindowState = FormWindowState.Normal;
+                        }          
+                    }
                     break;
                 default:
                     break;
@@ -400,6 +429,10 @@ namespace Interoperability
                 Settings["address"] = address;
                 Settings["username"] = username;
                 Settings["password"] = password;
+            }
+            if (!Settings.ContainsKey("showInteroperability_GUI"))
+            {
+                Settings["showInteroperability_GUI"] = false.ToString();
             }
             Settings.Save();
 

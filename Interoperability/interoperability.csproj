@@ -154,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Features_to_add.txt" />
+    <None Include="Interop_Icon.png" />
+    <None Include="icon.bmp" />
+    <None Include="Resources\Logo_Icon.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
