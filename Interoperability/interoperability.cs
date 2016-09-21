@@ -15,6 +15,7 @@ using MissionPlanner.Utilities;
 using MissionPlanner.GCSViews;
 
 using System.Speech.Synthesis;
+using System.Speech.Recognition;
 
 using MissionPlanner.Plugin;
 
@@ -190,20 +191,23 @@ namespace Interoperability
         private string geo_cords = "DD.DDDDDD";
 
 
-        private Thread Telemetry_Thread;        //Endabled by default
-        private Thread Obstacle_SDA_Thread;     //Disabled by default
-        private Thread Mission_Thread;          //Disabled by default
-        private Thread Map_Control_Thread;      //Enabled by default
+        private Thread Telemetry_Thread;        
+        private Thread Obstacle_SDA_Thread;     
+        private Thread Mission_Thread;          
+        private Thread Map_Control_Thread;
+        private Thread Callout_Thread;      
 
-        private bool Telemetry_Upload_shouldStop = true;    //Used to start/stop the telemtry thread
-        private bool Obstacle_SDA_shouldStop = true;        //Used to start/stop the SDA thread
-        private bool Mission_Download_shouldStop = true;    //Used to start/stop the misison thread
-        private bool Map_Control_shouldStop = true;         //Used to start/stop the map control thread
-
-        private bool Telemetry_Upload_isAlive = false;
-        private bool Obstacle_SDA_isAlive = false;
-        private bool Mission_Download_isAlive = false;
-        private bool Map_Control_isAlive = false;
+        private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
+        private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
+        private bool Mission_Thread_shouldStop = true;          //Used to start/stop the misison thread
+        private bool Map_Control_Thread_shouldStop = true;      //Used to start/stop the map control thread
+        private bool Callout_Thread_shouldStop = true;          //Used to start/stop the callout thread
+           
+        private bool Telemetry_Thread_isAlive = false;
+        private bool Obstacle_SDA_Thread_isAlive = false;
+        private bool Mission_Thread_isAlive = false;
+        private bool Map_Thread_isAlive = false;
+        private bool Callout_Thread_isAlive = false;
 
         private int ImportantCounter = 0;
         private long ImporantTimeCount = 0;
@@ -263,7 +267,7 @@ namespace Interoperability
                 Interoperability_GUI.Show();
                 //Start map thread
                 Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
-                Map_Control_shouldStop = false;
+                Map_Control_Thread_shouldStop = false;
                 Map_Control_Thread.Start();
             }
 
@@ -275,6 +279,7 @@ namespace Interoperability
             Host.FDMenuMap.Items.Add(Interoperability_GUI.getContextMenu());
             Host.MainForm.MainMenu.Items.Insert(2, Interoperability_GUI.getMenuStrip());
 
+               // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
             ImportantTimer.Start();
 
@@ -290,29 +295,29 @@ namespace Interoperability
                 //Start Telemetry_Upload Thread
                 case 0:
                     Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
-                    Telemetry_Upload_shouldStop = false;
+                    Telemetry_Thread_shouldStop = false;
                     Telemetry_Thread.Start();
                     break;
                 //Start Obstacle_SDA Thread
                 case 1:
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
-                    Obstacle_SDA_shouldStop = false;
+                    Obstacle_SDA_Thread_shouldStop = false;
                     Obstacle_SDA_Thread.Start();
                     break;
                 //Stop Obstacle_SDA Thread
                 case 2:
-                    Obstacle_SDA_shouldStop = true;
+                    Obstacle_SDA_Thread_shouldStop = true;
                     break;
                 //Start mission download thread
                 case 3:
                     Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
-                    Mission_Download_shouldStop = false;
+                    Mission_Thread_shouldStop = false;
                     Mission_Thread.Start();
                     break;
                 //Reset Telemetry Upload Rate Stats
                 case 4:
                     resetUploadStats = true;
-                    if (!Telemetry_Upload_isAlive)
+                    if (!Telemetry_Thread_isAlive)
                     {
                         Interoperability_GUI.setAvgTelUploadText("0Hz");
                         Interoperability_GUI.setUniqueTelUploadText("0Hz");
@@ -321,56 +326,57 @@ namespace Interoperability
                     break;
                 //Stop telemtry upload thread
                 case 5:
-                    Telemetry_Upload_shouldStop = true;
+                    Telemetry_Thread_shouldStop = true;
                     break;
                 //Restart all running threads that rely on server credentials or unit settings
                 case 6:
                     getSettings();
-
-                    Map_Control_shouldStop = true;
+                    //No need to reset the map control thread
+                    /*
+                    Map_Control_Thread_shouldStop = true;
                     Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
-                    Map_Control_shouldStop = false;
+                    Map_Control_Thread_shouldStop = false;
                     Map_Control_Thread.Start();
-
+                    */
                     //If GUI format is not AUVSI, disable all server threads
                     bool isAUVSI = true;
                     if(Settings["gui_format"] != "AUVSI")
                     {
                         isAUVSI = false;
-                        Telemetry_Upload_shouldStop = true;
-                        Obstacle_SDA_shouldStop = true;
-                        Mission_Download_shouldStop = true;
+                        Telemetry_Thread_shouldStop = true;
+                        Obstacle_SDA_Thread_shouldStop = true;
+                        Mission_Thread_shouldStop = true;
                     }
 
-                    if (Telemetry_Upload_isAlive && isAUVSI)
+                    if (Telemetry_Thread_isAlive && isAUVSI)
                     {
-                        Telemetry_Upload_shouldStop = true;
+                        Telemetry_Thread_shouldStop = true;
                         Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
-                        Telemetry_Upload_shouldStop = false;
+                        Telemetry_Thread_shouldStop = false;
                         Telemetry_Thread.Start();
                     }
-                    if (Obstacle_SDA_isAlive && isAUVSI)
+                    if (Obstacle_SDA_Thread_isAlive && isAUVSI)
                     {
-                        Obstacle_SDA_shouldStop = true;
+                        Obstacle_SDA_Thread_shouldStop = true;
                         Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
-                        Obstacle_SDA_shouldStop = false;
+                        Obstacle_SDA_Thread_shouldStop = false;
                         Obstacle_SDA_Thread.Start();
                     }
-                    if (Mission_Download_isAlive && isAUVSI)
+                    if (Mission_Thread_isAlive && isAUVSI)
                     {
-                        Mission_Download_shouldStop = true;
+                        Mission_Thread_shouldStop = true;
                         Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
-                        Mission_Download_shouldStop = false;
+                        Mission_Thread_shouldStop = false;
                         Mission_Thread.Start();
                     }
                     break;
                 //Stop all threads, when loop until all threads are done
                 case 7:
-                    Telemetry_Upload_shouldStop = true;
-                    Mission_Download_shouldStop = true;
-                    Obstacle_SDA_shouldStop = true;
-                    Map_Control_shouldStop = true;
-                    while(Mission_Download_isAlive || Obstacle_SDA_isAlive || Telemetry_Upload_isAlive || Map_Control_isAlive)
+                    Telemetry_Thread_shouldStop = true;
+                    Mission_Thread_shouldStop = true;
+                    Obstacle_SDA_Thread_shouldStop = true;
+                    Map_Control_Thread_shouldStop = true;
+                    while(Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -383,7 +389,7 @@ namespace Interoperability
                         Interoperability_GUI.Show();
                         //Start map thread
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
-                        Map_Control_shouldStop = false;
+                        Map_Control_Thread_shouldStop = false;
                         Map_Control_Thread.Start();
                     }
                     else
@@ -397,7 +403,7 @@ namespace Interoperability
                     break;
                 //Easter egg
                 case 9:
-                    if(ImportantTimer.ElapsedMilliseconds -  ImporantTimeCount > 500)
+                    if(ImportantTimer.ElapsedMilliseconds -  ImporantTimeCount > 100)
                     {
                         switch (ImportantCounter)
                         {
@@ -421,6 +427,12 @@ namespace Interoperability
                         ImporantTimeCount = ImportantTimer.ElapsedMilliseconds;
                         ImportantCounter++;
                     }                               
+                    break;
+                //Start callout thread
+                case 10:
+                    Callout_Thread = new Thread(new ThreadStart(this.Callouts));
+                    Callout_Thread_shouldStop = false;
+                    Callout_Thread.Start();
                     break;
                 default:
                     break;
@@ -477,7 +489,7 @@ namespace Interoperability
 
         public async void Telemetry_Upload()
         {
-            Telemetry_Upload_isAlive = true;
+            Telemetry_Thread_isAlive = true;
             Console.WriteLine("Telemetry_Upload Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -513,13 +525,13 @@ namespace Interoperability
                         Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
                         Interoperability_GUI.TelemResp(resp.Content.ReadAsStringAsync().Result);
                         Interoperability_GUI.Telem_Start_Stop_Button_Off();
-                        Telemetry_Upload_shouldStop = true;
+                        Telemetry_Thread_shouldStop = true;
 
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
-                        Telemetry_Upload_shouldStop = false;
+                        Telemetry_Thread_shouldStop = false;
                     }
 
                     CurrentState csl = this.Host.cs;
@@ -528,7 +540,7 @@ namespace Interoperability
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
 
-                    while (!Telemetry_Upload_shouldStop)
+                    while (!Telemetry_Thread_shouldStop)
                     {
                         //Doesn't work, need another way to do this
                         //If person sets speed to 0, then GUI crashes 
@@ -600,7 +612,7 @@ namespace Interoperability
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
             }
-            Telemetry_Upload_isAlive = false;
+            Telemetry_Thread_isAlive = false;
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
@@ -608,7 +620,7 @@ namespace Interoperability
         //This is where we periodically download the obstacles from the server 
         public async void Obstacle_SDA()
         {
-            Obstacle_SDA_isAlive = true;
+            Obstacle_SDA_Thread_isAlive = true;
             Console.WriteLine("Obstacle_SDA Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -639,16 +651,16 @@ namespace Interoperability
                         Console.WriteLine("Invalid Credentials");
                         Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
                         Interoperability_GUI.SetSDAStart_StopButton_Off();
-                        Obstacle_SDA_shouldStop = true;
+                        Obstacle_SDA_Thread_shouldStop = true;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
                         Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
-                        Obstacle_SDA_shouldStop = false;
+                        Obstacle_SDA_Thread_shouldStop = false;
                     }
 
-                    while (!Obstacle_SDA_shouldStop)
+                    while (!Obstacle_SDA_Thread_shouldStop)
                     {
                         if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getsdaPollRate())))
                         {
@@ -677,14 +689,14 @@ namespace Interoperability
                 Interoperability_GUI.SetSDAStart_StopButton_Off();
 
             }
-            Obstacle_SDA_isAlive = false;
+            Obstacle_SDA_Thread_isAlive = false;
             Interoperability_GUI.SetSDAStart_StopButton_Off();
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
         public async void Mission_Download()
         {
-            Mission_Download_isAlive = true;
+            Mission_Thread_isAlive = true;
             Console.WriteLine("Mission_Download Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -708,19 +720,19 @@ namespace Interoperability
                     //resp.IsSuccessStatusCode;
                     if (!resp.IsSuccessStatusCode)
                     {
-                        Mission_Download_shouldStop = true;
+                        Mission_Thread_shouldStop = true;
                         //successful_login = false;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
-                        Mission_Download_shouldStop = false;
+                        Mission_Thread_shouldStop = false;
                         //successful_login = true;
                     }
 
 
 
-                    while (!Mission_Download_shouldStop)
+                    while (!Mission_Thread_shouldStop)
                     {
 
                         HttpResponseMessage SDAresp = await client.GetAsync("/api/missions");
@@ -730,7 +742,7 @@ namespace Interoperability
                         //Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(SDAresp.Content.ReadAsStringAsync().Result);
                         Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(Settings["test"]);
 
-                        Mission_Download_shouldStop = true;
+                        Mission_Thread_shouldStop = true;
                     }
                 }
             }
@@ -738,15 +750,16 @@ namespace Interoperability
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
             }
-            Mission_Download_isAlive = false;
+            Mission_Thread_isAlive = false;
             Console.WriteLine("Mission_Download Thread Stopped");
         }
 
-        public /*async*/ void Map_Control()
+        public void Map_Control()
         {
-            Map_Control_isAlive = true;
+            Map_Thread_isAlive = true;
             Console.WriteLine("Map_Control Thread Started");
             Stopwatch t = new Stopwatch();
+            Stopwatch FlightTime = new Stopwatch();
             double GroundElevation;
             t.Start();
 
@@ -795,7 +808,7 @@ namespace Interoperability
             Waypoints.Add(new PointLatLng(38.145189, -76.428537));
 
 
-            while (!Map_Control_shouldStop)
+            while (!Map_Control_Thread_shouldStop)
             {
                 if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapRefreshRate())))
                 {
@@ -884,12 +897,73 @@ namespace Interoperability
                         default:
                             break;
                     }
+                    Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
                     //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                     t.Restart();
+
+                    if(Host.cs.airspeed > 10)
+                    {
+                        FlightTime.Start();
+                    }
+                    else
+                    {
+                        FlightTime.Stop();
+                    }
                 }
             }
-            Map_Control_isAlive = false;
+            Map_Thread_isAlive = false;
             Console.WriteLine("Map_Control Thread Stopped");
+        }
+
+        public void Callouts()
+        {
+            Stopwatch t = new Stopwatch();
+            t.Start();
+            //Set up speech output 
+            SpeechSynthesizer Speech = new SpeechSynthesizer();
+
+
+
+            Callout_Thread_isAlive = true;
+
+            using (SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US")))
+            {
+                Choices colors = new Choices();
+                colors.Add(new string[] { "landing", "taking off", "airspeed", "altitude", "flight time" });
+
+                // Create a GrammarBuilder object and append the Choices object.
+                GrammarBuilder gb = new GrammarBuilder();
+                gb.Append(colors);
+                Grammar g = new Grammar(gb);
+                recognizer.LoadGrammar(g);
+                recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
+                recognizer.SetInputToDefaultAudioDevice();
+
+                while (Callout_Thread_shouldStop == false)
+                {
+                    if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)
+                    {
+                        recognizer.RecognizeAsync(RecognizeMode.Multiple);
+                    }
+                    else
+                    {
+                        recognizer.RecognizeAsyncStop();
+                    }
+
+                    if (t.ElapsedMilliseconds > (Interoperability_GUI.getCalloutPeriod()))
+                    {
+                        Speech.SpeakAsync("Current airspeed is" + Host.cs.airspeed.ToString() + "meters per second");
+                        t.Restart();
+                    }
+                }
+
+            }
+            Callout_Thread_isAlive = false;
+        }
+
+        private void recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            MessageBox.Show("Speech recognized: " + e.Result.Text);
         }
 
 

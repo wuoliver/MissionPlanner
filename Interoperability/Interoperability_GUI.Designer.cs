@@ -75,6 +75,9 @@
             this.label8 = new System.Windows.Forms.Label();
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
+            this.Callout_Tab = new System.Windows.Forms.TabPage();
+            this.Callout_StartStop_Button = new System.Windows.Forms.Button();
+            this.label17 = new System.Windows.Forms.Label();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -95,12 +98,14 @@
             this.showInteroperabilityControlPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
             this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.Callout_Tab = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
+            this.FlightTimeLabel = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
+            this.Callout_Tab.SuspendLayout();
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
@@ -597,6 +602,38 @@
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
             // 
+            // Callout_Tab
+            // 
+            this.Callout_Tab.Controls.Add(this.Callout_StartStop_Button);
+            this.Callout_Tab.Controls.Add(this.label17);
+            this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Callout_Tab.Name = "Callout_Tab";
+            this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
+            this.Callout_Tab.Size = new System.Drawing.Size(271, 538);
+            this.Callout_Tab.TabIndex = 5;
+            this.Callout_Tab.Text = "Callouts";
+            this.Callout_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Callout_StartStop_Button
+            // 
+            this.Callout_StartStop_Button.Location = new System.Drawing.Point(87, 71);
+            this.Callout_StartStop_Button.Name = "Callout_StartStop_Button";
+            this.Callout_StartStop_Button.Size = new System.Drawing.Size(75, 23);
+            this.Callout_StartStop_Button.TabIndex = 4;
+            this.Callout_StartStop_Button.Text = "Start";
+            this.Callout_StartStop_Button.UseVisualStyleBackColor = true;
+            this.Callout_StartStop_Button.Click += new System.EventHandler(this.Callout_StartStop_Button_Click);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(10, 13);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(113, 31);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Callouts";
+            // 
             // gMapControl1
             // 
             this.gMapControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -689,7 +726,7 @@
             // 
             this.UAS_GPS_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.UAS_GPS_Label.AutoSize = true;
-            this.UAS_GPS_Label.Location = new System.Drawing.Point(375, 571);
+            this.UAS_GPS_Label.Location = new System.Drawing.Point(375, 570);
             this.UAS_GPS_Label.Name = "UAS_GPS_Label";
             this.UAS_GPS_Label.Size = new System.Drawing.Size(115, 13);
             this.UAS_GPS_Label.TabIndex = 9;
@@ -709,7 +746,7 @@
             // 
             this.AutoPan_Checkbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AutoPan_Checkbox.AutoSize = true;
-            this.AutoPan_Checkbox.Location = new System.Drawing.Point(874, 569);
+            this.AutoPan_Checkbox.Location = new System.Drawing.Point(871, 569);
             this.AutoPan_Checkbox.Name = "AutoPan_Checkbox";
             this.AutoPan_Checkbox.Size = new System.Drawing.Size(70, 17);
             this.AutoPan_Checkbox.TabIndex = 11;
@@ -806,21 +843,34 @@
             this.InteropGUIButton.Click += new System.EventHandler(this.InteropGUIButton_Click);
             this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
             // 
-            // Callout_Tab
+            // label18
             // 
-            this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
-            this.Callout_Tab.Name = "Callout_Tab";
-            this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Callout_Tab.Size = new System.Drawing.Size(271, 538);
-            this.Callout_Tab.TabIndex = 5;
-            this.Callout_Tab.Text = "Telemtry Callouts";
-            this.Callout_Tab.UseVisualStyleBackColor = true;
+            this.label18.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(1031, 570);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(77, 13);
+            this.label18.TabIndex = 17;
+            this.label18.Text = "Flight Timer:";
+            // 
+            // FlightTimeLabel
+            // 
+            this.FlightTimeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.FlightTimeLabel.AutoSize = true;
+            this.FlightTimeLabel.Location = new System.Drawing.Point(1114, 570);
+            this.FlightTimeLabel.Name = "FlightTimeLabel";
+            this.FlightTimeLabel.Size = new System.Drawing.Size(49, 13);
+            this.FlightTimeLabel.TabIndex = 18;
+            this.FlightTimeLabel.Text = "00:00:00";
             // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.Controls.Add(this.FlightTimeLabel);
+            this.Controls.Add(this.label18);
             this.Controls.Add(this.MissionPlannerMenuAddon);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
@@ -829,9 +879,9 @@
             this.Controls.Add(this.AutoPan_Checkbox);
             this.Controls.Add(this.UAS_Altitude_ASL_Label);
             this.Controls.Add(this.UAS_GPS_Label);
-            this.Controls.Add(this.gMapControl1);
             this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.Interoperability_GUI_Tab);
+            this.Controls.Add(this.gMapControl1);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MissionPlannerMenuAddon;
@@ -848,6 +898,8 @@
             this.Map_Tab.ResumeLayout(false);
             this.Map_Tab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
+            this.Callout_Tab.ResumeLayout(false);
+            this.Callout_Tab.PerformLayout();
             this.InteropMap_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
@@ -925,5 +977,9 @@
         private System.Windows.Forms.MenuStrip MissionPlannerMenuAddon;
         private System.Windows.Forms.ToolStripMenuItem InteropGUIButton;
         private System.Windows.Forms.TabPage Callout_Tab;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Button Callout_StartStop_Button;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label FlightTimeLabel;
     }
 }

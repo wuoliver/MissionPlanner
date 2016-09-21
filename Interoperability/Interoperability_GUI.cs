@@ -25,6 +25,11 @@ namespace Interoperability_GUI_Forms
         protected int sdaPollRate = 10;
         protected int UAS_Scale = 2;
 
+        //Used for callout thread
+        protected int Callout_minAirspeed = 10;
+        protected int Callout_period = 5000;
+        protected bool SpeechRecognition_Enabled = false;
+
         public bool isOpened = false;
         global::Interoperability_GUI_Forms.Settings_GUI settings_gui;
         Interoperability_Settings Settings;
@@ -227,10 +232,25 @@ namespace Interoperability_GUI_Forms
             return sdaPollRate;
         }
 
+        public int getCalloutPeriod()
+        {
+            return Callout_period;
+        }
+
+        public int getCalloutminAirspeed()
+        {
+            return Callout_period;
+        }
         public Settings_GUI getSettings_GUI()
         {
             return settings_gui;
         }
+
+        public bool getSpeechRecognition_Enabled()
+        {
+            return SpeechRecognition_Enabled;
+        }
+
 
 
         /*private const int CP_NOCLOSE_BUTTON = 0x200;
@@ -280,6 +300,12 @@ namespace Interoperability_GUI_Forms
                     this.TelemServerResp.Text = resp;
                 });
             }
+        }
+
+        public void setFlightTimerLabel(long elapsedmiliseconds)
+        {
+            TimeSpan t = TimeSpan.FromMilliseconds(elapsedmiliseconds);
+            FlightTimeLabel.Text = string.Format("{0:D2}:{1:D2}:{2:D2}", t.Hours, t.Minutes, t.Seconds);
         }
 
         public void SDAResp(string resp)
@@ -936,6 +962,12 @@ namespace Interoperability_GUI_Forms
             }
             
         }
+
+        private void Callout_StartStop_Button_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(10);
+        }
+
     }
 
     public static class MercatorProjection

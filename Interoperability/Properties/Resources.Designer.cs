@@ -103,6 +103,16 @@ namespace interoperability.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Interop_Icon_Old {
+            get {
+                object obj = ResourceManager.GetObject("Interop_Icon_Old", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Interop_Icon_Oliver {
             get {
                 object obj = ResourceManager.GetObject("Interop_Icon_Oliver", resourceCulture);

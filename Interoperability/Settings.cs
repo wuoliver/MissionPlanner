@@ -91,6 +91,8 @@ namespace Interoperability_GUI_Forms
 
         private void Save_Click(object sender, EventArgs e)
         {
+            string old_gui_format = Settings["gui_format"];
+
             Settings["address"] = IP_ADDR_BOX.Text;
             Settings["username"] = USERNAME_BOX.Text;
             Settings["password"] = PASSWORD_BOX.Text;
@@ -103,15 +105,19 @@ namespace Interoperability_GUI_Forms
 
             //Restarts all the threads relying on HTTP to update credentials
             InteroperabilityCallback(6);
-            if(GUI_FORMAT_BOX.Text == "AUVSI")
-            {
-                InteroperabilityGUICallback(0);
-            }
-            else
-            {
-                InteroperabilityGUICallback(1);
-            }
 
+            //Change tab layout 
+            if (GUI_FORMAT_BOX.Text != old_gui_format)
+            {
+                if (GUI_FORMAT_BOX.Text == "AUVSI")
+                {
+                    InteroperabilityGUICallback(0);
+                }
+                else
+                {
+                    InteroperabilityGUICallback(1);
+                }
+            }
             isOpened = false;
             this.Close();
         }

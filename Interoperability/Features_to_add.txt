@@ -38,3 +38,18 @@ USC:
 	Map Controls
 	Geese algorithm 
 
+----------------------------------------------------------------
+
+Speech Recogition for Rikky to request airspeed or altitude DONE
+https://msdn.microsoft.com/en-us/library/office/hh361683%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
+
+TTS to output airspeed, altitude, and other important stuff 
+
+TODO: 
+Need to finish thread 
+
+------------------------------------------------------------------------
+
+Add flight timer that automatically starts and ends DONE
+	Need a place to reset flight timer 
+	
