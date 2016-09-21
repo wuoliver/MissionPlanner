@@ -191,18 +191,18 @@ namespace Interoperability
         private string geo_cords = "DD.DDDDDD";
 
 
-        private Thread Telemetry_Thread;        
-        private Thread Obstacle_SDA_Thread;     
-        private Thread Mission_Thread;          
+        private Thread Telemetry_Thread;
+        private Thread Obstacle_SDA_Thread;
+        private Thread Mission_Thread;
         private Thread Map_Control_Thread;
-        private Thread Callout_Thread;      
+        private Thread Callout_Thread;
 
         private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
         private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
         private bool Mission_Thread_shouldStop = true;          //Used to start/stop the misison thread
         private bool Map_Control_Thread_shouldStop = true;      //Used to start/stop the map control thread
         private bool Callout_Thread_shouldStop = true;          //Used to start/stop the callout thread
-           
+
         private bool Telemetry_Thread_isAlive = false;
         private bool Obstacle_SDA_Thread_isAlive = false;
         private bool Mission_Thread_isAlive = false;
@@ -259,7 +259,7 @@ namespace Interoperability
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
             Settings.Load();
-            getSettings(); 
+            getSettings();
             // Start interface
             Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
             if (Convert.ToBoolean(Settings["showInteroperability_GUI"]) == true)
@@ -279,7 +279,7 @@ namespace Interoperability
             Host.FDMenuMap.Items.Add(Interoperability_GUI.getContextMenu());
             Host.MainForm.MainMenu.Items.Insert(2, Interoperability_GUI.getMenuStrip());
 
-               // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
+            // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
             ImportantTimer.Start();
 
@@ -340,7 +340,7 @@ namespace Interoperability
                     */
                     //If GUI format is not AUVSI, disable all server threads
                     bool isAUVSI = true;
-                    if(Settings["gui_format"] != "AUVSI")
+                    if (Settings["gui_format"] != "AUVSI")
                     {
                         isAUVSI = false;
                         Telemetry_Thread_shouldStop = true;
@@ -376,7 +376,7 @@ namespace Interoperability
                     Mission_Thread_shouldStop = true;
                     Obstacle_SDA_Thread_shouldStop = true;
                     Map_Control_Thread_shouldStop = true;
-                    while(Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive)
+                    while (Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -395,15 +395,15 @@ namespace Interoperability
                     else
                     {
                         Interoperability_GUI.BringToFront();
-                        if(Interoperability_GUI.WindowState == FormWindowState.Minimized)
+                        if (Interoperability_GUI.WindowState == FormWindowState.Minimized)
                         {
                             Interoperability_GUI.WindowState = FormWindowState.Normal;
-                        }          
+                        }
                     }
                     break;
                 //Easter egg
                 case 9:
-                    if(ImportantTimer.ElapsedMilliseconds -  ImporantTimeCount > 100)
+                    if (ImportantTimer.ElapsedMilliseconds - ImporantTimeCount > 100)
                     {
                         switch (ImportantCounter)
                         {
@@ -426,7 +426,7 @@ namespace Interoperability
                         }
                         ImporantTimeCount = ImportantTimer.ElapsedMilliseconds;
                         ImportantCounter++;
-                    }                               
+                    }
                     break;
                 //Start callout thread
                 case 10:
@@ -901,7 +901,7 @@ namespace Interoperability
                     //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                     t.Restart();
 
-                    if(Host.cs.airspeed > 10)
+                    if (Host.cs.airspeed > 10)
                     {
                         FlightTime.Start();
                     }
@@ -938,7 +938,7 @@ namespace Interoperability
                 recognizer.LoadGrammar(g);
                 recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
                 recognizer.SetInputToDefaultAudioDevice();
-                 
+
                 while (Callout_Thread_shouldStop == false)
                 {
                     if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)

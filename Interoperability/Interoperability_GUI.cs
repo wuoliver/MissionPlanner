@@ -103,11 +103,11 @@ namespace Interoperability_GUI_Forms
         {
             int TabCount;
             switch (action)
-            {  
+            {
                 //Disable USC Elements, Enable AUVSI
                 case 0:
                     TabCount = Interoperability_GUI_Tab.TabPages.Count;
-                    for (int i=0; i < TabCount; i++)
+                    for (int i = 0; i < TabCount; i++)
                     {
                         Interoperability_GUI_Tab.TabPages.RemoveAt(0);
                     }
@@ -117,7 +117,7 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (AUVSI)";
-                    break; 
+                    break;
                 //Disable AUVSI Elements, Enable USC 
                 case 1:
                     TabCount = Interoperability_GUI_Tab.TabPages.Count;
@@ -133,7 +133,7 @@ namespace Interoperability_GUI_Forms
                     this.Text = "UTAT UAV Interoperability Control Panel (USC)";
                     break;
                 default:
-                    break; 
+                    break;
             }
         }
         public void MAP_Settings_String(ref Interoperability_Settings Settings, ref string value, string key)
@@ -208,7 +208,7 @@ namespace Interoperability_GUI_Forms
             }
 
         }
-         
+
         public ToolStripItem getContextMenu()
         {
             return MissionPlanner_ContextMenuStrip.Items[0];
@@ -352,7 +352,7 @@ namespace Interoperability_GUI_Forms
                     SDA_Obstacles.AppendText("\tLongitude: " + _Obstacles.stationary_obstacles[i].longitude.ToString("N6") + "\n");
                     SDA_Obstacles.AppendText("\n");
                 }
-                
+
             });
         }
 
@@ -422,7 +422,7 @@ namespace Interoperability_GUI_Forms
                 InteroperabilityCallback(2);
                 SDA_Start_Stop_Button.Text = "Start SDA Polling";
             }
-        } 
+        }
 
         public void SetSDAStart_StopButton_Off()
         {
@@ -588,7 +588,7 @@ namespace Interoperability_GUI_Forms
             //gMapControl1.
         }
 
-        public void MAP_updateAltLabel(string altitude,string delta_altutide)
+        public void MAP_updateAltLabel(string altitude, string delta_altutide)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
@@ -923,7 +923,7 @@ namespace Interoperability_GUI_Forms
             }*/
 
             Console.Beep(433, 100);
-            
+
         }
 
         private void Interoperability_GUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -946,7 +946,7 @@ namespace Interoperability_GUI_Forms
         //not used anymore
         private void InteropGUIButton_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void InteropGUIButton_MouseUp(object sender, MouseEventArgs e)
@@ -960,7 +960,7 @@ namespace Interoperability_GUI_Forms
                 Console.WriteLine("Opening Interoperability Control Panel");
                 InteroperabilityCallback(8);
             }
-            
+
         }
 
         private void Callout_StartStop_Button_Click(object sender, EventArgs e)
@@ -1120,7 +1120,7 @@ namespace Interoperability_GUI_Forms
             {
                 gmapscale = 1;
             }
-            if(gmapscale > 1500)
+            if (gmapscale > 1500)
             {
                 gmapscale = 1500;
             }

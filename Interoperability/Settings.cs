@@ -69,7 +69,7 @@ namespace Interoperability_GUI_Forms
 
         }
 
-        
+
 
         private void Settings_Load(object sender, EventArgs e)
         {
@@ -81,7 +81,7 @@ namespace Interoperability_GUI_Forms
             Settings_GUI.isOpened = false;
         }
 
-        
+
 
         private void Cancel_Click(object sender, EventArgs e)
         {
