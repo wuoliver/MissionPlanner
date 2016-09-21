@@ -938,7 +938,7 @@ namespace Interoperability
                 recognizer.LoadGrammar(g);
                 recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
                 recognizer.SetInputToDefaultAudioDevice();
-
+                 
                 while (Callout_Thread_shouldStop == false)
                 {
                     if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)
