@@ -28,7 +28,7 @@ namespace Interoperability_GUI_Forms
         //Used for callout thread
         protected int Callout_minAirspeed = 10;
         protected int Callout_period = 5000;
-        protected bool SpeechRecognition_Enabled = false;
+        protected bool SpeechRecognition_Enabled = true;
 
         public bool isOpened = false;
         global::Interoperability_GUI_Forms.Settings_GUI settings_gui;
@@ -239,7 +239,7 @@ namespace Interoperability_GUI_Forms
 
         public int getCalloutminAirspeed()
         {
-            return Callout_period;
+            return Callout_period; 
         }
         public Settings_GUI getSettings_GUI()
         {

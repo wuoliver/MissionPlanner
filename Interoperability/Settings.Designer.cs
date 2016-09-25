@@ -175,6 +175,7 @@
             // 
             // Airspeed_Units_Combo
             // 
+            this.Airspeed_Units_Combo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Airspeed_Units_Combo.FormattingEnabled = true;
             this.Airspeed_Units_Combo.Items.AddRange(new object[] {
             "Metres per Second",
@@ -189,6 +190,7 @@
             // 
             // Distance_Units_Combo
             // 
+            this.Distance_Units_Combo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Distance_Units_Combo.FormattingEnabled = true;
             this.Distance_Units_Combo.Items.AddRange(new object[] {
             "Metres",
@@ -200,6 +202,7 @@
             // 
             // Coordinate_System_Combo
             // 
+            this.Coordinate_System_Combo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Coordinate_System_Combo.FormattingEnabled = true;
             this.Coordinate_System_Combo.Items.AddRange(new object[] {
             "DD.DDDDDD",
@@ -232,6 +235,7 @@
             // 
             // GUI_FORMAT_BOX
             // 
+            this.GUI_FORMAT_BOX.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GUI_FORMAT_BOX.FormattingEnabled = true;
             this.GUI_FORMAT_BOX.Items.AddRange(new object[] {
             "USC",

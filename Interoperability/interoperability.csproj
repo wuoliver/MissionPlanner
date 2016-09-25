@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Features_to_add.txt" />
+    <None Include="Interop_Icon_Rikky.png" />
     <None Include="Interop_Icon_Old.png" />
     <None Include="Interop_Icon_Jesse.png" />
     <None Include="Interop_Icon_Yih_Tang.png" />

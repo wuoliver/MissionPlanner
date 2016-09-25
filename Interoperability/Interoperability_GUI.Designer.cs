@@ -76,6 +76,18 @@
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
             this.Callout_Tab = new System.Windows.Forms.TabPage();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.Callout_StartStop_Button = new System.Windows.Forms.Button();
             this.label17 = new System.Windows.Forms.Label();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
@@ -604,6 +616,18 @@
             // 
             // Callout_Tab
             // 
+            this.Callout_Tab.Controls.Add(this.checkBox5);
+            this.Callout_Tab.Controls.Add(this.checkBox4);
+            this.Callout_Tab.Controls.Add(this.label21);
+            this.Callout_Tab.Controls.Add(this.textBox2);
+            this.Callout_Tab.Controls.Add(this.button1);
+            this.Callout_Tab.Controls.Add(this.comboBox1);
+            this.Callout_Tab.Controls.Add(this.label20);
+            this.Callout_Tab.Controls.Add(this.label19);
+            this.Callout_Tab.Controls.Add(this.textBox1);
+            this.Callout_Tab.Controls.Add(this.checkBox3);
+            this.Callout_Tab.Controls.Add(this.checkBox2);
+            this.Callout_Tab.Controls.Add(this.checkBox1);
             this.Callout_Tab.Controls.Add(this.Callout_StartStop_Button);
             this.Callout_Tab.Controls.Add(this.label17);
             this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
@@ -614,9 +638,123 @@
             this.Callout_Tab.Text = "Callouts";
             this.Callout_Tab.UseVisualStyleBackColor = true;
             // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(139, 130);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(96, 17);
+            this.checkBox5.TabIndex = 16;
+            this.checkBox5.Text = "Next Waypoint";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(16, 130);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(93, 17);
+            this.checkBox4.TabIndex = 15;
+            this.checkBox4.Text = "Mode Change";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(13, 212);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(92, 13);
+            this.label21.TabIndex = 14;
+            this.label21.Text = "Altitude Threshold";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(139, 209);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(100, 20);
+            this.textBox2.TabIndex = 13;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(164, 241);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "Set Mode";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Choose",
+            "Landing",
+            "Takeoff ",
+            ""});
+            this.comboBox1.Location = new System.Drawing.Point(56, 243);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(96, 21);
+            this.comboBox1.TabIndex = 11;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(16, 246);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(34, 13);
+            this.label20.TabIndex = 10;
+            this.label20.Text = "Mode";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(13, 185);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(98, 13);
+            this.label19.TabIndex = 9;
+            this.label19.Text = "Airspeed Threshold";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(139, 182);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 20);
+            this.textBox1.TabIndex = 8;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(16, 277);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(149, 17);
+            this.checkBox3.TabIndex = 7;
+            this.checkBox3.Text = "Enable Voice Recognition";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(139, 88);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(61, 17);
+            this.checkBox2.TabIndex = 6;
+            this.checkBox2.Text = "Altitude";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(16, 88);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(67, 17);
+            this.checkBox1.TabIndex = 5;
+            this.checkBox1.Text = "Airspeed";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
             // Callout_StartStop_Button
             // 
-            this.Callout_StartStop_Button.Location = new System.Drawing.Point(87, 71);
+            this.Callout_StartStop_Button.Location = new System.Drawing.Point(16, 502);
             this.Callout_StartStop_Button.Name = "Callout_StartStop_Button";
             this.Callout_StartStop_Button.Size = new System.Drawing.Size(75, 23);
             this.Callout_StartStop_Button.TabIndex = 4;
@@ -981,5 +1119,17 @@
         private System.Windows.Forms.Button Callout_StartStop_Button;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label FlightTimeLabel;
+        private System.Windows.Forms.CheckBox checkBox5;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

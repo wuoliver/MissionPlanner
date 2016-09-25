@@ -407,7 +407,7 @@ namespace Interoperability
                     {
                         switch (ImportantCounter)
                         {
-                            case 0:
+                            case 0: 
                                 Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Oliver;
                                 break;
                             case 1:
@@ -418,6 +418,9 @@ namespace Interoperability
                                 break;
                             case 3:
                                 Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Jesse;
+                                break;
+                            case 4:
+                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Rikky;
                                 break;
                             default:
                                 Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon;
@@ -922,8 +925,6 @@ namespace Interoperability
             //Set up speech output 
             SpeechSynthesizer Speech = new SpeechSynthesizer();
 
-
-
             Callout_Thread_isAlive = true;
 
             using (SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US")))
@@ -938,17 +939,18 @@ namespace Interoperability
                 recognizer.LoadGrammar(g);
                 recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
                 recognizer.SetInputToDefaultAudioDevice();
+                recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
                 while (Callout_Thread_shouldStop == false)
                 {
-                    if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)
+                    /*if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)
                     {
                         recognizer.RecognizeAsync(RecognizeMode.Multiple);
                     }
                     else
                     {
                         recognizer.RecognizeAsyncStop();
-                    }
+                    }*/
 
                     if (t.ElapsedMilliseconds > (Interoperability_GUI.getCalloutPeriod()))
                     {
@@ -958,6 +960,7 @@ namespace Interoperability
                 }
 
             }
+            Console.WriteLine("Left Thing");
             Callout_Thread_isAlive = false;
         }
 
