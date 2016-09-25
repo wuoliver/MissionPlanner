@@ -407,7 +407,7 @@ namespace Interoperability
                     {
                         switch (ImportantCounter)
                         {
-                            case 0: 
+                            case 0:
                                 Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Oliver;
                                 break;
                             case 1:
@@ -549,58 +549,55 @@ namespace Interoperability
                         //If person sets speed to 0, then GUI crashes 
                         if (Interoperability_GUI.getTelemPollRate() != 0)
                         {
-                            if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getTelemPollRate()))) //(DateTime.Now >= nextrun)
+                            csl = this.Host.cs;
+                            lat = csl.lat;
+                            lng = csl.lng;
+                            alt = csl.altasl;
+                            yaw = csl.yaw;
+                            if (lat != oldlat || lng != oldlng || alt != oldalt || yaw != oldyaw)
                             {
-                                // this.nextrun = DateTime.Now.Add(new TimeSpan(0, 0, 1));
-                                csl = this.Host.cs;
-                                lat = csl.lat;
-                                lng = csl.lng;
-                                alt = csl.altasl;
-                                yaw = csl.yaw;
-                                if (lat != oldlat || lng != oldlng || alt != oldalt || yaw != oldyaw)
-                                {
-                                    uniquedata_count++;
-                                    averagedata_count++;
-                                    oldlat = csl.lat;
-                                    oldlng = csl.lng;
-                                    oldalt = csl.altasl;
-                                    oldyaw = csl.yaw;
-                                }
-                                if (count % Interoperability_GUI.getTelemPollRate() == 0)
-                                {
-                                    Interoperability_GUI.setAvgTelUploadText((averagedata_count / (count / Interoperability_GUI.getTelemPollRate())) + "Hz");
-                                    Interoperability_GUI.setUniqueTelUploadText(uniquedata_count + "Hz");
-                                    uniquedata_count = 0;
-                                }
-                                if (resetUploadStats)
-                                {
-                                    uniquedata_count = 0;
-                                    averagedata_count = 0;
-                                    count = 0;
-                                    resetUploadStats = false;
-                                }
-
-
-                                t.Restart();
-
-                                var telemData = new Dictionary<string, string>();
-
-                                CurrentState cs = this.Host.cs;
-
-                                telemData.Add("latitude", lat.ToString("F10"));
-                                telemData.Add("longitude", lng.ToString("F10"));
-                                telemData.Add("altitude_msl", alt.ToString("F10"));
-                                telemData.Add("uas_heading", yaw.ToString("F10"));
-                                //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
-
-                                var telem = new FormUrlEncodedContent(telemData);
-                                HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
-                                Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
-                                Interoperability_GUI.TelemResp(telemresp.Content.ReadAsStringAsync().Result);
-                                count++;
-                                Interoperability_GUI.setTotalTelemUpload(count);
+                                uniquedata_count++;
+                                averagedata_count++;
+                                oldlat = csl.lat;
+                                oldlng = csl.lng;
+                                oldalt = csl.altasl;
+                                oldyaw = csl.yaw;
                             }
+                            if (count % Interoperability_GUI.getTelemPollRate() == 0)
+                            {
+                                Interoperability_GUI.setAvgTelUploadText((averagedata_count / (count / Interoperability_GUI.getTelemPollRate())) + "Hz");
+                                Interoperability_GUI.setUniqueTelUploadText(uniquedata_count + "Hz");
+                                uniquedata_count = 0;
+                            }
+                            if (resetUploadStats)
+                            {
+                                uniquedata_count = 0;
+                                averagedata_count = 0;
+                                count = 0;
+                                resetUploadStats = false;
+                            }
+
+
+                            t.Restart();
+
+                            var telemData = new Dictionary<string, string>();
+
+                            CurrentState cs = this.Host.cs;
+
+                            telemData.Add("latitude", lat.ToString("F10"));
+                            telemData.Add("longitude", lng.ToString("F10"));
+                            telemData.Add("altitude_msl", alt.ToString("F10"));
+                            telemData.Add("uas_heading", yaw.ToString("F10"));
+                            //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
+
+                            var telem = new FormUrlEncodedContent(telemData);
+                            HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
+                            Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
+                            Interoperability_GUI.TelemResp(telemresp.Content.ReadAsStringAsync().Result);
+                            count++;
+                            Interoperability_GUI.setTotalTelemUpload(count);
                         }
+                        Thread.Sleep(1000/Interoperability_GUI.getTelemPollRate());
                     }
                 }
             }
@@ -665,9 +662,6 @@ namespace Interoperability
 
                     while (!Obstacle_SDA_Thread_shouldStop)
                     {
-                        if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getsdaPollRate())))
-                        {
-
                             HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
                             //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
                             count++;
@@ -681,7 +675,7 @@ namespace Interoperability
                             System.Threading.Thread.Sleep(100);
 
                             t.Restart();
-                        }
+                        Thread.Sleep(1000 / Interoperability_GUI.getsdaPollRate());
                     }
                 }
             }
@@ -813,10 +807,7 @@ namespace Interoperability
 
             while (!Map_Control_Thread_shouldStop)
             {
-                if (t.ElapsedMilliseconds > (1000 / Math.Abs(Interoperability_GUI.getMapRefreshRate())))
-                {
                     Interoperability_GUI.MAP_Clear_Overlays();
-
                     //Draw Obstacles 
                     if (Obstacles_Downloaded)
                     {
@@ -909,10 +900,10 @@ namespace Interoperability
                         FlightTime.Start();
                     }
                     else
-                    {
+                    { 
                         FlightTime.Stop();
                     }
-                }
+                Thread.Sleep(1000 / Interoperability_GUI.getMapRefreshRate());
             }
             Map_Thread_isAlive = false;
             Console.WriteLine("Map_Control Thread Stopped");
