@@ -27,7 +27,7 @@ namespace Interoperability_GUI_Forms
 
         //Used for callout thread
         protected int Callout_minAirspeed = 10;
-        protected int Callout_period = 5000;
+        protected int Callout_period = 1000;
         protected bool SpeechRecognition_Enabled = true;
 
         public bool isOpened = false;
@@ -71,17 +71,17 @@ namespace Interoperability_GUI_Forms
             Settings = _Settings;
 
             //Must be called after settings
-            MAP_Settings_Bool(ref Settings, ref DrawWP, "DrawWP");
-            MAP_Settings_Bool(ref Settings, ref DrawObstacles, "DrawObstacles");
-            MAP_Settings_Bool(ref Settings, ref DrawPlane, "DrawPlane");
-            MAP_Settings_Bool(ref Settings, ref DrawGeofence, "DrawGeofence");
-            MAP_Settings_Bool(ref Settings, ref DrawSearchArea, "DrawSearchArea");
-            MAP_Settings_Bool(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
-            MAP_Settings_Bool(ref Settings, ref MAP_Autopan, "MAP_Autopan");
+            MAP_Settings_Init_Bool(ref Settings, ref DrawWP, "DrawWP");
+            MAP_Settings_Init_Bool(ref Settings, ref DrawObstacles, "DrawObstacles");
+            MAP_Settings_Init_Bool(ref Settings, ref DrawPlane, "DrawPlane");
+            MAP_Settings_Init_Bool(ref Settings, ref DrawGeofence, "DrawGeofence");
+            MAP_Settings_Init_Bool(ref Settings, ref DrawSearchArea, "DrawSearchArea");
+            MAP_Settings_Init_Bool(ref Settings, ref UAS_FixedSize, "UAS_Fixedsize");
+            MAP_Settings_Init_Bool(ref Settings, ref MAP_Autopan, "MAP_Autopan");
 
 
-            MAP_Settings_Int(ref Settings, ref UAS_Scale, "UAS_Scale");
-            MAP_Settings_String(ref Settings, ref gui_format, "gui_format");
+            MAP_Settings_Init_Int(ref Settings, ref UAS_Scale, "UAS_Scale");
+            MAP_Settings_Init_String(ref Settings, ref gui_format, "gui_format");
 
             InitializeGUI_States();
 
@@ -136,7 +136,7 @@ namespace Interoperability_GUI_Forms
                     break;
             }
         }
-        public void MAP_Settings_String(ref Interoperability_Settings Settings, ref string value, string key)
+        public void MAP_Settings_Init_String(ref Interoperability_Settings Settings, ref string value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -147,7 +147,7 @@ namespace Interoperability_GUI_Forms
                 value = Settings[key];
             }
         }
-        public void MAP_Settings_Int(ref Interoperability_Settings Settings, ref int value, string key)
+        public void MAP_Settings_Init_Int(ref Interoperability_Settings Settings, ref int value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -158,7 +158,7 @@ namespace Interoperability_GUI_Forms
                 value = Convert.ToInt32(Settings[key]);
             }
         }
-        public void MAP_Settings_Bool(ref Interoperability_Settings Settings, ref bool value, string key)
+        public void MAP_Settings_Init_Bool(ref Interoperability_Settings Settings, ref bool value, string key)
         {
             if (!Settings.ContainsKey(key))
             {
@@ -239,7 +239,7 @@ namespace Interoperability_GUI_Forms
 
         public int getCalloutminAirspeed()
         {
-            return Callout_period; 
+            return Callout_period;
         }
         public Settings_GUI getSettings_GUI()
         {
@@ -251,6 +251,10 @@ namespace Interoperability_GUI_Forms
             return SpeechRecognition_Enabled;
         }
 
+        public string getCalloutMode()
+        {
+            return Callout_Mode_ComboBox.Text;
+        }
 
 
         /*private const int CP_NOCLOSE_BUTTON = 0x200;
@@ -968,6 +972,10 @@ namespace Interoperability_GUI_Forms
             InteroperabilityCallback(10);
         }
 
+        private void Flight_Time_Label_DoubleClick(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(11);
+        }
     }
 
     public static class MercatorProjection

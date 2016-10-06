@@ -58,7 +58,9 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
-            this.label16 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
@@ -81,7 +83,7 @@
             this.label21 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.Callout_Mode_ComboBox = new System.Windows.Forms.ComboBox();
             this.label20 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -106,11 +108,11 @@
             this.label15 = new System.Windows.Forms.Label();
             this.UAS_D_Altitude_Label = new System.Windows.Forms.Label();
             this.Interop_Tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.Flight_Time_Label = new System.Windows.Forms.Label();
             this.MissionPlanner_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showInteroperabilityControlPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
             this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.label18 = new System.Windows.Forms.Label();
             this.FlightTimeLabel = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
@@ -414,7 +416,9 @@
             // 
             // Map_Tab
             // 
-            this.Map_Tab.Controls.Add(this.label16);
+            this.Map_Tab.Controls.Add(this.button2);
+            this.Map_Tab.Controls.Add(this.label22);
+            this.Map_Tab.Controls.Add(this.comboBox2);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
@@ -438,14 +442,32 @@
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
             // 
-            // label16
+            // button2
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(16, 307);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(89, 13);
-            this.label16.TabIndex = 16;
-            this.label16.Text = "Import Waypoints";
+            this.button2.Location = new System.Drawing.Point(169, 322);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(85, 23);
+            this.button2.TabIndex = 19;
+            this.button2.Text = "Import/Export";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(13, 303);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(89, 13);
+            this.label22.TabIndex = 18;
+            this.label22.Text = "Mission Select";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(16, 322);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(147, 21);
+            this.comboBox2.TabIndex = 17;
             // 
             // Fixed_UAS_Size_Checkbox
             // 
@@ -596,11 +618,11 @@
             // 
             // Mission_Enable
             // 
-            this.Mission_Enable.Location = new System.Drawing.Point(16, 490);
+            this.Mission_Enable.Location = new System.Drawing.Point(51, 502);
             this.Mission_Enable.Name = "Mission_Enable";
             this.Mission_Enable.Size = new System.Drawing.Size(163, 23);
             this.Mission_Enable.TabIndex = 1;
-            this.Mission_Enable.Text = "Get Mission Info";
+            this.Mission_Enable.Text = "Get Mission from Server";
             this.Mission_Enable.UseVisualStyleBackColor = true;
             this.Mission_Enable.Click += new System.EventHandler(this.Mission_Enable_Click);
             // 
@@ -621,7 +643,7 @@
             this.Callout_Tab.Controls.Add(this.label21);
             this.Callout_Tab.Controls.Add(this.textBox2);
             this.Callout_Tab.Controls.Add(this.button1);
-            this.Callout_Tab.Controls.Add(this.comboBox1);
+            this.Callout_Tab.Controls.Add(this.Callout_Mode_ComboBox);
             this.Callout_Tab.Controls.Add(this.label20);
             this.Callout_Tab.Controls.Add(this.label19);
             this.Callout_Tab.Controls.Add(this.textBox1);
@@ -641,7 +663,7 @@
             // checkBox5
             // 
             this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(139, 130);
+            this.checkBox5.Location = new System.Drawing.Point(139, 93);
             this.checkBox5.Name = "checkBox5";
             this.checkBox5.Size = new System.Drawing.Size(96, 17);
             this.checkBox5.TabIndex = 16;
@@ -651,7 +673,7 @@
             // checkBox4
             // 
             this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(16, 130);
+            this.checkBox4.Location = new System.Drawing.Point(16, 93);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(93, 17);
             this.checkBox4.TabIndex = 15;
@@ -661,7 +683,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(13, 212);
+            this.label21.Location = new System.Drawing.Point(13, 161);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(92, 13);
             this.label21.TabIndex = 14;
@@ -669,38 +691,38 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(139, 209);
+            this.textBox2.Location = new System.Drawing.Point(139, 158);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(100, 20);
             this.textBox2.TabIndex = 13;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(164, 241);
+            this.button1.Location = new System.Drawing.Point(164, 193);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 12;
             this.button1.Text = "Set Mode";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // comboBox1
+            // Callout_Mode_ComboBox
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.Callout_Mode_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Callout_Mode_ComboBox.FormattingEnabled = true;
+            this.Callout_Mode_ComboBox.Items.AddRange(new object[] {
             "Choose",
             "Landing",
             "Takeoff ",
             ""});
-            this.comboBox1.Location = new System.Drawing.Point(56, 243);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(96, 21);
-            this.comboBox1.TabIndex = 11;
+            this.Callout_Mode_ComboBox.Location = new System.Drawing.Point(53, 193);
+            this.Callout_Mode_ComboBox.Name = "Callout_Mode_ComboBox";
+            this.Callout_Mode_ComboBox.Size = new System.Drawing.Size(96, 21);
+            this.Callout_Mode_ComboBox.TabIndex = 11;
             // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(16, 246);
+            this.label20.Location = new System.Drawing.Point(13, 196);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(34, 13);
             this.label20.TabIndex = 10;
@@ -709,7 +731,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(13, 185);
+            this.label19.Location = new System.Drawing.Point(13, 134);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(98, 13);
             this.label19.TabIndex = 9;
@@ -717,7 +739,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(139, 182);
+            this.textBox1.Location = new System.Drawing.Point(139, 131);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(100, 20);
             this.textBox1.TabIndex = 8;
@@ -725,7 +747,7 @@
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(16, 277);
+            this.checkBox3.Location = new System.Drawing.Point(16, 238);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(149, 17);
             this.checkBox3.TabIndex = 7;
@@ -735,7 +757,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(139, 88);
+            this.checkBox2.Location = new System.Drawing.Point(139, 70);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(61, 17);
             this.checkBox2.TabIndex = 6;
@@ -745,7 +767,7 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(16, 88);
+            this.checkBox1.Location = new System.Drawing.Point(16, 70);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(67, 17);
             this.checkBox1.TabIndex = 5;
@@ -754,7 +776,7 @@
             // 
             // Callout_StartStop_Button
             // 
-            this.Callout_StartStop_Button.Location = new System.Drawing.Point(16, 502);
+            this.Callout_StartStop_Button.Location = new System.Drawing.Point(90, 272);
             this.Callout_StartStop_Button.Name = "Callout_StartStop_Button";
             this.Callout_StartStop_Button.Size = new System.Drawing.Size(75, 23);
             this.Callout_StartStop_Button.TabIndex = 4;
@@ -938,6 +960,19 @@
             this.UAS_D_Altitude_Label.TabIndex = 15;
             this.UAS_D_Altitude_Label.Text = "000.00m";
             // 
+            // Flight_Time_Label
+            // 
+            this.Flight_Time_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Flight_Time_Label.AutoSize = true;
+            this.Flight_Time_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Flight_Time_Label.Location = new System.Drawing.Point(1035, 570);
+            this.Flight_Time_Label.Name = "Flight_Time_Label";
+            this.Flight_Time_Label.Size = new System.Drawing.Size(73, 13);
+            this.Flight_Time_Label.TabIndex = 17;
+            this.Flight_Time_Label.Text = "Flight Time:";
+            this.Interop_Tooltip.SetToolTip(this.Flight_Time_Label, "Automatic Flight Timer: Double click to reset.");
+            this.Flight_Time_Label.DoubleClick += new System.EventHandler(this.Flight_Time_Label_DoubleClick);
+            // 
             // MissionPlanner_ContextMenuStrip
             // 
             this.MissionPlanner_ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -981,17 +1016,6 @@
             this.InteropGUIButton.Click += new System.EventHandler(this.InteropGUIButton_Click);
             this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
             // 
-            // label18
-            // 
-            this.label18.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(1031, 570);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(77, 13);
-            this.label18.TabIndex = 17;
-            this.label18.Text = "Flight Timer:";
-            // 
             // FlightTimeLabel
             // 
             this.FlightTimeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -1008,7 +1032,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
             this.Controls.Add(this.FlightTimeLabel);
-            this.Controls.Add(this.label18);
+            this.Controls.Add(this.Flight_Time_Label);
             this.Controls.Add(this.MissionPlannerMenuAddon);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
@@ -1109,7 +1133,6 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label UAS_D_Altitude_Label;
         private System.Windows.Forms.ToolTip Interop_Tooltip;
-        private System.Windows.Forms.Label label16;
         private System.Windows.Forms.ContextMenuStrip MissionPlanner_ContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem showInteroperabilityControlPanelToolStripMenuItem;
         private System.Windows.Forms.MenuStrip MissionPlannerMenuAddon;
@@ -1117,19 +1140,22 @@
         private System.Windows.Forms.TabPage Callout_Tab;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Button Callout_StartStop_Button;
-        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label Flight_Time_Label;
         private System.Windows.Forms.Label FlightTimeLabel;
         private System.Windows.Forms.CheckBox checkBox5;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox Callout_Mode_ComboBox;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.ComboBox comboBox2;
     }
 }

@@ -91,6 +91,7 @@ namespace Interoperability
         public float latitude { get; set; }
         public float longitude { get; set; }
         public int order { get; set; }
+        public Waypoint() { }
         public Waypoint(float _latitude, float _longitude)
         {
             latitude = _latitude;
@@ -134,18 +135,12 @@ namespace Interoperability
         public int id { get; set; }
         public bool active { get; set; }
         public GPS_Position air_drop_pos { get; set; }
-        public FlyZone fly_zones { get; set; }
+        public List<FlyZone> fly_zones { get; set; }
         public GPS_Position home_pos { get; set; }
         public List<Waypoint> mission_waypoints { get; set; }
         public GPS_Position off_axis_target_pos { get; set; }
         public List<Waypoint> search_grid_points { get; set; }
         public GPS_Position sric_pos { get; set; }
-    }
-
-    //Holds a list of missions
-    public class Mission_List
-    {
-        public List<Mission> List { get; set; }
     }
 
     //Target Classes
@@ -213,14 +208,14 @@ namespace Interoperability
         private long ImporantTimeCount = 0;
         private Stopwatch ImportantTimer = new Stopwatch();
 
-
-        private SpeechSynthesizer Speech = new SpeechSynthesizer();
-
         bool Obstacles_Downloaded = false;          //Used to tell the map control thread we can access obstaclesList 
         bool resetUploadStats = false;              //Used to reset telemetry upload stats
+        bool resetFlightTimer = false;              //Used to reset the flight timer
 
         Obstacles obstaclesList;                    //Instance that holds all SDA Obstacles 
         Interoperability_Settings Settings;         //Instance that holds all Interoperability Settings
+
+        List<Mission> Mission_List;                 //Holds a list of all missions from interoperability +  
 
 
 
@@ -235,7 +230,7 @@ namespace Interoperability
         }
         override public string Version
         {
-            get { return ("0.6.1"); }
+            get { return ("0.7.1"); }
         }
         override public string Author
         {
@@ -270,8 +265,6 @@ namespace Interoperability
                 Map_Control_Thread_shouldStop = false;
                 Map_Control_Thread.Start();
             }
-
-            //Console.WriteLine("Loop rate is " + Interoperability_GUI.getTelemPollRate() + " Hz.");
 
             loopratehz = 0.25F;
 
@@ -376,7 +369,8 @@ namespace Interoperability
                     Mission_Thread_shouldStop = true;
                     Obstacle_SDA_Thread_shouldStop = true;
                     Map_Control_Thread_shouldStop = true;
-                    while (Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive)
+                    Callout_Thread_shouldStop = true;
+                    while (Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive || Callout_Thread_isAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -436,6 +430,9 @@ namespace Interoperability
                     Callout_Thread = new Thread(new ThreadStart(this.Callouts));
                     Callout_Thread_shouldStop = false;
                     Callout_Thread.Start();
+                    break;
+                case 11:
+                    resetFlightTimer = true;
                     break;
                 default:
                     break;
@@ -597,7 +594,7 @@ namespace Interoperability
                             count++;
                             Interoperability_GUI.setTotalTelemUpload(count);
                         }
-                        Thread.Sleep(1000/Interoperability_GUI.getTelemPollRate());
+                        Thread.Sleep(1000 / Interoperability_GUI.getTelemPollRate());
                     }
                 }
             }
@@ -662,19 +659,19 @@ namespace Interoperability
 
                     while (!Obstacle_SDA_Thread_shouldStop)
                     {
-                            HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
-                            //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
-                            count++;
+                        HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
+                        //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
+                        count++;
 
-                            Console.WriteLine("outputting formatted data");
-                            obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
+                        Console.WriteLine("outputting formatted data");
+                        obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
 
-                            Obstacles_Downloaded = true;
-                            Interoperability_GUI.setObstacles(obstaclesList);
+                        Obstacles_Downloaded = true;
+                        Interoperability_GUI.setObstacles(obstaclesList);
 
-                            System.Threading.Thread.Sleep(100);
+                        System.Threading.Thread.Sleep(100);
 
-                            t.Restart();
+                        t.Restart();
                         Thread.Sleep(1000 / Interoperability_GUI.getsdaPollRate());
                     }
                 }
@@ -690,6 +687,15 @@ namespace Interoperability
             Interoperability_GUI.SetSDAStart_StopButton_Off();
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
+
+        public void ExportMapData()
+        {
+            string thing = new JavaScriptSerializer().Serialize(obstaclesList);
+            Console.WriteLine(thing);
+            //thing = new JavaScriptSerializer().Serialize(Mission);
+            Console.WriteLine(thing);
+        }
+
 
         public async void Mission_Download()
         {
@@ -727,8 +733,6 @@ namespace Interoperability
                         //successful_login = true;
                     }
 
-
-
                     while (!Mission_Thread_shouldStop)
                     {
 
@@ -737,8 +741,8 @@ namespace Interoperability
                         count++;
 
                         //Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(SDAresp.Content.ReadAsStringAsync().Result);
-                        Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(Settings["test"]);
-
+                        // Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(Settings["test"]);
+                        List<Mission> missionList = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
                         Mission_Thread_shouldStop = true;
                     }
                 }
@@ -807,102 +811,108 @@ namespace Interoperability
 
             while (!Map_Control_Thread_shouldStop)
             {
-                    Interoperability_GUI.MAP_Clear_Overlays();
-                    //Draw Obstacles 
-                    if (Obstacles_Downloaded)
+                Interoperability_GUI.MAP_Clear_Overlays();
+                //Draw Obstacles 
+                if (Obstacles_Downloaded)
+                {
+                    if (Interoperability_GUI.getDrawObstacles())
                     {
-                        if (Interoperability_GUI.getDrawObstacles())
+                        for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                         {
-                            for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
-                            {
-                                Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
-                                    obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
-                                    obstaclesList.stationary_obstacles[i].longitude);
-                            }
+                            Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
+                                obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
+                                obstaclesList.stationary_obstacles[i].longitude);
+                        }
 
-                            for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
-                            {
-                                Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
-                                   obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
-                                   obstaclesList.moving_obstacles[i].longitude, "polygon");
-                            }
+                        for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
+                        {
+                            Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
+                               obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
+                               obstaclesList.moving_obstacles[i].longitude, "polygon");
                         }
                     }
+                }
 
-                    //Draw geofence
-                    if (Interoperability_GUI.getDrawGeofence())
-                    {
-                        Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Geofence", Color.Red, Color.Transparent, 3, 50);
-                    }
-                    //Draw search area
-                    if (Interoperability_GUI.getDrawSearchArea())
-                    {
-                        Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
-                    }
+                //Draw geofence
+                if (Interoperability_GUI.getDrawGeofence())
+                {
+                    Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Geofence", Color.Red, Color.Transparent, 3, 50);
+                }
+                //Draw search area
+                if (Interoperability_GUI.getDrawSearchArea())
+                {
+                    Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
+                }
 
-                    //Draw plane location                   
-                    if (Interoperability_GUI.getDrawPlane())
-                    {
-                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
-                            Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
-                    }
+                //Draw plane location                   
+                if (Interoperability_GUI.getDrawPlane())
+                {
+                    Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
+                        Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
+                }
 
-                    if (Interoperability_GUI.getDrawWP())
-                    {
-                        //Draw waypoints
-                        Interoperability_GUI.MAP_updateWP(Waypoints);
-                        //Draw lines between waypoints
-                        Interoperability_GUI.MAP_updateWPRoute(Waypoints);
-                    }
-                    if (Interoperability_GUI.getAutopan())
-                    {
-                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
-                    }
-                    Interoperability_GUI.MAP_Update_Overlay();
+                if (Interoperability_GUI.getDrawWP())
+                {
+                    //Draw waypoints
+                    Interoperability_GUI.MAP_updateWP(Waypoints);
+                    //Draw lines between waypoints
+                    Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                }
+                if (Interoperability_GUI.getAutopan())
+                {
+                    Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
+                }
+                Interoperability_GUI.MAP_Update_Overlay();
 
 
-                    //Update GPS Location label at bottom of interface
-                    switch (geo_cords)
-                    {
-                        case "DD.DDDDDD":
-                            Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
-                            break;
-                        case "DD MM SS.SS":
-                            Interoperability_GUI.MAP_updateGPSLabel(DDtoDMS(Host.cs.lat, Host.cs.lng));
-                            break;
-                        default:
-                            Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
-                            break;
-                    }
+                //Update GPS Location label at bottom of interface
+                switch (geo_cords)
+                {
+                    case "DD.DDDDDD":
+                        Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
+                        break;
+                    case "DD MM SS.SS":
+                        Interoperability_GUI.MAP_updateGPSLabel(DDtoDMS(Host.cs.lat, Host.cs.lng));
+                        break;
+                    default:
+                        Interoperability_GUI.MAP_updateGPSLabel(Host.cs.lat.ToString("00.000000") + " " + Host.cs.lng.ToString("00.000000"));
+                        break;
+                }
 
-                    GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
+                GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
 
-                    //Update altitude and delta altitude label at bottom of interface
-                    switch (dist_units)
-                    {
-                        case "Metres":
-                            Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
-                                (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
-                            break;
-                        case "Feet":
-                            Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
-                                (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
-                            break;
-                        default:
-                            break;
-                    }
-                    Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
-                    //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
-                    t.Restart();
+                //Update altitude and delta altitude label at bottom of interface
+                switch (dist_units)
+                {
+                    case "Metres":
+                        Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
+                            (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
+                        break;
+                    case "Feet":
+                        Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
+                            (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
+                        break;
+                    default:
+                        break;
+                }
+                Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
+                //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
+                t.Restart();
 
-                    if (Host.cs.airspeed > 10)
-                    {
-                        FlightTime.Start();
-                    }
-                    else
-                    { 
-                        FlightTime.Stop();
-                    }
+                //It's okay if we call this multiple times, because it just resumes the flight timer
+                if (Host.cs.airspeed > 10)
+                {
+                    FlightTime.Start();
+                }
+                else
+                {
+                    FlightTime.Stop();
+                }
+                if (resetFlightTimer == true)
+                {
+                    FlightTime.Reset();
+                    resetFlightTimer = false;
+                }
                 Thread.Sleep(1000 / Interoperability_GUI.getMapRefreshRate());
             }
             Map_Thread_isAlive = false;
@@ -917,41 +927,59 @@ namespace Interoperability
             SpeechSynthesizer Speech = new SpeechSynthesizer();
 
             Callout_Thread_isAlive = true;
+            Console.WriteLine("Callout Thread Started");
 
             using (SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US")))
             {
-                Choices colors = new Choices();
-                colors.Add(new string[] { "landing", "taking off", "airspeed", "altitude", "flight time" });
+                Choices Modes = new Choices();
+                Modes.Add(new string[] { "landing", "taking off", "airspeed", "altitude", "flight time" });
 
                 // Create a GrammarBuilder object and append the Choices object.
                 GrammarBuilder gb = new GrammarBuilder();
-                gb.Append(colors);
+                gb.Append(Modes);
                 Grammar g = new Grammar(gb);
                 recognizer.LoadGrammar(g);
+                //Voice recognition allows 
                 recognizer.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
                 recognizer.SetInputToDefaultAudioDevice();
-                recognizer.RecognizeAsync(RecognizeMode.Multiple);
+
+                bool Recognizer_Enabled = false;
+                string CalloutMode = "";
 
                 while (Callout_Thread_shouldStop == false)
                 {
-                    /*if (Interoperability_GUI.getSpeechRecognition_Enabled() == true)
+                    if (Interoperability_GUI.getSpeechRecognition_Enabled() == true && !Recognizer_Enabled)
                     {
                         recognizer.RecognizeAsync(RecognizeMode.Multiple);
+                        Recognizer_Enabled = true;
                     }
-                    else
+                    else if (Interoperability_GUI.getSpeechRecognition_Enabled() == false)
                     {
                         recognizer.RecognizeAsyncStop();
-                    }*/
+                        Recognizer_Enabled = false;
+                    }
 
+                    //Probably shouldn't be calling this in an infinite loop
+                    CalloutMode = Interoperability_GUI.getCalloutMode();
+                    if (CalloutMode == "Landing")
+                    {
+
+                    }
+                    else if (CalloutMode == "Takeoff")
+                    {
+
+                    }
+                    Thread.Sleep(10000000);
                     if (t.ElapsedMilliseconds > (Interoperability_GUI.getCalloutPeriod()))
                     {
-                        Speech.SpeakAsync("Current airspeed is" + Host.cs.airspeed.ToString() + "meters per second");
+                        //If we speak asynchronously, then we might speak over the previous speach  
+                        Speech.SpeakAsync(Convert.ToInt32(Host.cs.airspeed).ToString());
                         t.Restart();
                     }
                 }
 
             }
-            Console.WriteLine("Left Thing");
+            Console.WriteLine("Callout thread has stopped");
             Callout_Thread_isAlive = false;
         }
 
@@ -1067,9 +1095,7 @@ namespace Interoperability
         /// <returns></returns>
         override public bool Exit()
         {
-            Map_Control_Thread.Abort();
-            Telemetry_Thread.Abort();
-            Obstacle_SDA_Thread.Abort();
+            interoperabilityAction(7);
             return (true);
         }
     }

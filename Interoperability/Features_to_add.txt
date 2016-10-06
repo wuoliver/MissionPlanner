@@ -12,12 +12,18 @@ Ability to export telemtry data into xml/csv with whatever data you want:
 	Etc..
 	
 Import/Export waypoints, search areas, boundaries, obstacles (moving obstacle paths + gps coordinates)
+	
+
 
 Add points of interest through clicking, or pressing a key on the keyboard
 
 Photo overlap/view map, so we see how much area we can cover based on a lens type, etc...
 
 Image georeferencing based on altitude, camera poperties, and projection 
+
+Automatic waypoint generation 
+
+SDA Obstacle Avoidance (Collision Warning + Automatic Avoidance)
 
 
 USC: 
@@ -27,29 +33,18 @@ Function to place markers at all geese locations, then have an algorithm determi
 
 
 All: 
-Have setting to change interface depending on if using for USC or AUVSI			DONE
-AUVSI: 
-	Telemtry Upload
-	Obstacle Download
-	Image Upload
-	Map Controls
-
-USC:
-	Map Controls
-	Geese algorithm 
-
 ----------------------------------------------------------------
 
 Speech Recogition for Rikky to request airspeed or altitude DONE
 https://msdn.microsoft.com/en-us/library/office/hh361683%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
 
-TTS to output airspeed, altitude, and other important stuff 
+TTS to output airspeed, altitude, and other important stuff IN PROGRESS
 
 TODO: 
 Need to finish thread 
 
 ------------------------------------------------------------------------
 
-Add flight timer that automatically starts and ends DONE
-	Need a place to reset flight timer 
-	
+
+Server to listen for requests: 
+	Take in a timestamp, then return GPS coordinates + Plane bank and pitch angles 
