@@ -42,10 +42,8 @@ using System.Diagnostics; // For stopwatch
  */
 
 
-namespace Interoperability
+namespace interoperability
 {
-
-
     //SDA Classes 
     public class Moving_Obstacle
     {
@@ -133,6 +131,7 @@ namespace Interoperability
     public class Mission
     {
         public int id { get; set; }
+        public string name { get; set; }
         public bool active { get; set; }
         public GPS_Position air_drop_pos { get; set; }
         public List<FlyZone> fly_zones { get; set; }
@@ -219,8 +218,6 @@ namespace Interoperability
 
 
 
-
-
         //Instantiate windows forms
         global::Interoperability_GUI_Forms.Interoperability_GUI_Main Interoperability_GUI;
 
@@ -255,8 +252,18 @@ namespace Interoperability
             Settings = new Interoperability_Settings();
             Settings.Load();
             getSettings();
+
+            //Instantiate all threads, but do not start
+            Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+            Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+            Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+            Callout_Thread = new Thread(new ThreadStart(this.Callouts));
+
+            //Instantiate Mission_List
+            Mission_List = new List<Mission>();
+
             // Start interface
-            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
+            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List);
             if (Convert.ToBoolean(Settings["showInteroperability_GUI"]) == true)
             {
                 Interoperability_GUI.Show();
@@ -370,7 +377,7 @@ namespace Interoperability
                     Obstacle_SDA_Thread_shouldStop = true;
                     Map_Control_Thread_shouldStop = true;
                     Callout_Thread_shouldStop = true;
-                    while (Mission_Thread_isAlive || Obstacle_SDA_Thread_isAlive || Telemetry_Thread_isAlive || Map_Thread_isAlive || Callout_Thread_isAlive)
+                    while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive || Callout_Thread.IsAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -379,7 +386,7 @@ namespace Interoperability
                 case 8:
                     if (!Interoperability_GUI.isOpened)
                     {
-                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
+                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List);
                         Interoperability_GUI.Show();
                         //Start map thread
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
@@ -402,22 +409,22 @@ namespace Interoperability
                         switch (ImportantCounter)
                         {
                             case 0:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Oliver;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon_Oliver;
                                 break;
                             case 1:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Yih_Tang;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon_Yih_Tang;
                                 break;
                             case 2:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Erik;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon_Erik;
                                 break;
                             case 3:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Jesse;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon_Jesse;
                                 break;
                             case 4:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon_Rikky;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon_Rikky;
                                 break;
                             default:
-                                Host.MainForm.MainMenu.Items[2].Image = interoperability.Properties.Resources.Interop_Icon;
+                                Host.MainForm.MainMenu.Items[2].Image = Properties.Resources.Interop_Icon;
                                 ImportantCounter = -1;
                                 break;
                         }
@@ -540,7 +547,7 @@ namespace Interoperability
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
 
-                    while (!Telemetry_Thread_shouldStop)
+                    while (Telemetry_Thread_shouldStop == false)
                     {
                         //Doesn't work, need another way to do this
                         //If person sets speed to 0, then GUI crashes 
@@ -609,7 +616,7 @@ namespace Interoperability
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
             }
-            Telemetry_Thread_isAlive = false;
+            Telemetry_Thread_isAlive = false; 
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
@@ -688,11 +695,10 @@ namespace Interoperability
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
-        public void ExportMapData()
+        //Will be used to export to something. Is used to 
+        public void ExportMapData(List<Mission> missionList)
         {
-            string thing = new JavaScriptSerializer().Serialize(obstaclesList);
-            Console.WriteLine(thing);
-            //thing = new JavaScriptSerializer().Serialize(Mission);
+            string thing = new JavaScriptSerializer().Serialize(missionList);
             Console.WriteLine(thing);
         }
 
@@ -703,8 +709,6 @@ namespace Interoperability
             Console.WriteLine("Mission_Download Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
-
-            int count = 0;
             CookieContainer cookies = new CookieContainer();
 
             try
@@ -720,29 +724,31 @@ namespace Interoperability
                     v.Add("password", password);
                     var auth = new FormUrlEncodedContent(v);
                     HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
-                    //resp.IsSuccessStatusCode;
                     if (!resp.IsSuccessStatusCode)
                     {
                         Mission_Thread_shouldStop = true;
-                        //successful_login = false;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
                         Mission_Thread_shouldStop = false;
-                        //successful_login = true;
                     }
 
                     while (!Mission_Thread_shouldStop)
                     {
-
                         HttpResponseMessage SDAresp = await client.GetAsync("/api/missions");
                         Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
-                        count++;
 
-                        //Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(SDAresp.Content.ReadAsStringAsync().Result);
-                        // Mission_List missionList = new JavaScriptSerializer().Deserialize<Mission_List>(Settings["test"]);
-                        List<Mission> missionList = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
+                        List<Mission> Server_Mission = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
+
+                        int count = Mission_List.Count();
+                        //Add obtained missions to the current list of missions 
+                        for(int i=0; i < Server_Mission.Count(); i++)
+                        {
+                            Server_Mission[i].name = "Server Mission_" + Convert.ToString(i + count);
+                            Mission_List.Add(Server_Mission[i]);
+                        }
+                        
                         Mission_Thread_shouldStop = true;
                     }
                 }
@@ -969,7 +975,7 @@ namespace Interoperability
                     {
 
                     }
-                    Thread.Sleep(10000000);
+                    //Thread.Sleep(10000000);
                     if (t.ElapsedMilliseconds > (Interoperability_GUI.getCalloutPeriod()))
                     {
                         //If we speak asynchronously, then we might speak over the previous speach  
@@ -1025,7 +1031,7 @@ namespace Interoperability
             {
                 DMS += "W";
             }
-
+    
             DMS += Convert.ToInt32(Math.Abs(lng)).ToString("000") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00");
             return DMS;
         }

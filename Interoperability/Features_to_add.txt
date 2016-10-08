@@ -27,9 +27,7 @@ SDA Obstacle Avoidance (Collision Warning + Automatic Avoidance)
 
 
 USC: 
-
 Function to place markers at all geese locations, then have an algorithm determine "nest" locations
-
 
 
 All: 
@@ -48,3 +46,6 @@ Need to finish thread
 
 Server to listen for requests: 
 	Take in a timestamp, then return GPS coordinates + Plane bank and pitch angles 
+
+
+

@@ -59,8 +59,9 @@
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
             this.button2 = new System.Windows.Forms.Button();
+            this.Mission_ImportExport_Button = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.MissionSelect_ComboBox = new System.Windows.Forms.ComboBox();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
@@ -114,6 +115,11 @@
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
             this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
             this.FlightTimeLabel = new System.Windows.Forms.Label();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.missionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -123,6 +129,7 @@
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -185,7 +192,7 @@
             // Server_Settings
             // 
             this.Server_Settings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Server_Settings.Location = new System.Drawing.Point(1032, 12);
+            this.Server_Settings.Location = new System.Drawing.Point(1047, 1);
             this.Server_Settings.Name = "Server_Settings";
             this.Server_Settings.Size = new System.Drawing.Size(131, 23);
             this.Server_Settings.TabIndex = 7;
@@ -222,10 +229,10 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.Map_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Callout_Tab);
-            this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 20);
+            this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 27);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
-            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(279, 564);
+            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(279, 557);
             this.Interoperability_GUI_Tab.TabIndex = 8;
             // 
             // Telem_Tab
@@ -247,7 +254,7 @@
             this.Telem_Tab.Location = new System.Drawing.Point(4, 22);
             this.Telem_Tab.Name = "Telem_Tab";
             this.Telem_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Telem_Tab.Size = new System.Drawing.Size(271, 538);
+            this.Telem_Tab.Size = new System.Drawing.Size(271, 529);
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
@@ -323,7 +330,7 @@
             this.SDA_Tab.Location = new System.Drawing.Point(4, 22);
             this.SDA_Tab.Name = "SDA_Tab";
             this.SDA_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.SDA_Tab.Size = new System.Drawing.Size(271, 538);
+            this.SDA_Tab.Size = new System.Drawing.Size(271, 531);
             this.SDA_Tab.TabIndex = 1;
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
@@ -417,8 +424,9 @@
             // Map_Tab
             // 
             this.Map_Tab.Controls.Add(this.button2);
+            this.Map_Tab.Controls.Add(this.Mission_ImportExport_Button);
             this.Map_Tab.Controls.Add(this.label22);
-            this.Map_Tab.Controls.Add(this.comboBox2);
+            this.Map_Tab.Controls.Add(this.MissionSelect_ComboBox);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
@@ -437,19 +445,29 @@
             this.Map_Tab.Location = new System.Drawing.Point(4, 22);
             this.Map_Tab.Name = "Map_Tab";
             this.Map_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Map_Tab.Size = new System.Drawing.Size(271, 538);
+            this.Map_Tab.Size = new System.Drawing.Size(271, 531);
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(169, 322);
+            this.button2.Location = new System.Drawing.Point(169, 320);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(85, 23);
-            this.button2.TabIndex = 19;
-            this.button2.Text = "Import/Export";
+            this.button2.TabIndex = 20;
+            this.button2.Text = "Select";
             this.button2.UseVisualStyleBackColor = true;
+            // 
+            // Mission_ImportExport_Button
+            // 
+            this.Mission_ImportExport_Button.Location = new System.Drawing.Point(17, 349);
+            this.Mission_ImportExport_Button.Name = "Mission_ImportExport_Button";
+            this.Mission_ImportExport_Button.Size = new System.Drawing.Size(146, 23);
+            this.Mission_ImportExport_Button.TabIndex = 19;
+            this.Mission_ImportExport_Button.Text = "Import / Export Mission";
+            this.Mission_ImportExport_Button.UseVisualStyleBackColor = true;
+            this.Mission_ImportExport_Button.Click += new System.EventHandler(this.Mission_ImportExport_Button_Click);
             // 
             // label22
             // 
@@ -461,13 +479,14 @@
             this.label22.TabIndex = 18;
             this.label22.Text = "Mission Select";
             // 
-            // comboBox2
+            // MissionSelect_ComboBox
             // 
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(16, 322);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(147, 21);
-            this.comboBox2.TabIndex = 17;
+            this.MissionSelect_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MissionSelect_ComboBox.FormattingEnabled = true;
+            this.MissionSelect_ComboBox.Location = new System.Drawing.Point(16, 322);
+            this.MissionSelect_ComboBox.Name = "MissionSelect_ComboBox";
+            this.MissionSelect_ComboBox.Size = new System.Drawing.Size(147, 21);
+            this.MissionSelect_ComboBox.TabIndex = 17;
             // 
             // Fixed_UAS_Size_Checkbox
             // 
@@ -631,7 +650,7 @@
             this.TargetUpload_Tab.Location = new System.Drawing.Point(4, 22);
             this.TargetUpload_Tab.Name = "TargetUpload_Tab";
             this.TargetUpload_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.TargetUpload_Tab.Size = new System.Drawing.Size(271, 538);
+            this.TargetUpload_Tab.Size = new System.Drawing.Size(271, 531);
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
@@ -655,7 +674,7 @@
             this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
             this.Callout_Tab.Name = "Callout_Tab";
             this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Callout_Tab.Size = new System.Drawing.Size(271, 538);
+            this.Callout_Tab.Size = new System.Drawing.Size(271, 529);
             this.Callout_Tab.TabIndex = 5;
             this.Callout_Tab.Text = "Callouts";
             this.Callout_Tab.UseVisualStyleBackColor = true;
@@ -807,7 +826,7 @@
             this.gMapControl1.GrayScaleMode = false;
             this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
             this.gMapControl1.LevelsKeepInMemmory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(294, 41);
+            this.gMapControl1.Location = new System.Drawing.Point(294, 27);
             this.gMapControl1.MarkersEnabled = true;
             this.gMapControl1.MaxZoom = 24;
             this.gMapControl1.MinZoom = 2;
@@ -820,7 +839,7 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(869, 526);
+            this.gMapControl1.Size = new System.Drawing.Size(869, 540);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 0D;
             this.gMapControl1.OnMapDrag += new GMap.NET.MapDrag(this.gMapControl1_OnMapDrag);
@@ -982,7 +1001,6 @@
             // 
             // showInteroperabilityControlPanelToolStripMenuItem
             // 
-            this.showInteroperabilityControlPanelToolStripMenuItem.Image = global::interoperability.Properties.Resources.icon;
             this.showInteroperabilityControlPanelToolStripMenuItem.Name = "showInteroperabilityControlPanelToolStripMenuItem";
             this.showInteroperabilityControlPanelToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.showInteroperabilityControlPanelToolStripMenuItem.Text = "Show Interoperability Control Panel";
@@ -1026,14 +1044,53 @@
             this.FlightTimeLabel.TabIndex = 18;
             this.FlightTimeLabel.Text = "00:00:00";
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.editToolStripMenuItem,
+            this.missionToolStripMenuItem,
+            this.helpToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1178, 24);
+            this.menuStrip1.TabIndex = 19;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
+            // 
+            // editToolStripMenuItem
+            // 
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
+            this.editToolStripMenuItem.Text = "Edit";
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // missionToolStripMenuItem
+            // 
+            this.missionToolStripMenuItem.Name = "missionToolStripMenuItem";
+            this.missionToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.missionToolStripMenuItem.Text = "Mission";
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.FlightTimeLabel);
             this.Controls.Add(this.Flight_Time_Label);
             this.Controls.Add(this.MissionPlannerMenuAddon);
+            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.label14);
@@ -1041,7 +1098,6 @@
             this.Controls.Add(this.AutoPan_Checkbox);
             this.Controls.Add(this.UAS_Altitude_ASL_Label);
             this.Controls.Add(this.UAS_GPS_Label);
-            this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.Interoperability_GUI_Tab);
             this.Controls.Add(this.gMapControl1);
             this.DoubleBuffered = true;
@@ -1066,6 +1122,8 @@
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
             this.MissionPlannerMenuAddon.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1154,8 +1212,14 @@
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button Mission_ImportExport_Button;
         private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.ComboBox MissionSelect_ComboBox;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem missionToolStripMenuItem;
     }
 }

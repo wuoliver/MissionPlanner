@@ -70,7 +70,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibVLC.NET", "ExtLibs\LibVL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SikRadio", "SikRadio\SikRadio.csproj", "{B8943726-04B0-4477-BFDA-E156A0CD98A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "interoperability", "Interoperability\interoperability.csproj", "{EE4813F0-6608-486C-99D6-A7297A1AF965}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interoperability", "Interoperability\Interoperability.csproj", "{EE4813F0-6608-486C-99D6-A7297A1AF965}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

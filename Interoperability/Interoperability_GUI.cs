@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Interoperability;
+using interoperability;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
@@ -31,8 +31,12 @@ namespace Interoperability_GUI_Forms
         protected bool SpeechRecognition_Enabled = true;
 
         public bool isOpened = false;
-        global::Interoperability_GUI_Forms.Settings_GUI settings_gui;
+        Settings_GUI Settings_GUI_Instance;
+        Interoperability_Mission_Import Interoperability_Mission_Import_Instance;
+        List<Mission> Mission_List;
+
         Interoperability_Settings Settings;
+        
 
         //Put on top or something afterwards
         GMapOverlay Static_Overlay;
@@ -61,7 +65,7 @@ namespace Interoperability_GUI_Forms
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
 
-        public Interoperability_GUI_Main(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
+        public Interoperability_GUI_Main(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings, List<Mission> _Mission_List)
         {
             Console.WriteLine("Created GUI");
             InitializeComponent();
@@ -69,6 +73,9 @@ namespace Interoperability_GUI_Forms
 
             //Get Settings object, used for server settings
             Settings = _Settings;
+
+            //Get Mission List objet
+            Mission_List = _Mission_List;
 
             //Must be called after settings
             MAP_Settings_Init_Bool(ref Settings, ref DrawWP, "DrawWP");
@@ -87,6 +94,9 @@ namespace Interoperability_GUI_Forms
 
             Settings.Save();
 
+            Settings_GUI_Instance = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
+            Interoperability_Mission_Import_Instance = new Interoperability_Mission_Import(Mission_List);
+
             //Set poll Rate text 
             Telemetry_pollRateInput.Text = telemPollRate.ToString();
             SDA_pollrateInput.Text = sdaPollRate.ToString();
@@ -97,6 +107,14 @@ namespace Interoperability_GUI_Forms
             Plane_Overlay = new GMapOverlay("Plane_Overlay");
             Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
             WP_Overlay = new GMapOverlay("Waypoints");
+
+
+            //Test code, please remove after October 22, 2016, unless required
+            MissionSelect_ComboBox.Items.Add("Mission 1 [F]");
+            MissionSelect_ComboBox.Items.Add("Mission 2 [F]");
+            MissionSelect_ComboBox.Items.Add("Mission 3 [F]");
+            MissionSelect_ComboBox.Items.Add("Mission 4 [F]");
+
         }
 
         public void InteroperabilityGUIAction(int action)
@@ -243,7 +261,7 @@ namespace Interoperability_GUI_Forms
         }
         public Settings_GUI getSettings_GUI()
         {
-            return settings_gui;
+            return Settings_GUI_Instance;
         }
 
         public bool getSpeechRecognition_Enabled()
@@ -399,11 +417,21 @@ namespace Interoperability_GUI_Forms
 
         private void Server_Settings_Click(object sender, EventArgs e)
         {
-            if (!Settings_GUI.isOpened)
+            if (!Settings_GUI_Instance.isOpened)
             {
-                settings_gui = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
-                settings_gui.Show();
+                Settings_GUI_Instance = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
+                Settings_GUI_Instance.ShowDialog();
             }
+        }
+
+        private void Mission_ImportExport_Button_Click(object sender, EventArgs e)
+        {
+            if (!Interoperability_Mission_Import_Instance.isOpened)
+            {
+                Interoperability_Mission_Import_Instance = new Interoperability_Mission_Import(Mission_List);
+                Interoperability_Mission_Import_Instance.ShowDialog();
+            }
+
         }
 
         private void Reset_Stats_Click(object sender, EventArgs e)

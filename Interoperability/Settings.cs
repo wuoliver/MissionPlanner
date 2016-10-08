@@ -14,7 +14,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Http;
 
-using Interoperability;
+using interoperability;
 
 
 
@@ -36,11 +36,10 @@ namespace Interoperability_GUI_Forms
         Action<int> InteroperabilityGUICallback;
         Interoperability_Settings Settings;
 
-        public static bool isOpened = false;
+        public bool isOpened = false;
 
         public Settings_GUI(Action<int> _InteroperabilityCallback, Action<int> _InteroperabilityGUICallback, Interoperability_Settings _Settings)
         {
-            isOpened = true;
             InitializeComponent();
             InteroperabilityCallback = _InteroperabilityCallback;
             InteroperabilityGUICallback = _InteroperabilityGUICallback;
@@ -74,11 +73,12 @@ namespace Interoperability_GUI_Forms
         private void Settings_Load(object sender, EventArgs e)
         {
             validation_label.Text = "";
+            isOpened = true;
         }
 
         private void Settings_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Settings_GUI.isOpened = false;
+            isOpened = false;
         }
 
 
