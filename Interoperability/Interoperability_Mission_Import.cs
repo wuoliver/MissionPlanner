@@ -14,8 +14,6 @@ namespace interoperability
 {
     public partial class Interoperability_Mission_Import : Form
     {
-
-
         //The edit button will open up a human readable text box, with line by line coordinates, and tags, and everything.
         //So humans can edit each mission if they want. 
 

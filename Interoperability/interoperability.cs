@@ -118,13 +118,41 @@ namespace interoperability
     {
         public float latitude { get; set; }
         public float longitude { get; set; }
+        public GPS_Position()
+        {
+            latitude = 0;
+            longitude = 0;
+        }
+        public GPS_Position(float _latitude, float _longitude)
+        {
+            latitude = _latitude;
+            longitude = _longitude;
+        }
+
+        public GPS_Position(double _latitude, double _longitude)
+        {
+            latitude = (float)_latitude;
+            longitude = (float)_longitude;
+        }
     }
 
     public class FlyZone
     {
         public float altitude_msl_max { get; set; }
         public float altitude_msl_min { get; set; }
-        List<Waypoint> boundary_pts { get; set; }
+        public List<Waypoint> boundary_pts { get; set; }
+        public FlyZone(float _altitude_msl_max, float _altitude_msl_min, List<Waypoint> _boundary_pts)
+        {
+            altitude_msl_max = _altitude_msl_max;
+            altitude_msl_min = _altitude_msl_min;
+            boundary_pts = _boundary_pts;
+        }
+        public FlyZone()
+        {
+            altitude_msl_max = 0;
+            altitude_msl_min = 0;
+            boundary_pts = new List<Waypoint>();
+        }
     }
 
     //The class that holds a single mission
@@ -139,7 +167,23 @@ namespace interoperability
         public List<Waypoint> mission_waypoints { get; set; }
         public GPS_Position off_axis_target_pos { get; set; }
         public List<Waypoint> search_grid_points { get; set; }
-        public GPS_Position sric_pos { get; set; }
+
+        //SRIC removed for AUVSI 2017
+        //public GPS_Position sric_pos { get; set; }
+
+        public Mission()
+        {
+            id = 0;
+            name = "uninitialized";
+            active = false;
+            air_drop_pos = new GPS_Position();
+            fly_zones = new List<FlyZone>();
+            fly_zones.Add(new FlyZone());
+            home_pos = new GPS_Position();
+            mission_waypoints = new List<Waypoint>();
+            off_axis_target_pos = new GPS_Position();
+            search_grid_points = new List<Waypoint>();
+        }
     }
 
     //Target Classes
@@ -214,7 +258,8 @@ namespace interoperability
         Obstacles obstaclesList;                    //Instance that holds all SDA Obstacles 
         Interoperability_Settings Settings;         //Instance that holds all Interoperability Settings
 
-        List<Mission> Mission_List;                 //Holds a list of all missions from interoperability +  
+        List<Mission> Mission_List;                 //Holds a list of all missions from interoperability + Server
+        Mission Current_Mission;                    //The current mission open in the program  
 
 
 
@@ -261,9 +306,10 @@ namespace interoperability
 
             //Instantiate Mission_List
             Mission_List = new List<Mission>();
+            Current_Mission = new Mission();
 
             // Start interface
-            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List);
+            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List, Current_Mission);
             if (Convert.ToBoolean(Settings["showInteroperability_GUI"]) == true)
             {
                 Interoperability_GUI.Show();
@@ -386,7 +432,7 @@ namespace interoperability
                 case 8:
                     if (!Interoperability_GUI.isOpened)
                     {
-                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List);
+                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List, Current_Mission);
                         Interoperability_GUI.Show();
                         //Start map thread
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
@@ -771,8 +817,6 @@ namespace interoperability
             t.Start();
 
             //Add static overlays:
-            //Issue because need to wait until obstaclesList has loaded or been instantiated
-
             //For testing right now. Will update when server has misison functionality added
             List<Waypoint> Op_Area = new List<Waypoint>();
             Op_Area.Add(new Waypoint(38.1462694, -76.4277778));
@@ -788,12 +832,15 @@ namespace interoperability
             Op_Area.Add(new Waypoint(38.1473472, -76.4232111));
             Op_Area.Add(new Waypoint(38.1461306, -76.4266528));
 
-            List<Waypoint> Search_Area = new List<Waypoint>();
-            Search_Area.Add(new Waypoint(38.1457306, -76.4295972));
-            Search_Area.Add(new Waypoint(38.1431861, -76.4338917));
-            Search_Area.Add(new Waypoint(38.1410028, -76.4322333));
-            Search_Area.Add(new Waypoint(38.1411917, -76.4269806));
-            Search_Area.Add(new Waypoint(38.1422194, -76.4261111));
+            //We clear becaues the construtor creates an empty flyzone.
+            Current_Mission.fly_zones.Clear();
+            Current_Mission.fly_zones.Add(new FlyZone(600, 100, Op_Area));
+
+            Current_Mission.search_grid_points.Add(new Waypoint(38.1457306, -76.4295972));
+            Current_Mission.search_grid_points.Add(new Waypoint(38.1431861, -76.4338917));
+            Current_Mission.search_grid_points.Add(new Waypoint(38.1410028, -76.4322333));
+            Current_Mission.search_grid_points.Add(new Waypoint(38.1411917, -76.4269806));
+            Current_Mission.search_grid_points.Add(new Waypoint(38.1422194, -76.4261111));
 
             List<PointLatLng> Waypoints = new List<PointLatLng>();
             Waypoints.Add(new PointLatLng(38.147720, -76.429610));
@@ -813,6 +860,9 @@ namespace interoperability
             Waypoints.Add(new PointLatLng(38.142084, -76.423817));
             Waypoints.Add(new PointLatLng(38.142016, -76.425469));
             Waypoints.Add(new PointLatLng(38.145189, -76.428537));
+
+            Current_Mission.air_drop_pos = new GPS_Position(38.145852, -76.426416);
+            Current_Mission.off_axis_target_pos = new GPS_Position(38.147408, -76.433651);
 
 
             while (!Map_Control_Thread_shouldStop)
@@ -842,12 +892,14 @@ namespace interoperability
                 //Draw geofence
                 if (Interoperability_GUI.getDrawGeofence())
                 {
-                    Interoperability_GUI.MAP_addStaticPoly(Op_Area, "Geofence", Color.Red, Color.Transparent, 3, 50);
+                    //Using first boundary point (assuming there is only one geofence) COME BACK TO THIS LATER
+                    Interoperability_GUI.MAP_addStaticPoly(Current_Mission.fly_zones[0].boundary_pts, "Geofence", Color.Red, Color.Transparent, 3, 50);
                 }
+
                 //Draw search area
                 if (Interoperability_GUI.getDrawSearchArea())
                 {
-                    Interoperability_GUI.MAP_addStaticPoly(Search_Area, "Search_Area", Color.Green, Color.Green, 3, 90);
+                        Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90); 
                 }
 
                 //Draw plane location                   
@@ -864,6 +916,12 @@ namespace interoperability
                     //Draw lines between waypoints
                     Interoperability_GUI.MAP_updateWPRoute(Waypoints);
                 }
+                //Draw off axis targets, emergent targets, and air drop location
+                if (Interoperability_GUI.getDrawOFAT_EN_DROP())
+                {
+                    Interoperability_GUI.MAP_updateOFAT_EN_DROP(Current_Mission);
+                }
+
                 if (Interoperability_GUI.getAutopan())
                 {
                     Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));

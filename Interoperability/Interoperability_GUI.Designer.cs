@@ -36,7 +36,6 @@
             this.avgTelUploadText = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Telemetry_pollRateInput = new System.Windows.Forms.TextBox();
-            this.Server_Settings = new System.Windows.Forms.Button();
             this.applyPollRateButton = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.Interoperability_GUI_Tab = new System.Windows.Forms.TabControl();
@@ -65,7 +64,7 @@
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
-            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.OFAT_EM_DROP_CheckBox = new System.Windows.Forms.CheckBox();
             this.UASLoc_Checkbox = new System.Windows.Forms.CheckBox();
             this.Waypoints_Checkbox = new System.Windows.Forms.CheckBox();
             this.SearchArea_Checkbox = new System.Windows.Forms.CheckBox();
@@ -101,6 +100,7 @@
             this.showObstaclesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showWaypointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showOFATEmergentDropToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.UAS_GPS_Label = new System.Windows.Forms.Label();
             this.UAS_Altitude_ASL_Label = new System.Windows.Forms.Label();
             this.AutoPan_Checkbox = new System.Windows.Forms.CheckBox();
@@ -115,11 +115,21 @@
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
             this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
             this.FlightTimeLabel = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.Interop_GUI_menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveMissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveMissionAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.missionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editMissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -129,7 +139,7 @@
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
+            this.Interop_GUI_menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -189,17 +199,6 @@
             this.Telemetry_pollRateInput.TabIndex = 5;
             this.Telemetry_pollRateInput.Text = "10";
             // 
-            // Server_Settings
-            // 
-            this.Server_Settings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Server_Settings.Location = new System.Drawing.Point(1047, 1);
-            this.Server_Settings.Name = "Server_Settings";
-            this.Server_Settings.Size = new System.Drawing.Size(131, 23);
-            this.Server_Settings.TabIndex = 7;
-            this.Server_Settings.Text = "Settings";
-            this.Server_Settings.UseVisualStyleBackColor = true;
-            this.Server_Settings.Click += new System.EventHandler(this.Server_Settings_Click);
-            // 
             // applyPollRateButton
             // 
             this.applyPollRateButton.Location = new System.Drawing.Point(178, 218);
@@ -254,7 +253,7 @@
             this.Telem_Tab.Location = new System.Drawing.Point(4, 22);
             this.Telem_Tab.Name = "Telem_Tab";
             this.Telem_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Telem_Tab.Size = new System.Drawing.Size(271, 529);
+            this.Telem_Tab.Size = new System.Drawing.Size(271, 531);
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
@@ -430,7 +429,7 @@
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
-            this.Map_Tab.Controls.Add(this.checkBox6);
+            this.Map_Tab.Controls.Add(this.OFAT_EM_DROP_CheckBox);
             this.Map_Tab.Controls.Add(this.UASLoc_Checkbox);
             this.Map_Tab.Controls.Add(this.Waypoints_Checkbox);
             this.Map_Tab.Controls.Add(this.SearchArea_Checkbox);
@@ -491,7 +490,7 @@
             // Fixed_UAS_Size_Checkbox
             // 
             this.Fixed_UAS_Size_Checkbox.AutoSize = true;
-            this.Fixed_UAS_Size_Checkbox.Location = new System.Drawing.Point(138, 238);
+            this.Fixed_UAS_Size_Checkbox.Location = new System.Drawing.Point(129, 239);
             this.Fixed_UAS_Size_Checkbox.Name = "Fixed_UAS_Size_Checkbox";
             this.Fixed_UAS_Size_Checkbox.Size = new System.Drawing.Size(116, 17);
             this.Fixed_UAS_Size_Checkbox.TabIndex = 15;
@@ -522,31 +521,32 @@
             this.UAS_Trackbar.Value = 2;
             this.UAS_Trackbar.Scroll += new System.EventHandler(this.UAS_Trackbar_Scroll);
             // 
-            // checkBox6
+            // OFAT_EM_DROP_CheckBox
             // 
-            this.checkBox6.AutoSize = true;
-            this.checkBox6.Location = new System.Drawing.Point(138, 189);
-            this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(79, 17);
-            this.checkBox6.TabIndex = 12;
-            this.checkBox6.Text = "Future Item";
-            this.checkBox6.UseVisualStyleBackColor = true;
+            this.OFAT_EM_DROP_CheckBox.AutoSize = true;
+            this.OFAT_EM_DROP_CheckBox.Location = new System.Drawing.Point(129, 189);
+            this.OFAT_EM_DROP_CheckBox.Name = "OFAT_EM_DROP_CheckBox";
+            this.OFAT_EM_DROP_CheckBox.Size = new System.Drawing.Size(138, 17);
+            this.OFAT_EM_DROP_CheckBox.TabIndex = 12;
+            this.OFAT_EM_DROP_CheckBox.Text = "OFAT | Emergent | Drop";
+            this.OFAT_EM_DROP_CheckBox.UseVisualStyleBackColor = true;
+            this.OFAT_EM_DROP_CheckBox.CheckedChanged += new System.EventHandler(this.OFAT_EM_DROP_CheckBox_CheckedChanged);
             // 
             // UASLoc_Checkbox
             // 
             this.UASLoc_Checkbox.AutoSize = true;
             this.UASLoc_Checkbox.Location = new System.Drawing.Point(16, 189);
             this.UASLoc_Checkbox.Name = "UASLoc_Checkbox";
-            this.UASLoc_Checkbox.Size = new System.Drawing.Size(92, 17);
+            this.UASLoc_Checkbox.Size = new System.Drawing.Size(48, 17);
             this.UASLoc_Checkbox.TabIndex = 11;
-            this.UASLoc_Checkbox.Text = "UAS Location";
+            this.UASLoc_Checkbox.Text = "UAS";
             this.UASLoc_Checkbox.UseVisualStyleBackColor = true;
             this.UASLoc_Checkbox.CheckedChanged += new System.EventHandler(this.UASLoc_Checkbox_CheckedChanged);
             // 
             // Waypoints_Checkbox
             // 
             this.Waypoints_Checkbox.AutoSize = true;
-            this.Waypoints_Checkbox.Location = new System.Drawing.Point(138, 155);
+            this.Waypoints_Checkbox.Location = new System.Drawing.Point(129, 155);
             this.Waypoints_Checkbox.Name = "Waypoints_Checkbox";
             this.Waypoints_Checkbox.Size = new System.Drawing.Size(76, 17);
             this.Waypoints_Checkbox.TabIndex = 10;
@@ -557,7 +557,7 @@
             // SearchArea_Checkbox
             // 
             this.SearchArea_Checkbox.AutoSize = true;
-            this.SearchArea_Checkbox.Location = new System.Drawing.Point(138, 120);
+            this.SearchArea_Checkbox.Location = new System.Drawing.Point(129, 120);
             this.SearchArea_Checkbox.Name = "SearchArea_Checkbox";
             this.SearchArea_Checkbox.Size = new System.Drawing.Size(85, 17);
             this.SearchArea_Checkbox.TabIndex = 9;
@@ -674,7 +674,7 @@
             this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
             this.Callout_Tab.Name = "Callout_Tab";
             this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Callout_Tab.Size = new System.Drawing.Size(271, 529);
+            this.Callout_Tab.Size = new System.Drawing.Size(271, 531);
             this.Callout_Tab.TabIndex = 5;
             this.Callout_Tab.Text = "Callouts";
             this.Callout_Tab.UseVisualStyleBackColor = true;
@@ -861,7 +861,8 @@
             this.showSearchAreaToolStripMenuItem,
             this.showObstaclesToolStripMenuItem,
             this.showPlaneToolStripMenuItem,
-            this.showWaypointsToolStripMenuItem});
+            this.showWaypointsToolStripMenuItem,
+            this.showOFATEmergentDropToolStripMenuItem});
             this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
             this.displayToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.displayToolStripMenuItem.Text = "Display";
@@ -869,37 +870,44 @@
             // showGeofenceToolStripMenuItem
             // 
             this.showGeofenceToolStripMenuItem.Name = "showGeofenceToolStripMenuItem";
-            this.showGeofenceToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showGeofenceToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.showGeofenceToolStripMenuItem.Text = "Show Geofence";
             this.showGeofenceToolStripMenuItem.Click += new System.EventHandler(this.showGeofenceToolStripMenuItem_Click);
             // 
             // showSearchAreaToolStripMenuItem
             // 
             this.showSearchAreaToolStripMenuItem.Name = "showSearchAreaToolStripMenuItem";
-            this.showSearchAreaToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showSearchAreaToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.showSearchAreaToolStripMenuItem.Text = "Show Search Area";
             this.showSearchAreaToolStripMenuItem.Click += new System.EventHandler(this.showSearchAreaToolStripMenuItem_Click);
             // 
             // showObstaclesToolStripMenuItem
             // 
             this.showObstaclesToolStripMenuItem.Name = "showObstaclesToolStripMenuItem";
-            this.showObstaclesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showObstaclesToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.showObstaclesToolStripMenuItem.Text = "Show Obstacles";
             this.showObstaclesToolStripMenuItem.Click += new System.EventHandler(this.showObstaclesToolStripMenuItem_Click);
             // 
             // showPlaneToolStripMenuItem
             // 
             this.showPlaneToolStripMenuItem.Name = "showPlaneToolStripMenuItem";
-            this.showPlaneToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showPlaneToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.showPlaneToolStripMenuItem.Text = "Show UAS Location";
             this.showPlaneToolStripMenuItem.Click += new System.EventHandler(this.showPlaneToolStripMenuItem_Click);
             // 
             // showWaypointsToolStripMenuItem
             // 
             this.showWaypointsToolStripMenuItem.Name = "showWaypointsToolStripMenuItem";
-            this.showWaypointsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showWaypointsToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.showWaypointsToolStripMenuItem.Text = "Show Waypoints";
             this.showWaypointsToolStripMenuItem.Click += new System.EventHandler(this.showWaypointsToolStripMenuItem_Click);
+            // 
+            // showOFATEmergentDropToolStripMenuItem
+            // 
+            this.showOFATEmergentDropToolStripMenuItem.Name = "showOFATEmergentDropToolStripMenuItem";
+            this.showOFATEmergentDropToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
+            this.showOFATEmergentDropToolStripMenuItem.Text = "Show OFAT | Emergent | Drop";
+            this.showOFATEmergentDropToolStripMenuItem.Click += new System.EventHandler(this.showSRICEmergentDropToolStripMenuItem_Click);
             // 
             // UAS_GPS_Label
             // 
@@ -1044,53 +1052,135 @@
             this.FlightTimeLabel.TabIndex = 18;
             this.FlightTimeLabel.Text = "00:00:00";
             // 
-            // menuStrip1
+            // Interop_GUI_menuStrip
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Interop_GUI_menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem,
+            this.settingsToolStripMenuItem,
             this.missionToolStripMenuItem,
             this.helpToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1178, 24);
-            this.menuStrip1.TabIndex = 19;
-            this.menuStrip1.Text = "menuStrip1";
+            this.Interop_GUI_menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.Interop_GUI_menuStrip.Name = "Interop_GUI_menuStrip";
+            this.Interop_GUI_menuStrip.Size = new System.Drawing.Size(1178, 24);
+            this.Interop_GUI_menuStrip.TabIndex = 19;
+            this.Interop_GUI_menuStrip.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
+            this.fileToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem,
+            this.openToolStripMenuItem,
+            this.saveMissionToolStripMenuItem,
+            this.saveMissionAsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
-            // editToolStripMenuItem
+            // newToolStripMenuItem
             // 
-            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-            this.editToolStripMenuItem.Text = "Edit";
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.openToolStripMenuItem.Text = "Open...";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // saveMissionToolStripMenuItem
+            // 
+            this.saveMissionToolStripMenuItem.Name = "saveMissionToolStripMenuItem";
+            this.saveMissionToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.saveMissionToolStripMenuItem.Text = "Save Mission...";
+            // 
+            // saveMissionAsToolStripMenuItem
+            // 
+            this.saveMissionAsToolStripMenuItem.Name = "saveMissionAsToolStripMenuItem";
+            this.saveMissionAsToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.saveMissionAsToolStripMenuItem.Text = "Save Mission As...";
+            this.saveMissionAsToolStripMenuItem.Click += new System.EventHandler(this.saveMissionAsToolStripMenuItem_Click);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openSettingsToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // openSettingsToolStripMenuItem
+            // 
+            this.openSettingsToolStripMenuItem.Name = "openSettingsToolStripMenuItem";
+            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.openSettingsToolStripMenuItem.Text = "Options";
+            this.openSettingsToolStripMenuItem.Click += new System.EventHandler(this.openSettingsToolStripMenuItem_Click);
+            // 
+            // missionToolStripMenuItem
+            // 
+            this.missionToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.missionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.editMissionToolStripMenuItem,
+            this.addItemToolStripMenuItem,
+            this.serverImportToolStripMenuItem});
+            this.missionToolStripMenuItem.Name = "missionToolStripMenuItem";
+            this.missionToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.missionToolStripMenuItem.Text = "Mission";
+            // 
+            // editMissionToolStripMenuItem
+            // 
+            this.editMissionToolStripMenuItem.Name = "editMissionToolStripMenuItem";
+            this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.editMissionToolStripMenuItem.Text = "Edit Mission";
+            // 
+            // addItemToolStripMenuItem
+            // 
+            this.addItemToolStripMenuItem.Name = "addItemToolStripMenuItem";
+            this.addItemToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.addItemToolStripMenuItem.Text = "Add Item";
+            // 
+            // serverImportToolStripMenuItem
+            // 
+            this.serverImportToolStripMenuItem.Name = "serverImportToolStripMenuItem";
+            this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.serverImportToolStripMenuItem.Text = "Server Import";
             // 
             // helpToolStripMenuItem
             // 
+            this.helpToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem,
+            this.readmeToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
-            // missionToolStripMenuItem
+            // aboutToolStripMenuItem
             // 
-            this.missionToolStripMenuItem.Name = "missionToolStripMenuItem";
-            this.missionToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
-            this.missionToolStripMenuItem.Text = "Mission";
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // readmeToolStripMenuItem
+            // 
+            this.readmeToolStripMenuItem.Name = "readmeToolStripMenuItem";
+            this.readmeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.readmeToolStripMenuItem.Text = "Readme";
             // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
-            this.Controls.Add(this.Server_Settings);
             this.Controls.Add(this.FlightTimeLabel);
             this.Controls.Add(this.Flight_Time_Label);
             this.Controls.Add(this.MissionPlannerMenuAddon);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.Interop_GUI_menuStrip);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.label14);
@@ -1122,8 +1212,8 @@
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
             this.MissionPlannerMenuAddon.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.Interop_GUI_menuStrip.ResumeLayout(false);
+            this.Interop_GUI_menuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1138,7 +1228,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox Telemetry_pollRateInput;
         private System.Windows.Forms.Button applyPollRateButton;
-        private System.Windows.Forms.Button Server_Settings;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TabControl Interoperability_GUI_Tab;
         private System.Windows.Forms.TabPage Telem_Tab;
@@ -1173,7 +1262,7 @@
         private System.Windows.Forms.Button Map_ApplyRefreshRate;
         private System.Windows.Forms.TextBox Map_RefreshRateInput;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.CheckBox checkBox6;
+        private System.Windows.Forms.CheckBox OFAT_EM_DROP_CheckBox;
         private System.Windows.Forms.CheckBox UASLoc_Checkbox;
         private System.Windows.Forms.CheckBox Waypoints_Checkbox;
         private System.Windows.Forms.CheckBox SearchArea_Checkbox;
@@ -1216,10 +1305,21 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.ComboBox MissionSelect_ComboBox;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem missionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveMissionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveMissionAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openSettingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editMissionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readmeToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip Interop_GUI_menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem addItemToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverImportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showOFATEmergentDropToolStripMenuItem;
     }
 }

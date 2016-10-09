@@ -70,7 +70,7 @@
             "Select Mission"});
             this.SelectMission_ComboBox.Location = new System.Drawing.Point(22, 38);
             this.SelectMission_ComboBox.Name = "SelectMission_ComboBox";
-            this.SelectMission_ComboBox.Size = new System.Drawing.Size(283, 21);
+            this.SelectMission_ComboBox.Size = new System.Drawing.Size(162, 21);
             this.SelectMission_ComboBox.TabIndex = 5;
             // 
             // label1
@@ -85,7 +85,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(204, 140);
+            this.button1.Location = new System.Drawing.Point(207, 146);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(101, 23);
             this.button1.TabIndex = 7;
@@ -103,7 +103,7 @@
             "SRIC",
             "Emergent Target",
             "Drop Location "});
-            this.MissionItemImport_ComboBox.Location = new System.Drawing.Point(22, 142);
+            this.MissionItemImport_ComboBox.Location = new System.Drawing.Point(22, 148);
             this.MissionItemImport_ComboBox.Name = "MissionItemImport_ComboBox";
             this.MissionItemImport_ComboBox.Size = new System.Drawing.Size(162, 21);
             this.MissionItemImport_ComboBox.TabIndex = 8;
@@ -120,18 +120,18 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(206, 65);
+            this.button5.Location = new System.Drawing.Point(207, 65);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(102, 23);
+            this.button5.Size = new System.Drawing.Size(101, 23);
             this.button5.TabIndex = 10;
             this.button5.Text = "Rename Mission";
             this.button5.UseVisualStyleBackColor = true;
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(22, 65);
+            this.button6.Location = new System.Drawing.Point(207, 94);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(102, 23);
+            this.button6.Size = new System.Drawing.Size(101, 23);
             this.button6.TabIndex = 11;
             this.button6.Text = "Delete Mission";
             this.button6.UseVisualStyleBackColor = true;
@@ -140,7 +140,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(19, 126);
+            this.label2.Location = new System.Drawing.Point(19, 132);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(120, 13);
             this.label2.TabIndex = 12;
@@ -148,9 +148,9 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(125, 65);
+            this.button2.Location = new System.Drawing.Point(207, 38);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(101, 23);
             this.button2.TabIndex = 13;
             this.button2.Text = "Edit Mission";
             this.button2.UseVisualStyleBackColor = true;
