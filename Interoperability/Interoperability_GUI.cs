@@ -24,6 +24,7 @@ namespace Interoperability_GUI_Forms
     public partial class Interoperability_GUI_Main : Form
     {
         Action<int> InteroperabilityCallback;
+
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
         protected int sdaPollRate = 10;
@@ -36,9 +37,7 @@ namespace Interoperability_GUI_Forms
 
         public bool isOpened = false;
         Settings_GUI Settings_GUI_Instance;
-        Interoperability_Mission_Import Interoperability_Mission_Import_Instance;
-        List<Mission> Mission_List;
-        Mission Current_Mission;
+        Interoperability_Mission_Edit Interoperability_Mission_Edit_Instance;
 
         Interoperability_Settings Settings;
 
@@ -73,7 +72,7 @@ namespace Interoperability_GUI_Forms
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
 
-        public Interoperability_GUI_Main(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings, List<Mission> _Mission_List, Mission _Current_Mission)
+        public Interoperability_GUI_Main(Action<int> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
             Console.WriteLine("Created GUI");
             InitializeComponent();
@@ -81,12 +80,6 @@ namespace Interoperability_GUI_Forms
 
             //Get Settings object, used for server settings
             Settings = _Settings;
-
-            //Get Mission List objet
-            Mission_List = _Mission_List;
-
-            //Get Current Mission
-            Current_Mission = _Current_Mission;
 
             //Must be called after settings
             MAP_Settings_Init_Bool(ref Settings, ref DrawWP, "DrawWP");
@@ -107,7 +100,8 @@ namespace Interoperability_GUI_Forms
             Settings.Save();
 
             Settings_GUI_Instance = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
-            Interoperability_Mission_Import_Instance = new Interoperability_Mission_Import(Mission_List);
+      
+            Interoperability_Mission_Edit_Instance = new Interoperability_Mission_Edit();
 
             //Set poll Rate text 
             Telemetry_pollRateInput.Text = telemPollRate.ToString();
@@ -120,13 +114,6 @@ namespace Interoperability_GUI_Forms
             Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
             WP_Overlay = new GMapOverlay("Waypoints");
             OFAT_EN_DROP_Overlay = new GMapOverlay("OFAT_EN_DROP_Overlay");
-
-
-            //Test code, please remove after October 22, 2016, unless required
-            MissionSelect_ComboBox.Items.Add("Mission 1 [F]");
-            MissionSelect_ComboBox.Items.Add("Mission 2 [F]");
-            MissionSelect_ComboBox.Items.Add("Mission 3 [F]");
-            MissionSelect_ComboBox.Items.Add("Mission 4 [F]");
 
         }
 
@@ -147,10 +134,10 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
-                    this.Text = "UTAT UAV Interoperability Control Panel (AUVSI)";
+                    this.Text = "UTAT UAV Interoperability Control Panel (AUVSI) - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 //Disable AUVSI Elements, Enable USC 
-                case 1:
+                case 1: 
                     TabCount = Interoperability_GUI_Tab.TabPages.Count;
                     for (int i = 0; i < TabCount; i++)
                     {
@@ -161,7 +148,7 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     //Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
-                    this.Text = "UTAT UAV Interoperability Control Panel (USC)";
+                    this.Text = "UTAT UAV Interoperability Control Panel (USC) - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 default:
                     break;
@@ -342,8 +329,11 @@ namespace Interoperability_GUI_Forms
 
         public void setFlightTimerLabel(long elapsedmiliseconds)
         {
-            TimeSpan t = TimeSpan.FromMilliseconds(elapsedmiliseconds);
-            FlightTimeLabel.Text = string.Format("{0:D2}:{1:D2}:{2:D2}", t.Hours, t.Minutes, t.Seconds);
+            this.FlightTimeLabel.BeginInvoke((MethodInvoker)delegate ()
+            {
+                TimeSpan t = TimeSpan.FromMilliseconds(elapsedmiliseconds);
+                FlightTimeLabel.Text = string.Format("{0:D2}:{1:D2}:{2:D2}", t.Hours, t.Minutes, t.Seconds);
+            });
         }
 
         public void SDAResp(string resp)
@@ -371,26 +361,27 @@ namespace Interoperability_GUI_Forms
             {
                 Console.WriteLine("In setObstacles");
                 SDA_Obstacles.Text = "";
-                //SDA_Obstacles.Text.
-                SDA_Obstacles.AppendText("MOVING OBJECTS\n");
+                String Buffer = "";
+                Buffer += "MOVING OBJECTS\r\n";
                 for (int i = 0; i < _Obstacles.moving_obstacles.Count(); i++)
                 {
-                    SDA_Obstacles.AppendText("\tAltitude MSL: " + _Obstacles.moving_obstacles[i].altitude_msl.ToString("N") + "\n");
-                    SDA_Obstacles.AppendText("\tSphere Radius: " + _Obstacles.moving_obstacles[i].sphere_radius.ToString("N") + "\n");
-                    SDA_Obstacles.AppendText("\tLatitude: " + _Obstacles.moving_obstacles[i].latitude.ToString("N6") + "\n");
-                    SDA_Obstacles.AppendText("\tLongitude: " + _Obstacles.moving_obstacles[i].longitude.ToString("N6") + "\n");
-                    SDA_Obstacles.AppendText("\n");
+                    Buffer += "\tAltitude MSL: " + _Obstacles.moving_obstacles[i].altitude_msl.ToString("N") + "\r\n";
+                    Buffer += "\tSphere Radius: " + _Obstacles.moving_obstacles[i].sphere_radius.ToString("N") + "\r\n";
+                    Buffer += "\tLatitude: " + _Obstacles.moving_obstacles[i].latitude.ToString("N6") + "\r\n";
+                    Buffer += "\tLongitude: " + _Obstacles.moving_obstacles[i].longitude.ToString("N6") + "\r\n";
+                    Buffer += "\r\n";
                 }
-                SDA_Obstacles.AppendText("STATIONARY OBJECTS\n");
+                Buffer += "STATIONARY OBJECTS\r\n";
                 for (int i = 0; i < _Obstacles.stationary_obstacles.Count(); i++)
                 {
-                    SDA_Obstacles.AppendText("\tCylinder Height: " + _Obstacles.stationary_obstacles[i].cylinder_height.ToString("N") + "\n");
-                    SDA_Obstacles.AppendText("\tCylinder Radius: " + _Obstacles.stationary_obstacles[i].cylinder_radius.ToString("N") + "\n");
-                    SDA_Obstacles.AppendText("\tLatitude: " + _Obstacles.stationary_obstacles[i].latitude.ToString("N6") + "\n");
-                    SDA_Obstacles.AppendText("\tLongitude: " + _Obstacles.stationary_obstacles[i].longitude.ToString("N6") + "\n");
-                    SDA_Obstacles.AppendText("\n");
+                    Buffer += "\tCylinder Height: " + _Obstacles.stationary_obstacles[i].cylinder_height.ToString("N") + "\r\n";
+                    Buffer += "\tCylinder Radius: " + _Obstacles.stationary_obstacles[i].cylinder_radius.ToString("N") + "\r\n";
+                    Buffer += "\tLatitude: " + _Obstacles.stationary_obstacles[i].latitude.ToString("N6") + "\r\n";
+                    Buffer += "\tLongitude: " + _Obstacles.stationary_obstacles[i].longitude.ToString("N6") + "\r\n";
+                    Buffer += "\r\n";
                 }
-
+                
+                SDA_Obstacles.Text = Buffer;
             });
         }
 
@@ -445,15 +436,15 @@ namespace Interoperability_GUI_Forms
             }
         }
 
-        private void Mission_ImportExport_Button_Click(object sender, EventArgs e)
+        /*private void Mission_ImportExport_Button_Click(object sender, EventArgs e)
         {
             if (!Interoperability_Mission_Import_Instance.isOpened)
             {
-                Interoperability_Mission_Import_Instance = new Interoperability_Mission_Import(Mission_List);
+                Interoperability_Mission_Import_Instance = new Interoperability_Mission_Import(Server_Mission_List);
                 Interoperability_Mission_Import_Instance.ShowDialog();
             }
 
-        }
+        }*/
 
         private void Reset_Stats_Click(object sender, EventArgs e)
         {
@@ -700,6 +691,10 @@ namespace Interoperability_GUI_Forms
                     marker.ToolTipText = "OFAT";
                     OFAT_EN_DROP_Overlay.Markers.Add(marker);
                 }
+                else
+                {
+                    //Console.WriteLine("Did not display off axis because coordinate at 0,0");
+                }
 
                 //Air Drop Location
                 if(Current_Mission.air_drop_pos.latitude != 0 || Current_Mission.air_drop_pos.longitude != 0)
@@ -709,7 +704,23 @@ namespace Interoperability_GUI_Forms
                     marker.ToolTipText = "Air Drop";
                     OFAT_EN_DROP_Overlay.Markers.Add(marker);
                 }
-             });
+                else
+                {
+                    //Console.WriteLine("Did not display air drop because coordinate at 0,0");
+                }
+
+                if (Current_Mission.air_drop_pos.latitude != 0 || Current_Mission.air_drop_pos.longitude != 0)
+                {
+                    marker = new GMarkerGoogle(new PointLatLng(Current_Mission.emergent_lkp.latitude, Current_Mission.emergent_lkp.longitude), GMarkerGoogleType.yellow_pushpin);
+                    marker.ToolTipMode = MarkerTooltipMode.Always;
+                    marker.ToolTipText = "Emergent Target";
+                    OFAT_EN_DROP_Overlay.Markers.Add(marker);
+                }
+                else
+                {
+
+                }
+            });
         }
 
         public void MAP_Update_Overlay()
@@ -1105,7 +1116,30 @@ namespace Interoperability_GUI_Forms
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Are you sure you want to create a new file? \nYou will lose any unsaved changes to your mission", "Interoperability Control Panel", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if(Interoperability.getinstance().Current_Mission.unedited == true)
+            {
+                DialogResult result;
+                result = MessageBox.Show("Are you sure you want to create a new file? \nYou will lose any unsaved changes to your mission", "Interoperability Control Panel", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                
+                if(result == DialogResult.OK)
+                {
+                    Interoperability.Interoperability_Mutex.WaitOne();
+                    Interoperability.getinstance().Current_Mission = new Mission();
+                    Interoperability.Interoperability_Mutex.ReleaseMutex();
+
+                }
+                else
+                {
+                    //Do nothing
+                }
+            }
+            else
+            {
+                Interoperability.Interoperability_Mutex.WaitOne();
+                Interoperability.getinstance().Current_Mission = new Mission();
+                Interoperability.Interoperability_Mutex.ReleaseMutex();
+
+            }
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1113,7 +1147,6 @@ namespace Interoperability_GUI_Forms
             MessageBox.Show("       UTAT UAV Interoperability Control Panel    \nDeveloped by Oliver Wu, Davis Wu, and Jesse Wang", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        //NO idea if this works :p
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
@@ -1132,13 +1165,38 @@ namespace Interoperability_GUI_Forms
                     {
                         using (myStream)
                         {
-                            Current_Mission = new JavaScriptSerializer().Deserialize<Mission>(myStream.ToString());
+                            //Stopping and starting the threads causes issues sometimes, where callback 7 will infinitely loop because one on the threads refuses to stop (-_-)
+
+                            //wait until all threads have stopped
+                            //InteroperabilityCallback(7);
+
+                            StreamReader reader = new StreamReader(myStream);
+                            string text = reader.ReadToEnd();
+                            Interoperability.Interoperability_Mutex.WaitOne();
+                            Interoperability.getinstance().Current_Mission = new JavaScriptSerializer().Deserialize<Mission>(text);
+                            Interoperability.Interoperability_Mutex.ReleaseMutex();
+
+                            //restart all stopped threads 
+                            //InteroperabilityCallback(6);
+
+                            if (Settings["gui_format"] == "AUVSI")
+                            {
+                                this.Text = "UTAT UAV Interoperability Control Panel (AUVSI) - " + Interoperability.getinstance().Current_Mission.name;
+                            }
+                            else
+                            {
+                                this.Text = "UTAT UAV Interoperability Control Panel (USC) - " + Interoperability.getinstance().Current_Mission.name;
+                            }
+                            
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) 
                 {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    //MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    //MessageBox.Show("Error, Invalid Mission File.\n" + ex.Message);
+                    MessageBox.Show("Error, Invalid Mission File.\n" + ex.Message, "Interoperability Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
                 }
             }
         }
@@ -1156,11 +1214,22 @@ namespace Interoperability_GUI_Forms
             {
                 if ((myStream = saveFileDialog1.OpenFile()) != null)
                 {
-                    string thing = new JavaScriptSerializer().Serialize(Current_Mission);
+                    Interoperability.Interoperability_Mutex.WaitOne();
+                    string thing = new JavaScriptSerializer().Serialize(Interoperability.getinstance().Current_Mission);
+                    Interoperability.Interoperability_Mutex.ReleaseMutex();
                     byte[] byteArray = Encoding.UTF8.GetBytes(thing);
                     myStream.Write(byteArray, 0, byteArray.Count());
                     myStream.Close();
                 }
+            }
+        }
+
+        private void editMissionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Interoperability_Mission_Edit_Instance.isOpened)
+            {
+                Interoperability_Mission_Edit_Instance = new Interoperability_Mission_Edit();
+                Interoperability_Mission_Edit_Instance.ShowDialog();
             }
         }
     }

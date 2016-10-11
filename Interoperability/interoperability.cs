@@ -141,16 +141,26 @@ namespace interoperability
         public float altitude_msl_max { get; set; }
         public float altitude_msl_min { get; set; }
         public List<Waypoint> boundary_pts { get; set; }
+        public string name { get; set; }
         public FlyZone(float _altitude_msl_max, float _altitude_msl_min, List<Waypoint> _boundary_pts)
         {
             altitude_msl_max = _altitude_msl_max;
             altitude_msl_min = _altitude_msl_min;
             boundary_pts = _boundary_pts;
+            name = "Geofence";
+        }
+        public FlyZone(float _altitude_msl_max, float _altitude_msl_min, string _name, List<Waypoint> _boundary_pts)
+        {
+            altitude_msl_max = _altitude_msl_max;
+            altitude_msl_min = _altitude_msl_min;
+            name = _name;
+            boundary_pts = _boundary_pts;           
         }
         public FlyZone()
         {
             altitude_msl_max = 0;
             altitude_msl_min = 0;
+            name = "Geofence";
             boundary_pts = new List<Waypoint>();
         }
     }
@@ -160,8 +170,10 @@ namespace interoperability
     {
         public int id { get; set; }
         public string name { get; set; }
+        public bool unedited { get; set; }
         public bool active { get; set; }
         public GPS_Position air_drop_pos { get; set; }
+        public GPS_Position emergent_lkp { get; set; }
         public List<FlyZone> fly_zones { get; set; }
         public GPS_Position home_pos { get; set; }
         public List<Waypoint> mission_waypoints { get; set; }
@@ -174,9 +186,11 @@ namespace interoperability
         public Mission()
         {
             id = 0;
-            name = "uninitialized";
+            name = "New Mission";
+            unedited = true;
             active = false;
             air_drop_pos = new GPS_Position();
+            emergent_lkp = new GPS_Position();
             fly_zones = new List<FlyZone>();
             fly_zones.Add(new FlyZone());
             home_pos = new GPS_Position();
@@ -251,17 +265,20 @@ namespace interoperability
         private long ImporantTimeCount = 0;
         private Stopwatch ImportantTimer = new Stopwatch();
 
-        bool Obstacles_Downloaded = false;          //Used to tell the map control thread we can access obstaclesList 
-        bool resetUploadStats = false;              //Used to reset telemetry upload stats
-        bool resetFlightTimer = false;              //Used to reset the flight timer
+        bool Obstacles_Downloaded = false;                  //Used to tell the map control thread we can access obstaclesList 
+        bool resetUploadStats = false;                      //Used to reset telemetry upload stats
+        bool resetFlightTimer = false;                      //Used to reset the flight timer
 
-        Obstacles obstaclesList;                    //Instance that holds all SDA Obstacles 
-        Interoperability_Settings Settings;         //Instance that holds all Interoperability Settings
+        Obstacles obstaclesList;                            //Instance that holds all SDA Obstacles 
+        public Interoperability_Settings Settings;          //Instance that holds all Interoperability Settings
 
-        List<Mission> Mission_List;                 //Holds a list of all missions from interoperability + Server
-        Mission Current_Mission;                    //The current mission open in the program  
+        public List<Mission> Mission_List { get; set; }   //Holds a list of all missions from interoperability + Server
+        public Mission Current_Mission { get; set; }      //The current mission open in the program  
+
+        private static Interoperability Instance = null;
 
 
+        public static Mutex Interoperability_Mutex = new Mutex();
 
         //Instantiate windows forms
         global::Interoperability_GUI_Forms.Interoperability_GUI_Main Interoperability_GUI;
@@ -286,12 +303,12 @@ namespace interoperability
         /// <returns></returns>
         override public bool Init()
         {
+            Instance = this;
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
                 + "*                            Interoperability 0.3.1                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
-
 
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
@@ -309,7 +326,7 @@ namespace interoperability
             Current_Mission = new Mission();
 
             // Start interface
-            Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List, Current_Mission);
+            Interoperability_GUI = new Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
             if (Convert.ToBoolean(Settings["showInteroperability_GUI"]) == true)
             {
                 Interoperability_GUI.Show();
@@ -332,6 +349,10 @@ namespace interoperability
             Console.WriteLine("End of init()");
 
             return (true);
+        }
+        public static Interoperability getinstance()
+        {
+            return Instance;
         }
 
         public void interoperabilityAction(int action)
@@ -378,12 +399,13 @@ namespace interoperability
                 case 6:
                     getSettings();
                     //No need to reset the map control thread
-                    /*
-                    Map_Control_Thread_shouldStop = true;
-                    Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
-                    Map_Control_Thread_shouldStop = false;
-                    Map_Control_Thread.Start();
-                    */
+                    if(Map_Thread_isAlive == false)
+                    {
+                        Map_Control_Thread_shouldStop = true;
+                        Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+                        Map_Control_Thread_shouldStop = false;
+                        Map_Control_Thread.Start();
+                    }
                     //If GUI format is not AUVSI, disable all server threads
                     bool isAUVSI = true;
                     if (Settings["gui_format"] != "AUVSI")
@@ -432,7 +454,7 @@ namespace interoperability
                 case 8:
                     if (!Interoperability_GUI.isOpened)
                     {
-                        Interoperability_GUI = new global::Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings, Mission_List, Current_Mission);
+                        Interoperability_GUI = new Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
                         Interoperability_GUI.Show();
                         //Start map thread
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
@@ -487,10 +509,14 @@ namespace interoperability
                 case 11:
                     resetFlightTimer = true;
                     break;
+                //Clear current mission
+                case 12:
+                    Current_Mission = new Mission();
+                    Current_Mission.name = "TEST RESET";
+                    break;
                 default:
                     break;
             }
-
         }
 
 
@@ -504,7 +530,6 @@ namespace interoperability
 
             //this.Host.FDMenuMap.
         }
-
 
         public void getSettings()
         {
@@ -818,29 +843,37 @@ namespace interoperability
 
             //Add static overlays:
             //For testing right now. Will update when server has misison functionality added
-            List<Waypoint> Op_Area = new List<Waypoint>();
-            Op_Area.Add(new Waypoint(38.1462694, -76.4277778));
-            Op_Area.Add(new Waypoint(38.151625, -76.4286833));
-            Op_Area.Add(new Waypoint(38.1518889, -76.4314667));
-            Op_Area.Add(new Waypoint(38.1505944, -76.4353611));
-            Op_Area.Add(new Waypoint(38.1475667, -76.4323417));
-            Op_Area.Add(new Waypoint(38.1446667, -76.4329472));
-            Op_Area.Add(new Waypoint(38.1432556, -76.4347667));
-            Op_Area.Add(new Waypoint(38.1404639, -76.4326361));
-            Op_Area.Add(new Waypoint(38.1407194, -76.4260139));
-            Op_Area.Add(new Waypoint(38.1437611, -76.4212056));
-            Op_Area.Add(new Waypoint(38.1473472, -76.4232111));
-            Op_Area.Add(new Waypoint(38.1461306, -76.4266528));
+            if (false)
+            {
+                List<Waypoint> Op_Area = new List<Waypoint>();
+                Op_Area.Add(new Waypoint(38.1462694, -76.4277778));
+                Op_Area.Add(new Waypoint(38.1516250, -76.4286833));
+                Op_Area.Add(new Waypoint(38.1518889, -76.4314667));
+                Op_Area.Add(new Waypoint(38.1505944, -76.4353611));
+                Op_Area.Add(new Waypoint(38.1475667, -76.4323417));
+                Op_Area.Add(new Waypoint(38.1446667, -76.4329472));
+                Op_Area.Add(new Waypoint(38.1432556, -76.4347667));
+                Op_Area.Add(new Waypoint(38.1404639, -76.4326361));
+                Op_Area.Add(new Waypoint(38.1407194, -76.4260139));
+                Op_Area.Add(new Waypoint(38.1437611, -76.4212056));
+                Op_Area.Add(new Waypoint(38.1473472, -76.4232111));
+                Op_Area.Add(new Waypoint(38.1461306, -76.4266528));
 
-            //We clear becaues the construtor creates an empty flyzone.
-            Current_Mission.fly_zones.Clear();
-            Current_Mission.fly_zones.Add(new FlyZone(600, 100, Op_Area));
+                //We clear becaues the construtor creates an empty flyzone.
+                Current_Mission.fly_zones.Clear();
+                Current_Mission.fly_zones.Add(new FlyZone(600, 100, Op_Area));
 
-            Current_Mission.search_grid_points.Add(new Waypoint(38.1457306, -76.4295972));
-            Current_Mission.search_grid_points.Add(new Waypoint(38.1431861, -76.4338917));
-            Current_Mission.search_grid_points.Add(new Waypoint(38.1410028, -76.4322333));
-            Current_Mission.search_grid_points.Add(new Waypoint(38.1411917, -76.4269806));
-            Current_Mission.search_grid_points.Add(new Waypoint(38.1422194, -76.4261111));
+                Current_Mission.search_grid_points.Add(new Waypoint(38.1457306, -76.4295972));
+                Current_Mission.search_grid_points.Add(new Waypoint(38.1431861, -76.4338917));
+                Current_Mission.search_grid_points.Add(new Waypoint(38.1410028, -76.4322333));
+                Current_Mission.search_grid_points.Add(new Waypoint(38.1411917, -76.4269806));
+                Current_Mission.search_grid_points.Add(new Waypoint(38.1422194, -76.4261111));
+
+                Current_Mission.air_drop_pos = new GPS_Position(38.145852, -76.426416);
+                Current_Mission.off_axis_target_pos = new GPS_Position(38.147408, -76.433651);
+                Current_Mission.emergent_lkp = new GPS_Position(38.144187, -76.423645);
+            }
+
 
             List<PointLatLng> Waypoints = new List<PointLatLng>();
             Waypoints.Add(new PointLatLng(38.147720, -76.429610));
@@ -860,10 +893,6 @@ namespace interoperability
             Waypoints.Add(new PointLatLng(38.142084, -76.423817));
             Waypoints.Add(new PointLatLng(38.142016, -76.425469));
             Waypoints.Add(new PointLatLng(38.145189, -76.428537));
-
-            Current_Mission.air_drop_pos = new GPS_Position(38.145852, -76.426416);
-            Current_Mission.off_axis_target_pos = new GPS_Position(38.147408, -76.433651);
-
 
             while (!Map_Control_Thread_shouldStop)
             {
@@ -1053,16 +1082,13 @@ namespace interoperability
         }
 
 
-        public string DDtoDMS(double lat, double lng)
+        public static string DDtoDMS(double lat, double lng)
         {
             string DMS;
 
-            double minutes = (lat - Math.Floor(lat)) * 60.0;
-            double seconds = (minutes - Math.Floor(minutes)) * 60.0;
-            double tenths = (seconds - Math.Floor(seconds)) * 10.0;
-            minutes = Math.Floor(minutes);
-            seconds = Math.Floor(seconds);
-            tenths = Math.Floor(tenths);
+            double minutes = (lat - Convert.ToInt32(lat)) * 60.0;
+            double seconds = (minutes - Convert.ToInt32(minutes)) * 60.0;
+            minutes = Convert.ToInt32(minutes);
 
             if (lat > 0)
             {
@@ -1072,14 +1098,11 @@ namespace interoperability
             {
                 DMS = "S";
             }
-            DMS += Convert.ToInt32(Math.Abs(lat)).ToString("00") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00") + " ";
+            DMS += Convert.ToInt32(Math.Abs(lat)).ToString("00") + "-" + Math.Abs(minutes).ToString("00") + "-" + Math.Abs(seconds).ToString("00.00") + " ";// + "." + tenths.ToString("00") + " ";
 
-            minutes = (lng - Math.Floor(lng)) * 60.0;
-            seconds = (minutes - Math.Floor(minutes)) * 60.0;
-            tenths = (seconds - Math.Floor(seconds)) * 10.0;
-            minutes = Math.Floor(minutes);
-            seconds = Math.Floor(seconds);
-            tenths = Math.Floor(tenths);
+            minutes = (lng - Convert.ToInt32(lng)) * 60.0;
+            seconds = (minutes - Convert.ToInt32(minutes)) * 60.0;
+            minutes = Convert.ToInt32(minutes);
 
             if (lng > 0)
             {
@@ -1089,9 +1112,55 @@ namespace interoperability
             {
                 DMS += "W";
             }
-    
-            DMS += Convert.ToInt32(Math.Abs(lng)).ToString("000") + "-" + minutes.ToString("00") + "-" + seconds.ToString("00") + "." + tenths.ToString("00");
+            DMS += Convert.ToInt32(Math.Abs(lng)).ToString("000") + "-" + Math.Abs(minutes).ToString("00") + "-" + Math.Abs(seconds).ToString("00.00"); //+ "." + tenths.ToString("00");
             return DMS;
+        }
+
+        /// <summary>
+        /// Returns Decimal Degrees given a Degree Minute Seconds string
+        /// </summary>
+        /// <param name="lat">Latitude in DMS</param>
+        /// <param name="lng">Longitude in DMS</param>
+        /// <returns></returns>
+        public static PointLatLng DMStoDD(string lat, string lng)
+        {
+            double DD_Lat, DD_Lng;
+            PointLatLng Converted_DD = new PointLatLng();
+            //Assuming the format is correct
+            char[] delimiterChars = { '-' };
+
+            string[] lat_split = lat.Split(delimiterChars);
+            string[] lng_split = lng.Split(delimiterChars);
+            //43.236403, -98.927366
+            try
+            {
+                double lat_degrees = Convert.ToDouble(lat_split[0][1].ToString() + lat_split[0][2].ToString());
+                double lat_minutes = Convert.ToDouble(lat_split[1].ToString()) / 60;
+                double lat_seconds = Convert.ToDouble(lat_split[2]) / 3600;
+                DD_Lat = lat_degrees + lat_minutes + lat_seconds;
+
+                if(lat_split[0][0] == 'S')
+                {
+                    DD_Lat *= -1;
+                }
+
+                double lng_degrees = Convert.ToDouble(lng_split[0][1].ToString() + lng_split[0][2].ToString() + lng_split[0][3].ToString());
+                double lng_minutes = Convert.ToDouble(lng_split[1].ToString()) / 60;
+                double lng_seconds = Convert.ToDouble(lng_split[2]) / 3600;
+                DD_Lng = lng_degrees + lng_minutes + lng_seconds;
+
+                if(lng_split[0][0] == 'W')
+                {
+                    DD_Lng *= -1;
+                }
+            }
+            catch
+            {
+                //Something went wrong with the format I think
+                return Converted_DD;
+            }
+
+            return new PointLatLng(DD_Lat, DD_Lng);
         }
 
         // BE CAREFUL, THIS IS SKETCHY AS FUCK

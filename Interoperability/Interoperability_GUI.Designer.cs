@@ -57,10 +57,6 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
-            this.button2 = new System.Windows.Forms.Button();
-            this.Mission_ImportExport_Button = new System.Windows.Forms.Button();
-            this.label22 = new System.Windows.Forms.Label();
-            this.MissionSelect_ComboBox = new System.Windows.Forms.ComboBox();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
@@ -125,8 +121,15 @@
             this.openSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.missionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editMissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.entireMissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.itemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.geofenceToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.searchAreaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.waypointsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.airDropLocationToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.offAxisTargetToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.emergentTargetToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -422,10 +425,6 @@
             // 
             // Map_Tab
             // 
-            this.Map_Tab.Controls.Add(this.button2);
-            this.Map_Tab.Controls.Add(this.Mission_ImportExport_Button);
-            this.Map_Tab.Controls.Add(this.label22);
-            this.Map_Tab.Controls.Add(this.MissionSelect_ComboBox);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
@@ -448,44 +447,6 @@
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(169, 320);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(85, 23);
-            this.button2.TabIndex = 20;
-            this.button2.Text = "Select";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // Mission_ImportExport_Button
-            // 
-            this.Mission_ImportExport_Button.Location = new System.Drawing.Point(17, 349);
-            this.Mission_ImportExport_Button.Name = "Mission_ImportExport_Button";
-            this.Mission_ImportExport_Button.Size = new System.Drawing.Size(146, 23);
-            this.Mission_ImportExport_Button.TabIndex = 19;
-            this.Mission_ImportExport_Button.Text = "Import / Export Mission";
-            this.Mission_ImportExport_Button.UseVisualStyleBackColor = true;
-            this.Mission_ImportExport_Button.Click += new System.EventHandler(this.Mission_ImportExport_Button_Click);
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(13, 303);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(89, 13);
-            this.label22.TabIndex = 18;
-            this.label22.Text = "Mission Select";
-            // 
-            // MissionSelect_ComboBox
-            // 
-            this.MissionSelect_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.MissionSelect_ComboBox.FormattingEnabled = true;
-            this.MissionSelect_ComboBox.Location = new System.Drawing.Point(16, 322);
-            this.MissionSelect_ComboBox.Name = "MissionSelect_ComboBox";
-            this.MissionSelect_ComboBox.Size = new System.Drawing.Size(147, 21);
-            this.MissionSelect_ComboBox.TabIndex = 17;
             // 
             // Fixed_UAS_Size_Checkbox
             // 
@@ -1125,7 +1086,6 @@
             this.missionToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.missionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editMissionToolStripMenuItem,
-            this.addItemToolStripMenuItem,
             this.serverImportToolStripMenuItem});
             this.missionToolStripMenuItem.Name = "missionToolStripMenuItem";
             this.missionToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
@@ -1136,18 +1096,71 @@
             this.editMissionToolStripMenuItem.Name = "editMissionToolStripMenuItem";
             this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.editMissionToolStripMenuItem.Text = "Edit Mission";
-            // 
-            // addItemToolStripMenuItem
-            // 
-            this.addItemToolStripMenuItem.Name = "addItemToolStripMenuItem";
-            this.addItemToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
-            this.addItemToolStripMenuItem.Text = "Add Item";
+            this.editMissionToolStripMenuItem.Click += new System.EventHandler(this.editMissionToolStripMenuItem_Click);
             // 
             // serverImportToolStripMenuItem
             // 
+            this.serverImportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.entireMissionToolStripMenuItem,
+            this.itemToolStripMenuItem});
             this.serverImportToolStripMenuItem.Name = "serverImportToolStripMenuItem";
             this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.serverImportToolStripMenuItem.Text = "Server Import";
+            // 
+            // entireMissionToolStripMenuItem
+            // 
+            this.entireMissionToolStripMenuItem.Name = "entireMissionToolStripMenuItem";
+            this.entireMissionToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.entireMissionToolStripMenuItem.Text = "Mission";
+            // 
+            // itemToolStripMenuItem
+            // 
+            this.itemToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.geofenceToolStripMenuItem1,
+            this.searchAreaToolStripMenuItem1,
+            this.waypointsToolStripMenuItem1,
+            this.airDropLocationToolStripMenuItem1,
+            this.offAxisTargetToolStripMenuItem1,
+            this.emergentTargetToolStripMenuItem1});
+            this.itemToolStripMenuItem.Name = "itemToolStripMenuItem";
+            this.itemToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.itemToolStripMenuItem.Text = "Item";
+            // 
+            // geofenceToolStripMenuItem1
+            // 
+            this.geofenceToolStripMenuItem1.Name = "geofenceToolStripMenuItem1";
+            this.geofenceToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.geofenceToolStripMenuItem1.Text = "Geofence";
+            // 
+            // searchAreaToolStripMenuItem1
+            // 
+            this.searchAreaToolStripMenuItem1.Name = "searchAreaToolStripMenuItem1";
+            this.searchAreaToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.searchAreaToolStripMenuItem1.Text = "Search Area";
+            // 
+            // waypointsToolStripMenuItem1
+            // 
+            this.waypointsToolStripMenuItem1.Name = "waypointsToolStripMenuItem1";
+            this.waypointsToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.waypointsToolStripMenuItem1.Text = "Waypoints";
+            // 
+            // airDropLocationToolStripMenuItem1
+            // 
+            this.airDropLocationToolStripMenuItem1.Name = "airDropLocationToolStripMenuItem1";
+            this.airDropLocationToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.airDropLocationToolStripMenuItem1.Text = "Air Drop Location";
+            // 
+            // offAxisTargetToolStripMenuItem1
+            // 
+            this.offAxisTargetToolStripMenuItem1.Name = "offAxisTargetToolStripMenuItem1";
+            this.offAxisTargetToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.offAxisTargetToolStripMenuItem1.Text = "Off Axis Target";
+            // 
+            // emergentTargetToolStripMenuItem1
+            // 
+            this.emergentTargetToolStripMenuItem1.Name = "emergentTargetToolStripMenuItem1";
+            this.emergentTargetToolStripMenuItem1.Size = new System.Drawing.Size(167, 22);
+            this.emergentTargetToolStripMenuItem1.Text = "Emergent Target";
             // 
             // helpToolStripMenuItem
             // 
@@ -1301,10 +1314,6 @@
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button Mission_ImportExport_Button;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.ComboBox MissionSelect_ComboBox;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem missionToolStripMenuItem;
@@ -1318,8 +1327,15 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readmeToolStripMenuItem;
         private System.Windows.Forms.MenuStrip Interop_GUI_menuStrip;
-        private System.Windows.Forms.ToolStripMenuItem addItemToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serverImportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showOFATEmergentDropToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem entireMissionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem itemToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem geofenceToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem searchAreaToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem waypointsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem airDropLocationToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem offAxisTargetToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem emergentTargetToolStripMenuItem1;
     }
 }
