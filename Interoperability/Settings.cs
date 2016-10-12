@@ -91,35 +91,47 @@ namespace Interoperability_GUI_Forms
 
         private void Save_Click(object sender, EventArgs e)
         {
-            string old_gui_format = Settings["gui_format"];
 
-            Settings["address"] = IP_ADDR_BOX.Text;
-            Settings["username"] = USERNAME_BOX.Text;
-            Settings["password"] = PASSWORD_BOX.Text;
-            Settings["dist_units"] = Distance_Units_Combo.Text;
-            Settings["airspd_units"] = Airspeed_Units_Combo.Text;
-            Settings["geo_cords"] = Coordinate_System_Combo.Text;
-            Settings["gui_format"] = GUI_FORMAT_BOX.Text;
-            Settings["showInteroperability_GUI"] = ShowGUI_Checkbox.Checked.ToString();
-            Settings.Save();
+            DialogResult result;
+            result = MessageBox.Show("Warning, this will reset all open TCP connections.\nAre you sure you want to save?", "Interoperability Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            //Restarts all the threads relying on HTTP to update credentials
-            InteroperabilityCallback(6);
-
-            //Change tab layout 
-            if (GUI_FORMAT_BOX.Text != old_gui_format)
+            if(result == DialogResult.OK)
             {
-                if (GUI_FORMAT_BOX.Text == "AUVSI")
+                string old_gui_format = Settings["gui_format"];
+
+                Settings["address"] = IP_ADDR_BOX.Text;
+                Settings["username"] = USERNAME_BOX.Text;
+                Settings["password"] = PASSWORD_BOX.Text;
+                Settings["dist_units"] = Distance_Units_Combo.Text;
+                Settings["airspd_units"] = Airspeed_Units_Combo.Text;
+                Settings["geo_cords"] = Coordinate_System_Combo.Text;
+                Settings["gui_format"] = GUI_FORMAT_BOX.Text;
+                Settings["showInteroperability_GUI"] = ShowGUI_Checkbox.Checked.ToString();
+                Settings.Save();
+
+                //Restarts all the threads relying on HTTP to update credentials
+                InteroperabilityCallback(6);
+
+                //Change tab layout 
+                if (GUI_FORMAT_BOX.Text != old_gui_format)
                 {
-                    InteroperabilityGUICallback(0);
+                    if (GUI_FORMAT_BOX.Text == "AUVSI")
+                    {
+                        InteroperabilityGUICallback(0);
+                    }
+                    else
+                    {
+                        InteroperabilityGUICallback(1);
+                    }
                 }
-                else
-                {
-                    InteroperabilityGUICallback(1);
-                }
+                isOpened = false;
+                this.Close();
             }
-            isOpened = false;
-            this.Close();
+            else
+            {
+                //Do nothing
+            }
+            
         }
 
         async void testLogin()

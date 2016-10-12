@@ -89,28 +89,37 @@ namespace interoperability
         public float latitude { get; set; }
         public float longitude { get; set; }
         public int order { get; set; }
-        public Waypoint() { }
+        public bool empty { get; set; }
+
+        public Waypoint()
+        {
+            empty = true;
+        }
         public Waypoint(float _latitude, float _longitude)
         {
             latitude = _latitude;
             longitude = _longitude;
+            empty = false;
         }
         public Waypoint(double _latitude, double _longitude)
         {
             latitude = (float)_latitude;
             longitude = (float)_longitude;
+            empty = false;
         }
 
         public Waypoint(float _altitude_msl, float _latitude, float _longitude)
         {
             latitude = _latitude;
             longitude = _longitude;
+            empty = false;
         }
 
         public Waypoint(float _altitude_msl, float _latitude, float _longitude, int order)
         {
             latitude = _latitude;
             longitude = _longitude;
+            empty = false;
         }
     }
 
@@ -1086,9 +1095,9 @@ namespace interoperability
         {
             string DMS;
 
-            double minutes = (lat - Convert.ToInt32(lat)) * 60.0;
-            double seconds = (minutes - Convert.ToInt32(minutes)) * 60.0;
-            minutes = Convert.ToInt32(minutes);
+            double minutes = Math.Floor((Math.Abs(lat) - Math.Floor(Math.Abs(lat))) * 60.0);
+            double seconds = (Math.Abs(lat) - Math.Floor(Math.Abs(lat)) - minutes / 60) * 3600;
+            
 
             if (lat > 0)
             {
@@ -1100,9 +1109,8 @@ namespace interoperability
             }
             DMS += Convert.ToInt32(Math.Abs(lat)).ToString("00") + "-" + Math.Abs(minutes).ToString("00") + "-" + Math.Abs(seconds).ToString("00.00") + " ";// + "." + tenths.ToString("00") + " ";
 
-            minutes = (lng - Convert.ToInt32(lng)) * 60.0;
-            seconds = (minutes - Convert.ToInt32(minutes)) * 60.0;
-            minutes = Convert.ToInt32(minutes);
+            minutes = Math.Floor((Math.Abs(lng) - Math.Floor(Math.Abs(lng))) * 60.0);
+            seconds = (Math.Abs(lng) - Math.Floor(Math.Abs(lng)) - minutes / 60) * 3600;
 
             if (lng > 0)
             {
@@ -1122,10 +1130,11 @@ namespace interoperability
         /// <param name="lat">Latitude in DMS</param>
         /// <param name="lng">Longitude in DMS</param>
         /// <returns></returns>
-        public static PointLatLng DMStoDD(string lat, string lng)
+        public static Waypoint DMStoDD(string lat, string lng)
         {
             double DD_Lat, DD_Lng;
-            PointLatLng Converted_DD = new PointLatLng();
+            Waypoint Converted_DD = new Waypoint();
+
             //Assuming the format is correct
             char[] delimiterChars = { '-' };
 
@@ -1160,7 +1169,7 @@ namespace interoperability
                 return Converted_DD;
             }
 
-            return new PointLatLng(DD_Lat, DD_Lng);
+            return new Waypoint(DD_Lat, DD_Lng);
         }
 
         // BE CAREFUL, THIS IS SKETCHY AS FUCK

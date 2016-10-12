@@ -45,7 +45,6 @@
             this.Airspeed_Units_Combo = new System.Windows.Forms.ComboBox();
             this.Distance_Units_Combo = new System.Windows.Forms.ComboBox();
             this.Coordinate_System_Combo = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.GUI_FORMAT_BOX = new System.Windows.Forms.ComboBox();
             this.ShowGUI_Checkbox = new System.Windows.Forms.CheckBox();
@@ -53,7 +52,7 @@
             // 
             // Save
             // 
-            this.Save.Location = new System.Drawing.Point(255, 298);
+            this.Save.Location = new System.Drawing.Point(260, 281);
             this.Save.Name = "Save";
             this.Save.Size = new System.Drawing.Size(75, 23);
             this.Save.TabIndex = 0;
@@ -63,7 +62,7 @@
             // 
             // IP_ADDR_BOX
             // 
-            this.IP_ADDR_BOX.Location = new System.Drawing.Point(159, 29);
+            this.IP_ADDR_BOX.Location = new System.Drawing.Point(164, 12);
             this.IP_ADDR_BOX.Name = "IP_ADDR_BOX";
             this.IP_ADDR_BOX.Size = new System.Drawing.Size(166, 20);
             this.IP_ADDR_BOX.TabIndex = 1;
@@ -72,7 +71,7 @@
             // 
             this.IP_ADDR_LABEL.AutoSize = true;
             this.IP_ADDR_LABEL.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.IP_ADDR_LABEL.Location = new System.Drawing.Point(12, 32);
+            this.IP_ADDR_LABEL.Location = new System.Drawing.Point(17, 15);
             this.IP_ADDR_LABEL.Name = "IP_ADDR_LABEL";
             this.IP_ADDR_LABEL.Size = new System.Drawing.Size(109, 13);
             this.IP_ADDR_LABEL.TabIndex = 2;
@@ -82,7 +81,7 @@
             // 
             this.USERNAME_LABEL.AutoSize = true;
             this.USERNAME_LABEL.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.USERNAME_LABEL.Location = new System.Drawing.Point(12, 58);
+            this.USERNAME_LABEL.Location = new System.Drawing.Point(17, 41);
             this.USERNAME_LABEL.Name = "USERNAME_LABEL";
             this.USERNAME_LABEL.Size = new System.Drawing.Size(63, 13);
             this.USERNAME_LABEL.TabIndex = 3;
@@ -92,7 +91,7 @@
             // 
             this.PASSWORD_LABEL.AutoSize = true;
             this.PASSWORD_LABEL.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PASSWORD_LABEL.Location = new System.Drawing.Point(12, 84);
+            this.PASSWORD_LABEL.Location = new System.Drawing.Point(17, 67);
             this.PASSWORD_LABEL.Name = "PASSWORD_LABEL";
             this.PASSWORD_LABEL.Size = new System.Drawing.Size(61, 13);
             this.PASSWORD_LABEL.TabIndex = 4;
@@ -100,21 +99,21 @@
             // 
             // USERNAME_BOX
             // 
-            this.USERNAME_BOX.Location = new System.Drawing.Point(159, 55);
+            this.USERNAME_BOX.Location = new System.Drawing.Point(164, 38);
             this.USERNAME_BOX.Name = "USERNAME_BOX";
             this.USERNAME_BOX.Size = new System.Drawing.Size(166, 20);
             this.USERNAME_BOX.TabIndex = 5;
             // 
             // PASSWORD_BOX
             // 
-            this.PASSWORD_BOX.Location = new System.Drawing.Point(159, 81);
+            this.PASSWORD_BOX.Location = new System.Drawing.Point(164, 64);
             this.PASSWORD_BOX.Name = "PASSWORD_BOX";
             this.PASSWORD_BOX.Size = new System.Drawing.Size(166, 20);
             this.PASSWORD_BOX.TabIndex = 6;
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(15, 298);
+            this.Cancel.Location = new System.Drawing.Point(20, 281);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 7;
@@ -124,7 +123,7 @@
             // 
             // Verify
             // 
-            this.Verify.Location = new System.Drawing.Point(225, 117);
+            this.Verify.Location = new System.Drawing.Point(230, 100);
             this.Verify.Name = "Verify";
             this.Verify.Size = new System.Drawing.Size(100, 23);
             this.Verify.TabIndex = 8;
@@ -136,7 +135,7 @@
             // 
             this.validation_label.AutoSize = true;
             this.validation_label.ForeColor = System.Drawing.Color.DarkGreen;
-            this.validation_label.Location = new System.Drawing.Point(13, 122);
+            this.validation_label.Location = new System.Drawing.Point(18, 105);
             this.validation_label.Name = "validation_label";
             this.validation_label.Size = new System.Drawing.Size(108, 13);
             this.validation_label.TabIndex = 9;
@@ -147,7 +146,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 151);
+            this.label1.Location = new System.Drawing.Point(17, 134);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(93, 13);
             this.label1.TabIndex = 11;
@@ -157,7 +156,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(12, 178);
+            this.label2.Location = new System.Drawing.Point(17, 161);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(94, 13);
             this.label2.TabIndex = 12;
@@ -167,7 +166,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(12, 205);
+            this.label3.Location = new System.Drawing.Point(17, 188);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(116, 13);
             this.label3.TabIndex = 13;
@@ -183,7 +182,7 @@
             "KPH",
             "MPH",
             "Knots"});
-            this.Airspeed_Units_Combo.Location = new System.Drawing.Point(159, 148);
+            this.Airspeed_Units_Combo.Location = new System.Drawing.Point(164, 131);
             this.Airspeed_Units_Combo.Name = "Airspeed_Units_Combo";
             this.Airspeed_Units_Combo.Size = new System.Drawing.Size(166, 21);
             this.Airspeed_Units_Combo.TabIndex = 14;
@@ -195,7 +194,7 @@
             this.Distance_Units_Combo.Items.AddRange(new object[] {
             "Metres",
             "Feet"});
-            this.Distance_Units_Combo.Location = new System.Drawing.Point(159, 175);
+            this.Distance_Units_Combo.Location = new System.Drawing.Point(164, 158);
             this.Distance_Units_Combo.Name = "Distance_Units_Combo";
             this.Distance_Units_Combo.Size = new System.Drawing.Size(166, 21);
             this.Distance_Units_Combo.TabIndex = 15;
@@ -207,27 +206,16 @@
             this.Coordinate_System_Combo.Items.AddRange(new object[] {
             "DD.DDDDDD",
             "DD MM SS.SS"});
-            this.Coordinate_System_Combo.Location = new System.Drawing.Point(159, 202);
+            this.Coordinate_System_Combo.Location = new System.Drawing.Point(164, 185);
             this.Coordinate_System_Combo.Name = "Coordinate_System_Combo";
             this.Coordinate_System_Combo.Size = new System.Drawing.Size(166, 21);
             this.Coordinate_System_Combo.TabIndex = 16;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.Color.Blue;
-            this.label4.Location = new System.Drawing.Point(13, 9);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(317, 13);
-            this.label4.TabIndex = 17;
-            this.label4.Text = "Warning: clicking save will reset all open connections ";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(12, 232);
+            this.label5.Location = new System.Drawing.Point(17, 215);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(103, 13);
             this.label5.TabIndex = 18;
@@ -240,7 +228,7 @@
             this.GUI_FORMAT_BOX.Items.AddRange(new object[] {
             "USC",
             "AUVSI"});
-            this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(159, 229);
+            this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(164, 212);
             this.GUI_FORMAT_BOX.Name = "GUI_FORMAT_BOX";
             this.GUI_FORMAT_BOX.Size = new System.Drawing.Size(166, 21);
             this.GUI_FORMAT_BOX.TabIndex = 19;
@@ -249,7 +237,7 @@
             // 
             this.ShowGUI_Checkbox.AutoSize = true;
             this.ShowGUI_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShowGUI_Checkbox.Location = new System.Drawing.Point(16, 266);
+            this.ShowGUI_Checkbox.Location = new System.Drawing.Point(21, 249);
             this.ShowGUI_Checkbox.Name = "ShowGUI_Checkbox";
             this.ShowGUI_Checkbox.Size = new System.Drawing.Size(200, 17);
             this.ShowGUI_Checkbox.TabIndex = 21;
@@ -260,11 +248,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 332);
+            this.ClientSize = new System.Drawing.Size(342, 314);
             this.Controls.Add(this.ShowGUI_Checkbox);
             this.Controls.Add(this.GUI_FORMAT_BOX);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
             this.Controls.Add(this.Coordinate_System_Combo);
             this.Controls.Add(this.Distance_Units_Combo);
             this.Controls.Add(this.Airspeed_Units_Combo);
@@ -310,7 +297,6 @@
         private System.Windows.Forms.ComboBox Airspeed_Units_Combo;
         private System.Windows.Forms.ComboBox Distance_Units_Combo;
         private System.Windows.Forms.ComboBox Coordinate_System_Combo;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox GUI_FORMAT_BOX;
         private System.Windows.Forms.CheckBox ShowGUI_Checkbox;
