@@ -93,9 +93,9 @@ namespace Interoperability_GUI_Forms
         {
 
             DialogResult result;
-            result = MessageBox.Show("Warning, this will reset all open TCP connections.\nAre you sure you want to save?", "Interoperability Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            result = MessageBox.Show("Warning, this will reset all open TCP connections.\nAre you sure you want to save?", "Interoperability Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
-            if(result == DialogResult.OK)
+            if(result == DialogResult.Yes)
             {
                 string old_gui_format = Settings["gui_format"];
 

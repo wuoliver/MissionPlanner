@@ -1144,7 +1144,7 @@ namespace Interoperability_GUI_Forms
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("       UTAT UAV Interoperability Control Panel    \nDeveloped by Oliver Wu, Davis Wu, and Jesse Wang", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("       UTAT UAV Interoperability Control Panel    \nDeveloped by Oliver Wu, Davis Wu, and Jesse Wang\nLogo designed by Andrew Ilersich", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
