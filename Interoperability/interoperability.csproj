@@ -96,6 +96,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayUtil.cs" />
+    <Compile Include="CubicSpline.cs" />
     <Compile Include="Interoperability_GUI.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -121,6 +123,7 @@
     <Compile Include="Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
+    <Compile Include="TriDiagonalMatrix.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExtLibs\GMap.NET.Core\GMap.NET.Core.csproj">

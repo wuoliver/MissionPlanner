@@ -347,6 +347,11 @@ namespace Interoperability_GUI_Forms
             }
         }
 
+        public int getPlaneSimulationAirspeed()
+        {
+            return Convert.ToInt32(Plane_Simulated_Airspeed_Select.Value);
+        }
+
         //Function is called when the user clicks a button thing
         public void AddTarget()
         {
@@ -645,14 +650,14 @@ namespace Interoperability_GUI_Forms
             });
         }
 
-        public void MAP_updateWP(List<PointLatLng> waypoints)
+        public void MAP_updateWP(List<Waypoint> waypoints)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 GMapMarkerWP marker;
                 for (int i = 0; i < waypoints.Count(); i++)
                 {
-                    marker = new GMapMarkerWP(waypoints[i], i.ToString("0"));
+                    marker = new GMapMarkerWP(new PointLatLng(waypoints[i].latitude, waypoints[i].longitude), i.ToString("0"));
                     //marker.ToolTipMode = MarkerTooltipMode.Always;
                     //marker.ToolTipText = i.ToString();
                     WP_Overlay.Markers.Add(marker);
@@ -660,15 +665,15 @@ namespace Interoperability_GUI_Forms
             });
         }
 
-        public void MAP_updateWPRoute(List<PointLatLng> waypoints)
+        public void MAP_updateWPRoute(List<Waypoint> waypoints)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 for (int i = 0; i < waypoints.Count() - 1; i++)
                 {
                     List<PointLatLng> list = new List<PointLatLng>();
-                    list.Add(waypoints[i]);
-                    list.Add(waypoints[i + 1]);
+                    list.Add(new PointLatLng(waypoints[i].latitude, waypoints[i].longitude));
+                    list.Add(new PointLatLng(waypoints[i + 1].latitude, waypoints[i + 1].longitude));
 
                     WP_Overlay.Routes.Add(new GMapRoute(list, "route") { Stroke = new System.Drawing.Pen(System.Drawing.Color.Yellow, 4) });
                 }
@@ -1231,6 +1236,19 @@ namespace Interoperability_GUI_Forms
                 Interoperability_Mission_Edit_Instance = new Interoperability_Mission_Edit();
                 Interoperability_Mission_Edit_Instance.ShowDialog();
             }
+        }
+
+        private void SDA_Plane_Simulation_Start_Button_Click(object sender, EventArgs e)
+        {
+            if(SDA_Plane_Simulation_Start_Button.Text == "Start Simulation")
+            {
+                SDA_Plane_Simulation_Start_Button.Text = "Stop Simulation";
+            }
+            else
+            {
+                SDA_Plane_Simulation_Start_Button.Text = "Start Simulation";
+            }
+            InteroperabilityCallback(13);
         }
     }
 

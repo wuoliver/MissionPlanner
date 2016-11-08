@@ -19,10 +19,15 @@ using System.Speech.Recognition;
 
 using MissionPlanner.Plugin;
 
+using Interoperability_GUI_Forms;
+
 // Davis was here
 // One or both of these is for HTTP requests. I forget which one
 using System.Net;
 using System.Net.Http;
+
+//For spline interpolation
+using Spline;
 
 //For javascript serializer
 using System.Web.Script.Serialization;
@@ -112,6 +117,15 @@ namespace interoperability
         {
             latitude = _latitude;
             longitude = _longitude;
+            altitude_msl = _altitude_msl;
+            empty = false;
+        }
+
+        public Waypoint(double _altitude_msl, double _latitude, double _longitude)
+        {
+            latitude = (float)_latitude;
+            longitude = (float)_longitude;
+            altitude_msl = (float)_altitude_msl;
             empty = false;
         }
 
@@ -119,6 +133,7 @@ namespace interoperability
         {
             latitude = _latitude;
             longitude = _longitude;
+            altitude_msl = _altitude_msl;
             empty = false;
         }
     }
@@ -163,7 +178,7 @@ namespace interoperability
             altitude_msl_max = _altitude_msl_max;
             altitude_msl_min = _altitude_msl_min;
             name = _name;
-            boundary_pts = _boundary_pts;           
+            boundary_pts = _boundary_pts;
         }
         public FlyZone()
         {
@@ -181,11 +196,17 @@ namespace interoperability
         public string name { get; set; }
         public bool unedited { get; set; }
         public bool active { get; set; }
+        //Position of the air drop location 
         public GPS_Position air_drop_pos { get; set; }
+        //Last known position of the emergent target
         public GPS_Position emergent_lkp { get; set; }
+        //A list of flyzones (geofence)
         public List<FlyZone> fly_zones { get; set; }
         public GPS_Position home_pos { get; set; }
+        //Waypoints we must fly as part of the mission
         public List<Waypoint> mission_waypoints { get; set; }
+        //A list of all waypoints we will be flying in our mission
+        public List<Waypoint> all_waypoints { get; set; }
         public GPS_Position off_axis_target_pos { get; set; }
         public List<Waypoint> search_grid_points { get; set; }
 
@@ -204,6 +225,7 @@ namespace interoperability
             fly_zones.Add(new FlyZone());
             home_pos = new GPS_Position();
             mission_waypoints = new List<Waypoint>();
+            all_waypoints = new List<Waypoint>();
             off_axis_target_pos = new GPS_Position();
             search_grid_points = new List<Waypoint>();
         }
@@ -252,23 +274,35 @@ namespace interoperability
         private string geo_cords = "DD.DDDDDD";
 
 
+
+
+        //SDA Simulator Values
+        private double sim_lat = 0;
+        private double sim_lng = 0;
+        private float sim_alt = 0;
+        private float sim_yaw = 0;
+
+
         private Thread Telemetry_Thread;
         private Thread Obstacle_SDA_Thread;
         private Thread Mission_Thread;
         private Thread Map_Control_Thread;
         private Thread Callout_Thread;
+        private Thread SDA_Plane_Simulator_Thread;
 
         private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
         private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
         private bool Mission_Thread_shouldStop = true;          //Used to start/stop the misison thread
         private bool Map_Control_Thread_shouldStop = true;      //Used to start/stop the map control thread
         private bool Callout_Thread_shouldStop = true;          //Used to start/stop the callout thread
+        private bool SDA_Plane_Simulator_Thread_shouldStop = true;
 
         private bool Telemetry_Thread_isAlive = false;
         private bool Obstacle_SDA_Thread_isAlive = false;
         private bool Mission_Thread_isAlive = false;
         private bool Map_Thread_isAlive = false;
         private bool Callout_Thread_isAlive = false;
+        private bool SDA_Plane_Simulator_Thread_isAlive = false;
 
         private int ImportantCounter = 0;
         private long ImporantTimeCount = 0;
@@ -329,6 +363,8 @@ namespace interoperability
             Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
             Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
             Callout_Thread = new Thread(new ThreadStart(this.Callouts));
+            SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
+
 
             //Instantiate Mission_List
             Mission_List = new List<Mission>();
@@ -408,7 +444,7 @@ namespace interoperability
                 case 6:
                     getSettings();
                     //No need to reset the map control thread
-                    if(Map_Thread_isAlive == false)
+                    if (Map_Thread_isAlive == false)
                     {
                         Map_Control_Thread_shouldStop = true;
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
@@ -454,7 +490,9 @@ namespace interoperability
                     Obstacle_SDA_Thread_shouldStop = true;
                     Map_Control_Thread_shouldStop = true;
                     Callout_Thread_shouldStop = true;
-                    while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive || Callout_Thread.IsAlive)
+                    SDA_Plane_Simulator_Thread_shouldStop = true;
+                    while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive || 
+                        Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -522,6 +560,19 @@ namespace interoperability
                 case 12:
                     Current_Mission = new Mission();
                     Current_Mission.name = "TEST RESET";
+                    break;
+                //Start or stop simulator
+                case 13:
+                    if (SDA_Plane_Simulator_Thread_isAlive == true)
+                    {
+                        SDA_Plane_Simulator_Thread_shouldStop = true;
+                    }
+                    else
+                    {
+                        SDA_Plane_Simulator_Thread_shouldStop = false;
+                        SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
+                        SDA_Plane_Simulator_Thread.Start();
+                    }
                     break;
                 default:
                     break;
@@ -696,7 +747,7 @@ namespace interoperability
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
             }
-            Telemetry_Thread_isAlive = false; 
+            Telemetry_Thread_isAlive = false;
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
@@ -775,6 +826,188 @@ namespace interoperability
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
+
+        private List<Waypoint> SplineWP;
+
+        public void SDA_Plane_Simulator()
+        {
+            SDA_Plane_Simulator_Thread_isAlive = true;
+
+            //Add fake waypoints 
+            Current_Mission.all_waypoints.Clear();
+            Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
+            Current_Mission.all_waypoints.Add(new Waypoint(30, 38.146336, -76.428495));
+            Current_Mission.all_waypoints.Add(new Waypoint(50, 38.147551, -76.429503));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 38.148463, -76.430297));
+            Current_Mission.all_waypoints.Add(new Waypoint(200, 38.149492, -76.431477));
+            Current_Mission.all_waypoints.Add(new Waypoint(200, 38.150774, -76.432850));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.150724, -76.433687));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.150319, -76.434095));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149880, -76.433923));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149543, -76.433280));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149188, -76.432829));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146505, -76.430426));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145104, -76.429117));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142843, -76.427572));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142050, -76.427572));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141915, -76.428087));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144581, -76.430769));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144379, -76.431627));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141881, -76.429482));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141662, -76.430533));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144193, -76.432443));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143991, -76.433280));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141189, -76.431756));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.140715, -76.431112));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141324, -76.426606));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142455, -76.424847));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145493, -76.426928));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145965, -76.426306));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142877, -76.423881));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143130, -76.422873));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146235, -76.425319));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146421, -76.424482));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143535, -76.422036));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144075, -76.421506));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146674, -76.423473));
+            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143451, -76.426735));
+
+
+            if (Current_Mission.all_waypoints.Count() < 3)
+            {
+                SDA_Plane_Simulator_Thread_isAlive = false;
+                return;
+            }
+
+            int target_waypoint = 1;
+            int total_waypoints = Current_Mission.all_waypoints.Count();
+
+            sim_lat = Current_Mission.all_waypoints[0].latitude;
+            sim_lng = Current_Mission.all_waypoints[0].longitude;
+
+            double ddist = 0;
+
+
+            //Test Spline Algorithm
+
+            float[] x = new float[Current_Mission.all_waypoints.Count() + 1];
+            float[] y = new float[Current_Mission.all_waypoints.Count() + 1];
+            float[] xs;
+            float[] ys;
+
+            for (int i = 0; i < total_waypoints; i++)
+            {
+                x[i] = Current_Mission.all_waypoints[i].longitude;
+                y[i] = Current_Mission.all_waypoints[i].latitude;
+            }
+            x[total_waypoints] = Current_Mission.all_waypoints[0].longitude;
+            y[total_waypoints] = Current_Mission.all_waypoints[0].latitude;
+
+            CubicSpline.FitParametric(x, y, 1000, out xs, out ys);
+
+            SplineWP = new List<Waypoint>();
+            for(int i = 0; i < xs.Count(); i++)
+            {
+                SplineWP.Add(new Waypoint(ys[i], xs[i]));
+            }
+
+
+            double Total_Distance = 0;
+            //Get total distance of spline 
+            for (int i = 0; i < SplineWP.Count() - 1; i++)
+            {
+                double dx = MercatorProjection.lonToX(SplineWP[i + 1].longitude) - MercatorProjection.lonToX(SplineWP[i].longitude);
+                double dy = MercatorProjection.latToY(SplineWP[i + 1].latitude) - MercatorProjection.latToY(SplineWP[i].latitude);
+                Total_Distance += Math.Sqrt(dx * dx + dy * dy);
+            }
+
+            double current_dist = 0;
+
+            //End Test Spline Algorithm
+
+            while (SDA_Plane_Simulator_Thread_shouldStop == false)
+            {
+                
+
+                //If using straight moving lines
+                if (false)
+                {
+                    if (target_waypoint == total_waypoints)
+                    {
+                        target_waypoint = 0;
+                    }
+                    Console.WriteLine("Target Waypoint: " + target_waypoint.ToString());
+                    // Gets an actual dx and dy in meters
+                    double currX = MercatorProjection.lonToX(sim_lng);
+                    double currY = MercatorProjection.latToY(sim_lat);
+                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[target_waypoint].longitude) - currX;
+                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].latitude) - currY;
+
+                    //Since we're calling every 1/2 second, we move the plane AIRSPEED/2 meters per second
+                    ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
+
+                    // Makes dx and dy the right length
+                    double length = Math.Sqrt(dx * dx + dy * dy);
+                    double conversionRatio = ddist / length;
+
+                    if (ddist < length)
+                    {
+                        dx = dx * conversionRatio;
+                        dy = dy * conversionRatio;
+                    }
+
+                    sim_yaw = (float)(90 - Math.Atan2(dy, dx) * 180 / Math.PI);
+                    if (sim_yaw < 0)
+                    {
+                        sim_yaw += 360;
+                    }
+
+                    sim_lat = MercatorProjection.yToLat(currY + dy);
+                    sim_lng = MercatorProjection.xToLon(currX + dx);
+
+
+                    if (Math.Sqrt(Math.Pow(MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].latitude) - MercatorProjection.latToY(sim_lat), 2) +
+                        Math.Pow(MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].longitude) - MercatorProjection.latToY(sim_lng), 2)) < 10)
+                    {
+                        target_waypoint++;
+                    }
+                }
+                //Spline Interpolation
+                else
+                {
+                    ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
+                    current_dist += ddist;
+
+                    int spline_index = (int)Math.Ceiling(current_dist / (Total_Distance/SplineWP.Count()));
+
+                    if(current_dist >= Total_Distance || spline_index >= SplineWP.Count() - 1)
+                    {
+                        current_dist = 0;
+                        spline_index = 0;
+                    }
+
+                    sim_lat = SplineWP[spline_index].latitude;
+                    sim_lng = SplineWP[spline_index].longitude;
+
+
+                    double dy = SplineWP[spline_index + 1].latitude - sim_lat; 
+                    double dx = SplineWP[spline_index + 1].longitude - sim_lng;
+
+                    sim_yaw = (float)(90 - Math.Atan2(dy, dx) * 180 / Math.PI);
+                    if (sim_yaw < 0)
+                    {
+                        sim_yaw += 360;
+                    }
+
+
+                }
+                
+
+                Thread.Sleep(100);
+            }
+            SDA_Plane_Simulator_Thread_isAlive = false;
+        }
+
         //Will be used to export to something. Is used to 
         public void ExportMapData(List<Mission> missionList)
         {
@@ -823,12 +1056,12 @@ namespace interoperability
 
                         int count = Mission_List.Count();
                         //Add obtained missions to the current list of missions 
-                        for(int i=0; i < Server_Mission.Count(); i++)
+                        for (int i = 0; i < Server_Mission.Count(); i++)
                         {
                             Server_Mission[i].name = "Server Mission_" + Convert.ToString(i + count);
                             Mission_List.Add(Server_Mission[i]);
                         }
-                        
+
                         Mission_Thread_shouldStop = true;
                     }
                 }
@@ -884,24 +1117,24 @@ namespace interoperability
             }
 
 
-            List<PointLatLng> Waypoints = new List<PointLatLng>();
-            Waypoints.Add(new PointLatLng(38.147720, -76.429610));
-            Waypoints.Add(new PointLatLng(38.150893, -76.432056));
-            Waypoints.Add(new PointLatLng(38.149559, -76.434159));
-            Waypoints.Add(new PointLatLng(38.145729, -76.430275));
-            Waypoints.Add(new PointLatLng(38.143147, -76.428344));
-            Waypoints.Add(new PointLatLng(38.142168, -76.429482));
-            Waypoints.Add(new PointLatLng(38.144176, -76.431584));
-            Waypoints.Add(new PointLatLng(38.143214, -76.433151));
-            Waypoints.Add(new PointLatLng(38.141898, -76.432593));
-            Waypoints.Add(new PointLatLng(38.143063, -76.429675));
-            Waypoints.Add(new PointLatLng(38.144531, -76.426542));
-            Waypoints.Add(new PointLatLng(38.146471, -76.422379));
-            Waypoints.Add(new PointLatLng(38.144801, -76.421757));
-            Waypoints.Add(new PointLatLng(38.143029, -76.421692));
-            Waypoints.Add(new PointLatLng(38.142084, -76.423817));
-            Waypoints.Add(new PointLatLng(38.142016, -76.425469));
-            Waypoints.Add(new PointLatLng(38.145189, -76.428537));
+            List<Waypoint> Waypoints = new List<Waypoint>();
+            Waypoints.Add(new Waypoint(38.147720, -76.429610));
+            Waypoints.Add(new Waypoint(38.150893, -76.432056));
+            Waypoints.Add(new Waypoint(38.149559, -76.434159));
+            Waypoints.Add(new Waypoint(38.145729, -76.430275));
+            Waypoints.Add(new Waypoint(38.143147, -76.428344));
+            Waypoints.Add(new Waypoint(38.142168, -76.429482));
+            Waypoints.Add(new Waypoint(38.144176, -76.431584));
+            Waypoints.Add(new Waypoint(38.143214, -76.433151));
+            Waypoints.Add(new Waypoint(38.141898, -76.432593));
+            Waypoints.Add(new Waypoint(38.143063, -76.429675));
+            Waypoints.Add(new Waypoint(38.144531, -76.426542));
+            Waypoints.Add(new Waypoint(38.146471, -76.422379));
+            Waypoints.Add(new Waypoint(38.144801, -76.421757));
+            Waypoints.Add(new Waypoint(38.143029, -76.421692));
+            Waypoints.Add(new Waypoint(38.142084, -76.423817));
+            Waypoints.Add(new Waypoint(38.142016, -76.425469));
+            Waypoints.Add(new Waypoint(38.145189, -76.428537));
 
             while (!Map_Control_Thread_shouldStop)
             {
@@ -937,33 +1170,60 @@ namespace interoperability
                 //Draw search area
                 if (Interoperability_GUI.getDrawSearchArea())
                 {
-                        Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90); 
+                    Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
                 }
 
                 //Draw plane location                   
                 if (Interoperability_GUI.getDrawPlane())
                 {
-                    Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
-                        Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
+                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    {
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(sim_lat, sim_lng), sim_alt, sim_yaw, sim_yaw, sim_yaw, sim_yaw, 0);
+                    }
+                    else
+                    {
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
+                                                Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
+                    }
+
                 }
 
                 if (Interoperability_GUI.getDrawWP())
                 {
-                    //Draw waypoints
-                    Interoperability_GUI.MAP_updateWP(Waypoints);
-                    //Draw lines between waypoints
-                    Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    {
+                        Interoperability_GUI.MAP_updateWP(Current_Mission.all_waypoints);
+                        //Interoperability_GUI.MAP_updateWPRoute(Current_Mission.all_waypoints);
+                        Interoperability_GUI.MAP_updateWPRoute(SplineWP);
+                    }
+                    else
+                    {
+                        //Draw waypoints
+                        Interoperability_GUI.MAP_updateWP(Waypoints);
+                        //Draw lines between waypoints
+                        Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                    }
+
                 }
                 //Draw off axis targets, emergent targets, and air drop location
                 if (Interoperability_GUI.getDrawOFAT_EN_DROP())
                 {
                     Interoperability_GUI.MAP_updateOFAT_EN_DROP(Current_Mission);
-                }
+                } 
 
                 if (Interoperability_GUI.getAutopan())
                 {
-                    Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
+                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    {
+                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(sim_lat, sim_lng));
+                    }
+                    else
+                    {
+                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
+                    }
+                    
                 }
+
                 Interoperability_GUI.MAP_Update_Overlay();
 
 
@@ -1097,7 +1357,7 @@ namespace interoperability
 
             double minutes = Math.Floor((Math.Abs(lat) - Math.Floor(Math.Abs(lat))) * 60.0);
             double seconds = (Math.Abs(lat) - Math.Floor(Math.Abs(lat)) - minutes / 60) * 3600;
-            
+
 
             if (lat > 0)
             {
@@ -1148,7 +1408,7 @@ namespace interoperability
                 double lat_seconds = Convert.ToDouble(lat_split[2]) / 3600;
                 DD_Lat = lat_degrees + lat_minutes + lat_seconds;
 
-                if(lat_split[0][0] == 'S')
+                if (lat_split[0][0] == 'S')
                 {
                     DD_Lat *= -1;
                 }
@@ -1158,7 +1418,7 @@ namespace interoperability
                 double lng_seconds = Convert.ToDouble(lng_split[2]) / 3600;
                 DD_Lng = lng_degrees + lng_minutes + lng_seconds;
 
-                if(lng_split[0][0] == 'W')
+                if (lng_split[0][0] == 'W')
                 {
                     DD_Lng *= -1;
                 }

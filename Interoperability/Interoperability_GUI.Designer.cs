@@ -47,6 +47,11 @@
             this.label6 = new System.Windows.Forms.Label();
             this.Reset_Stats = new System.Windows.Forms.Button();
             this.SDA_Tab = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.Plane_Simulated_Airspeed_Select = new System.Windows.Forms.NumericUpDown();
+            this.button3 = new System.Windows.Forms.Button();
+            this.SDA_Plane_Simulation_Start_Button = new System.Windows.Forms.Button();
             this.SDA_ServerResponseTextBox = new System.Windows.Forms.TextBox();
             this.SDA_ServerResponseLabel = new System.Windows.Forms.Label();
             this.SDA_PollRateApply = new System.Windows.Forms.Button();
@@ -88,7 +93,6 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.Callout_StartStop_Button = new System.Windows.Forms.Button();
             this.label17 = new System.Windows.Forms.Label();
-            this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -133,9 +137,11 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Plane_Simulated_Airspeed_Select)).BeginInit();
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
             this.Callout_Tab.SuspendLayout();
@@ -320,6 +326,11 @@
             // 
             // SDA_Tab
             // 
+            this.SDA_Tab.Controls.Add(this.label18);
+            this.SDA_Tab.Controls.Add(this.label16);
+            this.SDA_Tab.Controls.Add(this.Plane_Simulated_Airspeed_Select);
+            this.SDA_Tab.Controls.Add(this.button3);
+            this.SDA_Tab.Controls.Add(this.SDA_Plane_Simulation_Start_Button);
             this.SDA_Tab.Controls.Add(this.SDA_ServerResponseTextBox);
             this.SDA_Tab.Controls.Add(this.SDA_ServerResponseLabel);
             this.SDA_Tab.Controls.Add(this.SDA_PollRateApply);
@@ -336,6 +347,56 @@
             this.SDA_Tab.TabIndex = 1;
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(229, 434);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(25, 13);
+            this.label18.TabIndex = 18;
+            this.label18.Text = "m/s";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(14, 436);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(100, 13);
+            this.label16.TabIndex = 17;
+            this.label16.Text = "Simulated Airspeed:";
+            // 
+            // Plane_Simulated_Airspeed_Select
+            // 
+            this.Plane_Simulated_Airspeed_Select.Location = new System.Drawing.Point(143, 434);
+            this.Plane_Simulated_Airspeed_Select.Name = "Plane_Simulated_Airspeed_Select";
+            this.Plane_Simulated_Airspeed_Select.Size = new System.Drawing.Size(80, 20);
+            this.Plane_Simulated_Airspeed_Select.TabIndex = 16;
+            this.Plane_Simulated_Airspeed_Select.Value = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(16, 486);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(105, 23);
+            this.button3.TabIndex = 15;
+            this.button3.Text = "Start Algorithm";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // SDA_Plane_Simulation_Start_Button
+            // 
+            this.SDA_Plane_Simulation_Start_Button.Location = new System.Drawing.Point(143, 403);
+            this.SDA_Plane_Simulation_Start_Button.Name = "SDA_Plane_Simulation_Start_Button";
+            this.SDA_Plane_Simulation_Start_Button.Size = new System.Drawing.Size(111, 23);
+            this.SDA_Plane_Simulation_Start_Button.TabIndex = 14;
+            this.SDA_Plane_Simulation_Start_Button.Text = "Start Simulation";
+            this.SDA_Plane_Simulation_Start_Button.UseVisualStyleBackColor = true;
+            this.SDA_Plane_Simulation_Start_Button.Click += new System.EventHandler(this.SDA_Plane_Simulation_Start_Button_Click);
             // 
             // SDA_ServerResponseTextBox
             // 
@@ -405,9 +466,9 @@
             // 
             // SDA_Start_Stop_Button
             // 
-            this.SDA_Start_Stop_Button.Location = new System.Drawing.Point(17, 465);
+            this.SDA_Start_Stop_Button.Location = new System.Drawing.Point(17, 403);
             this.SDA_Start_Stop_Button.Name = "SDA_Start_Stop_Button";
-            this.SDA_Start_Stop_Button.Size = new System.Drawing.Size(125, 23);
+            this.SDA_Start_Stop_Button.Size = new System.Drawing.Size(105, 23);
             this.SDA_Start_Stop_Button.TabIndex = 6;
             this.SDA_Start_Stop_Button.Text = "Start SDA Polling";
             this.SDA_Start_Stop_Button.UseVisualStyleBackColor = true;
@@ -773,40 +834,6 @@
             this.label17.Size = new System.Drawing.Size(113, 31);
             this.label17.TabIndex = 3;
             this.label17.Text = "Callouts";
-            // 
-            // gMapControl1
-            // 
-            this.gMapControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.gMapControl1.AutoSize = true;
-            this.gMapControl1.Bearing = 0F;
-            this.gMapControl1.CanDragMap = true;
-            this.gMapControl1.ContextMenuStrip = this.InteropMap_ContextMenuStrip;
-            this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
-            this.gMapControl1.GrayScaleMode = false;
-            this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
-            this.gMapControl1.LevelsKeepInMemmory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(294, 27);
-            this.gMapControl1.MarkersEnabled = true;
-            this.gMapControl1.MaxZoom = 24;
-            this.gMapControl1.MinZoom = 2;
-            this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
-            this.gMapControl1.Name = "gMapControl1";
-            this.gMapControl1.NegativeMode = false;
-            this.gMapControl1.PolygonsEnabled = true;
-            this.gMapControl1.RetryLoadTile = 0;
-            this.gMapControl1.RoutesEnabled = true;
-            this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
-            this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
-            this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(869, 540);
-            this.gMapControl1.TabIndex = 0;
-            this.gMapControl1.Zoom = 0D;
-            this.gMapControl1.OnMapDrag += new GMap.NET.MapDrag(this.gMapControl1_OnMapDrag);
-            this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
-            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
-            this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
             // InteropMap_ContextMenuStrip
             // 
@@ -1185,6 +1212,40 @@
             this.readmeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.readmeToolStripMenuItem.Text = "Readme";
             // 
+            // gMapControl1
+            // 
+            this.gMapControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gMapControl1.AutoSize = true;
+            this.gMapControl1.Bearing = 0F;
+            this.gMapControl1.CanDragMap = true;
+            this.gMapControl1.ContextMenuStrip = this.InteropMap_ContextMenuStrip;
+            this.gMapControl1.EmptyTileColor = System.Drawing.Color.Navy;
+            this.gMapControl1.GrayScaleMode = false;
+            this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
+            this.gMapControl1.LevelsKeepInMemmory = 5;
+            this.gMapControl1.Location = new System.Drawing.Point(294, 27);
+            this.gMapControl1.MarkersEnabled = true;
+            this.gMapControl1.MaxZoom = 24;
+            this.gMapControl1.MinZoom = 2;
+            this.gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
+            this.gMapControl1.Name = "gMapControl1";
+            this.gMapControl1.NegativeMode = false;
+            this.gMapControl1.PolygonsEnabled = true;
+            this.gMapControl1.RetryLoadTile = 0;
+            this.gMapControl1.RoutesEnabled = true;
+            this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
+            this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
+            this.gMapControl1.ShowTileGridLines = false;
+            this.gMapControl1.Size = new System.Drawing.Size(869, 540);
+            this.gMapControl1.TabIndex = 0;
+            this.gMapControl1.Zoom = 0D;
+            this.gMapControl1.OnMapDrag += new GMap.NET.MapDrag(this.gMapControl1_OnMapDrag);
+            this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
+            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
+            this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1216,6 +1277,7 @@
             this.Telem_Tab.PerformLayout();
             this.SDA_Tab.ResumeLayout(false);
             this.SDA_Tab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Plane_Simulated_Airspeed_Select)).EndInit();
             this.Map_Tab.ResumeLayout(false);
             this.Map_Tab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
@@ -1337,5 +1399,10 @@
         private System.Windows.Forms.ToolStripMenuItem airDropLocationToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem offAxisTargetToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem emergentTargetToolStripMenuItem1;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button SDA_Plane_Simulation_Start_Button;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.NumericUpDown Plane_Simulated_Airspeed_Select;
     }
 }
