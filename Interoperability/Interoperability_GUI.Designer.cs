@@ -50,7 +50,7 @@
             this.label18 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.Plane_Simulated_Airspeed_Select = new System.Windows.Forms.NumericUpDown();
-            this.button3 = new System.Windows.Forms.Button();
+            this.SDA_Start_Algorithm_Button = new System.Windows.Forms.Button();
             this.SDA_Plane_Simulation_Start_Button = new System.Windows.Forms.Button();
             this.SDA_ServerResponseTextBox = new System.Windows.Forms.TextBox();
             this.SDA_ServerResponseLabel = new System.Windows.Forms.Label();
@@ -329,7 +329,7 @@
             this.SDA_Tab.Controls.Add(this.label18);
             this.SDA_Tab.Controls.Add(this.label16);
             this.SDA_Tab.Controls.Add(this.Plane_Simulated_Airspeed_Select);
-            this.SDA_Tab.Controls.Add(this.button3);
+            this.SDA_Tab.Controls.Add(this.SDA_Start_Algorithm_Button);
             this.SDA_Tab.Controls.Add(this.SDA_Plane_Simulation_Start_Button);
             this.SDA_Tab.Controls.Add(this.SDA_ServerResponseTextBox);
             this.SDA_Tab.Controls.Add(this.SDA_ServerResponseLabel);
@@ -379,14 +379,15 @@
             0,
             0});
             // 
-            // button3
+            // SDA_Start_Algorithm_Button
             // 
-            this.button3.Location = new System.Drawing.Point(16, 486);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(105, 23);
-            this.button3.TabIndex = 15;
-            this.button3.Text = "Start Algorithm";
-            this.button3.UseVisualStyleBackColor = true;
+            this.SDA_Start_Algorithm_Button.Location = new System.Drawing.Point(16, 486);
+            this.SDA_Start_Algorithm_Button.Name = "SDA_Start_Algorithm_Button";
+            this.SDA_Start_Algorithm_Button.Size = new System.Drawing.Size(105, 23);
+            this.SDA_Start_Algorithm_Button.TabIndex = 15;
+            this.SDA_Start_Algorithm_Button.Text = "Start Algorithm";
+            this.SDA_Start_Algorithm_Button.UseVisualStyleBackColor = true;
+            this.SDA_Start_Algorithm_Button.Click += new System.EventHandler(this.SDA_Start_Algorithm_Button_Click);
             // 
             // SDA_Plane_Simulation_Start_Button
             // 
@@ -1399,7 +1400,7 @@
         private System.Windows.Forms.ToolStripMenuItem airDropLocationToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem offAxisTargetToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem emergentTargetToolStripMenuItem1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button SDA_Start_Algorithm_Button;
         private System.Windows.Forms.Button SDA_Plane_Simulation_Start_Button;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label16;

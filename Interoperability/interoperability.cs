@@ -281,6 +281,7 @@ namespace interoperability
         private double sim_lng = 0;
         private float sim_alt = 0;
         private float sim_yaw = 0;
+        private int sim_next_wp = 0;
 
 
         private Thread Telemetry_Thread;
@@ -289,6 +290,7 @@ namespace interoperability
         private Thread Map_Control_Thread;
         private Thread Callout_Thread;
         private Thread SDA_Plane_Simulator_Thread;
+        private Thread SDA_Avoidance_Algorithm_Thread;
 
         private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
         private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
@@ -296,6 +298,8 @@ namespace interoperability
         private bool Map_Control_Thread_shouldStop = true;      //Used to start/stop the map control thread
         private bool Callout_Thread_shouldStop = true;          //Used to start/stop the callout thread
         private bool SDA_Plane_Simulator_Thread_shouldStop = true;
+        private bool SDA_Avoidance_Algorithm_Thread_shouldStop = true;
+
 
         private bool Telemetry_Thread_isAlive = false;
         private bool Obstacle_SDA_Thread_isAlive = false;
@@ -303,6 +307,7 @@ namespace interoperability
         private bool Map_Thread_isAlive = false;
         private bool Callout_Thread_isAlive = false;
         private bool SDA_Plane_Simulator_Thread_isAlive = false;
+        private bool SDA_Avoidance_Algorithm_Thread_isAlive = false;
 
         private int ImportantCounter = 0;
         private long ImporantTimeCount = 0;
@@ -364,6 +369,7 @@ namespace interoperability
             Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
             Callout_Thread = new Thread(new ThreadStart(this.Callouts));
             SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
+            SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
 
 
             //Instantiate Mission_List
@@ -491,8 +497,9 @@ namespace interoperability
                     Map_Control_Thread_shouldStop = true;
                     Callout_Thread_shouldStop = true;
                     SDA_Plane_Simulator_Thread_shouldStop = true;
+                    SDA_Avoidance_Algorithm_Thread_shouldStop = true;
                     while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive || 
-                        Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive)
+                        Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive || SDA_Avoidance_Algorithm_Thread.IsAlive)
                     {
                         //Wait until all threads have stopped
                     }
@@ -572,6 +579,18 @@ namespace interoperability
                         SDA_Plane_Simulator_Thread_shouldStop = false;
                         SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
                         SDA_Plane_Simulator_Thread.Start();
+                    }
+                    break;
+                case 14:
+                    if (SDA_Avoidance_Algorithm_Thread_isAlive == true)
+                    {
+                        SDA_Avoidance_Algorithm_Thread_shouldStop = true;
+                    }
+                    else
+                    {
+                        SDA_Avoidance_Algorithm_Thread_shouldStop = false;
+                        SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
+                        SDA_Avoidance_Algorithm_Thread.Start();
                     }
                     break;
                 default:
@@ -829,6 +848,33 @@ namespace interoperability
 
         private List<Waypoint> SplineWP;
 
+        public void SDA_Avoidance_Algorithm()
+        {
+            SDA_Avoidance_Algorithm_Thread_isAlive = true;
+
+            while(SDA_Plane_Simulator_Thread_shouldStop == false)
+            {
+                /*Write your algorithm here
+                You have access to: 
+                    sim_lat         --Simulated latitude of the airplane
+                    sim_lng         --Simulated longitude of the airplane
+                    sim_alt         --Simulated altitude of the plane
+                    sim_yaw         --Simulated heading of the plane (compass bearing)
+                    sim_next_wp     --The next waypoint the plane will be moving towards 
+
+                    obstaclesList   --Holds a list of all moving and stationary obstacles (updated constantly)
+                        obstaclesList.moving_obstacles          --List of type 'Moving_Obstacle' 
+                        obstaclesList.stationary_obstacles      --List of type 'Stationary_Obstacle'
+                    Current_Mission.all_waypoints               --List of all waypoints the plane will be flying, type of 'Waypoint'
+                    Interoperability_GUI.getPlaneSimulationAirspeed() --The plane's simulated airspeed (in meters per second)
+                */
+
+                Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
+            }
+
+            SDA_Avoidance_Algorithm_Thread_isAlive = false;
+        }
+
         public void SDA_Plane_Simulator()
         {
             SDA_Plane_Simulator_Thread_isAlive = true;
@@ -888,10 +934,10 @@ namespace interoperability
             double ddist = 0;
 
 
-            //Test Spline Algorithm
-
-            float[] x = new float[Current_Mission.all_waypoints.Count() + 1];
-            float[] y = new float[Current_Mission.all_waypoints.Count() + 1];
+            //Spline Algorithm
+            //--------------------------------------------------------------------------------
+            float[] x = new float[total_waypoints + 1]; //Plus one so the plane goes back to waypoint 0
+            float[] y = new float[total_waypoints + 1];
             float[] xs;
             float[] ys;
 
@@ -911,6 +957,44 @@ namespace interoperability
                 SplineWP.Add(new Waypoint(ys[i], xs[i]));
             }
 
+            int[] altitude_array = new int[total_waypoints + 1];
+
+            //Start calculating altitude spline... kinda
+            int altitude_count = 0;
+            for(int i = 0; i < xs.Count(); i++)
+            {
+                double dd;
+                if(altitude_count < Current_Mission.all_waypoints.Count())
+                {
+                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[altitude_count].longitude - SplineWP[i].longitude);
+                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[altitude_count].latitude - SplineWP[i].latitude);
+                    dd = Math.Sqrt(dx * dx + dy * dy);
+                }
+                else
+                {
+                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[0].longitude - SplineWP[i].longitude);
+                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[0].latitude - SplineWP[i].latitude);
+                    dd = Math.Sqrt(dx * dx + dy * dy);
+                }
+
+                if (dd < 5)
+                {
+                    altitude_array[altitude_count] = i;
+                    altitude_count++;
+                }
+            }
+
+            for(int i = 0; i <= total_waypoints-2; i++)
+            {
+                //Get number of indexes between start and end altitude
+                int delta_index = altitude_array[i + 1] - altitude_array[i];
+                double delta_altitude = (Current_Mission.all_waypoints[i + 1].altitude_msl - Current_Mission.all_waypoints[i].altitude_msl) / delta_index;
+                for (int j = altitude_array[i]; j < altitude_array[i + 1]; j++)
+                {
+                    SplineWP[j].altitude_msl = (float)(Current_Mission.all_waypoints[i].altitude_msl + (j-altitude_array[i]) * delta_altitude);
+                }
+
+            }
 
             double Total_Distance = 0;
             //Get total distance of spline 
@@ -920,20 +1004,20 @@ namespace interoperability
                 double dy = MercatorProjection.latToY(SplineWP[i + 1].latitude) - MercatorProjection.latToY(SplineWP[i].latitude);
                 Total_Distance += Math.Sqrt(dx * dx + dy * dy);
             }
-
+            
             double current_dist = 0;
 
-            //End Test Spline Algorithm
+            //-------------------------------------------------------------------------------------------
+            //End Spline Algorithm
 
             while (SDA_Plane_Simulator_Thread_shouldStop == false)
             {
-                
-
                 //If using straight moving lines
                 if (false)
                 {
                     if (target_waypoint == total_waypoints)
                     {
+                        sim_next_wp = 0;
                         target_waypoint = 0;
                     }
                     Console.WriteLine("Target Waypoint: " + target_waypoint.ToString());
@@ -943,6 +1027,7 @@ namespace interoperability
                     double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[target_waypoint].longitude) - currX;
                     double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].latitude) - currY;
 
+                    double dalt = Current_Mission.all_waypoints[target_waypoint].altitude_msl - sim_alt;
                     //Since we're calling every 1/2 second, we move the plane AIRSPEED/2 meters per second
                     ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
 
@@ -954,6 +1039,7 @@ namespace interoperability
                     {
                         dx = dx * conversionRatio;
                         dy = dy * conversionRatio;
+                        dalt = dalt * conversionRatio;
                     }
 
                     sim_yaw = (float)(90 - Math.Atan2(dy, dx) * 180 / Math.PI);
@@ -964,15 +1050,18 @@ namespace interoperability
 
                     sim_lat = MercatorProjection.yToLat(currY + dy);
                     sim_lng = MercatorProjection.xToLon(currX + dx);
+                    sim_alt += (float)dalt;
 
 
                     if (Math.Sqrt(Math.Pow(MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].latitude) - MercatorProjection.latToY(sim_lat), 2) +
                         Math.Pow(MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].longitude) - MercatorProjection.latToY(sim_lng), 2)) < 10)
                     {
                         target_waypoint++;
+                        sim_next_wp++;
                     }
                 }
                 //Spline Interpolation
+                //Not very accurate (assumes each point is the same distance apart, which it's not)
                 else
                 {
                     ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
@@ -988,7 +1077,25 @@ namespace interoperability
 
                     sim_lat = SplineWP[spline_index].latitude;
                     sim_lng = SplineWP[spline_index].longitude;
+                    sim_alt = SplineWP[spline_index].altitude_msl;
 
+                    //Very stupid way of calculating target waypoint 
+                    for(int i = 0; i <= total_waypoints; i++)
+                    {
+                        if(spline_index < altitude_array[i])
+                        {
+                            sim_next_wp = i;
+                            break;
+                        }
+                        else if(spline_index > altitude_array[total_waypoints - 1])
+                        {
+                            sim_next_wp = 0;
+                            break;
+                        }
+                    }
+
+
+                    Console.WriteLine("Target Waypoint: " + sim_next_wp.ToString());
 
                     double dy = SplineWP[spline_index + 1].latitude - sim_lat; 
                     double dx = SplineWP[spline_index + 1].longitude - sim_lng;

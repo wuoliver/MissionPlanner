@@ -1250,6 +1250,19 @@ namespace Interoperability_GUI_Forms
             }
             InteroperabilityCallback(13);
         }
+
+        private void SDA_Start_Algorithm_Button_Click(object sender, EventArgs e)
+        {
+            if (SDA_Start_Algorithm_Button.Text == "Start Algorithm")
+            {
+                SDA_Start_Algorithm_Button.Text = "Stop Algorithm";
+            }
+            else
+            {
+                SDA_Start_Algorithm_Button.Text = "Start Algorithm";
+            }
+            InteroperabilityCallback(14);
+        }
     }
 
     public static class MercatorProjection
