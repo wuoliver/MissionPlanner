@@ -32,13 +32,13 @@ namespace Interoperability_GUI_Forms
 
         private string gui_format = "AUVSI";
 
-        Action<int> InteroperabilityCallback;
+        Action<Interoperability.Interop_Action> InteroperabilityCallback;
         Action<int> InteroperabilityGUICallback;
         Interoperability_Settings Settings;
 
         public bool isOpened = false;
 
-        public Settings_GUI(Action<int> _InteroperabilityCallback, Action<int> _InteroperabilityGUICallback, Interoperability_Settings _Settings)
+        public Settings_GUI(Action<Interoperability.Interop_Action> _InteroperabilityCallback, Action<int> _InteroperabilityGUICallback, Interoperability_Settings _Settings)
         {
             InitializeComponent();
             InteroperabilityCallback = _InteroperabilityCallback;
@@ -110,7 +110,7 @@ namespace Interoperability_GUI_Forms
                 Settings.Save();
 
                 //Restarts all the threads relying on HTTP to update credentials
-                InteroperabilityCallback(6);
+                InteroperabilityCallback(Interoperability.Interop_Action.Restart_Threads_Settings);
 
                 //Change tab layout 
                 if (GUI_FORMAT_BOX.Text != old_gui_format)

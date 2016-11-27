@@ -111,6 +111,8 @@
     <Compile Include="Interoperability_Mission_Edit.Designer.cs">
       <DependentUpon>Interoperability_Mission_Edit.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interop_Objects.cs" />
+    <Compile Include="Interop_Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

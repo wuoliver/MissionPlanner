@@ -666,7 +666,7 @@
             this.Mission_Enable.TabIndex = 1;
             this.Mission_Enable.Text = "Get Mission from Server";
             this.Mission_Enable.UseVisualStyleBackColor = true;
-            this.Mission_Enable.Click += new System.EventHandler(this.Mission_Enable_Click);
+            this.Mission_Enable.Click += new System.EventHandler(this.Mission_Download_Click);
             // 
             // TargetUpload_Tab
             // 
@@ -1028,7 +1028,6 @@
             this.InteropGUIButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.InteropGUIButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
             this.InteropGUIButton.ToolTipText = "UTAT Interoperability Control Panel";
-            this.InteropGUIButton.Click += new System.EventHandler(this.InteropGUIButton_Click);
             this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
             // 
             // FlightTimeLabel

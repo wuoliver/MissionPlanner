@@ -46,222 +46,8 @@ using System.Diagnostics; // For stopwatch
  * 
  */
 
-
 namespace interoperability
 {
-    //SDA Classes 
-    public class Moving_Obstacle
-    {
-        //Altitude in feet
-        public float altitude_msl { get; set; }
-        public float latitude { get; set; }
-        public float longitude { get; set; }
-        //radius in feet
-        public float sphere_radius { get; set; }
-
-        public void printall()
-        {
-            Console.WriteLine("Altitude_MSL: " + altitude_msl + "\nLatitude: " + latitude +
-                "\nLongitude: " + longitude + "\nSphere_Radius: " + sphere_radius);
-        }
-    }
-
-    public class Stationary_Obstacle
-    {   //In feet
-        public float cylinder_height { get; set; }
-        //In feet
-        public float cylinder_radius { get; set; }
-        public float latitude { get; set; }
-        public float longitude { get; set; }
-
-        public void printall()
-        {
-            Console.WriteLine("Cylinder Height: " + cylinder_height + "\nLatitude: " + latitude +
-                "\nLongitude: " + longitude + "\nCylinder radius: " + cylinder_radius);
-        }
-    }
-
-    public class Obstacles
-    {
-        public List<Moving_Obstacle> moving_obstacles;
-        public List<Stationary_Obstacle> stationary_obstacles;
-    }
-
-    //Mission Classes
-    public class Waypoint
-    {
-        public float altitude_msl { get; set; }
-        public float latitude { get; set; }
-        public float longitude { get; set; }
-        public int order { get; set; }
-        public bool empty { get; set; }
-
-        public Waypoint()
-        {
-            empty = true;
-        }
-        public Waypoint(float _latitude, float _longitude)
-        {
-            latitude = _latitude;
-            longitude = _longitude;
-            empty = false;
-        }
-        public Waypoint(double _latitude, double _longitude)
-        {
-            latitude = (float)_latitude;
-            longitude = (float)_longitude;
-            empty = false;
-        }
-
-        public Waypoint(float _altitude_msl, float _latitude, float _longitude)
-        {
-            latitude = _latitude;
-            longitude = _longitude;
-            altitude_msl = _altitude_msl;
-            empty = false;
-        }
-
-        public Waypoint(double _altitude_msl, double _latitude, double _longitude)
-        {
-            latitude = (float)_latitude;
-            longitude = (float)_longitude;
-            altitude_msl = (float)_altitude_msl;
-            empty = false;
-        }
-
-        public Waypoint(float _altitude_msl, float _latitude, float _longitude, int order)
-        {
-            latitude = _latitude;
-            longitude = _longitude;
-            altitude_msl = _altitude_msl;
-            empty = false;
-        }
-    }
-
-    public class GPS_Position
-    {
-        public float latitude { get; set; }
-        public float longitude { get; set; }
-        public GPS_Position()
-        {
-            latitude = 0;
-            longitude = 0;
-        }
-        public GPS_Position(float _latitude, float _longitude)
-        {
-            latitude = _latitude;
-            longitude = _longitude;
-        }
-
-        public GPS_Position(double _latitude, double _longitude)
-        {
-            latitude = (float)_latitude;
-            longitude = (float)_longitude;
-        }
-    }
-
-    public class FlyZone
-    {
-        public float altitude_msl_max { get; set; }
-        public float altitude_msl_min { get; set; }
-        public List<Waypoint> boundary_pts { get; set; }
-        public string name { get; set; }
-        public FlyZone(float _altitude_msl_max, float _altitude_msl_min, List<Waypoint> _boundary_pts)
-        {
-            altitude_msl_max = _altitude_msl_max;
-            altitude_msl_min = _altitude_msl_min;
-            boundary_pts = _boundary_pts;
-            name = "Geofence";
-        }
-        public FlyZone(float _altitude_msl_max, float _altitude_msl_min, string _name, List<Waypoint> _boundary_pts)
-        {
-            altitude_msl_max = _altitude_msl_max;
-            altitude_msl_min = _altitude_msl_min;
-            name = _name;
-            boundary_pts = _boundary_pts;
-        }
-        public FlyZone()
-        {
-            altitude_msl_max = 0;
-            altitude_msl_min = 0;
-            name = "Geofence";
-            boundary_pts = new List<Waypoint>();
-        }
-    }
-
-    //The class that holds a single mission
-    public class Mission
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public bool unedited { get; set; }
-        public bool active { get; set; }
-        //Position of the air drop location 
-        public GPS_Position air_drop_pos { get; set; }
-        //Last known position of the emergent target
-        public GPS_Position emergent_lkp { get; set; }
-        //A list of flyzones (geofence)
-        public List<FlyZone> fly_zones { get; set; }
-        public GPS_Position home_pos { get; set; }
-        //Waypoints we must fly as part of the mission
-        public List<Waypoint> mission_waypoints { get; set; }
-        //A list of all waypoints we will be flying in our mission
-        public List<Waypoint> all_waypoints { get; set; }
-        public GPS_Position off_axis_target_pos { get; set; }
-        public List<Waypoint> search_grid_points { get; set; }
-
-        //SRIC removed for AUVSI 2017
-        //public GPS_Position sric_pos { get; set; }
-
-        public Mission()
-        {
-            id = 0;
-            name = "New Mission";
-            unedited = true;
-            active = false;
-            air_drop_pos = new GPS_Position();
-            emergent_lkp = new GPS_Position();
-            fly_zones = new List<FlyZone>();
-            fly_zones.Add(new FlyZone());
-            home_pos = new GPS_Position();
-            mission_waypoints = new List<Waypoint>();
-            all_waypoints = new List<Waypoint>();
-            off_axis_target_pos = new GPS_Position();
-            search_grid_points = new List<Waypoint>();
-        }
-    }
-
-    //Target Classes
-    public class Target
-    {
-        public int id { get; set; }
-        public string type { get; set; }
-        public float latitude { get; set; }
-        public float longitude { get; set; }
-        public string orientation { get; set; }
-        public float shape { get; set; }
-        public float background_color { get; set; }
-        public float alphanumeric { get; set; }
-        public float alphanumeric_colour { get; set; }
-        public float description { get; set; }
-        public bool autonomous { get; set; }
-
-        public void printall()
-        {
-            Console.WriteLine("Target ID: " + id + "\nType: " + type + "\nLatitude: " + latitude +
-                "\nLongitude: " + longitude + "\nOrientation: " + orientation + "\nShape: " + shape +
-                "\nBackground Colour: " + background_color + "\nAlphanumeric: " + alphanumeric +
-                "\nAlphanumeric Colour : " + alphanumeric_colour + "\nDescription: " + description +
-                "\nAutonomous: " + autonomous);
-        }
-    }
-
-    public class Target_List
-    {
-        public List<Target> List;
-    }
-
-
     public class Interoperability : Plugin
     {
         //Default credentials if credentials file does not exist
@@ -273,9 +59,6 @@ namespace interoperability
         private string airspd_units = "Metres per Second";
         private string geo_cords = "DD.DDDDDD";
 
-
-
-
         //SDA Simulator Values
         private double sim_lat = 0;
         private double sim_lng = 0;
@@ -283,6 +66,7 @@ namespace interoperability
         private float sim_yaw = 0;
         private int sim_next_wp = 0;
 
+        private static Mutex Interoperability_Action_Mutex = new Mutex();
 
         private Thread Telemetry_Thread;
         private Thread Obstacle_SDA_Thread;
@@ -300,15 +84,6 @@ namespace interoperability
         private bool SDA_Plane_Simulator_Thread_shouldStop = true;
         private bool SDA_Avoidance_Algorithm_Thread_shouldStop = true;
 
-
-        private bool Telemetry_Thread_isAlive = false;
-        private bool Obstacle_SDA_Thread_isAlive = false;
-        private bool Mission_Thread_isAlive = false;
-        private bool Map_Thread_isAlive = false;
-        private bool Callout_Thread_isAlive = false;
-        private bool SDA_Plane_Simulator_Thread_isAlive = false;
-        private bool SDA_Avoidance_Algorithm_Thread_isAlive = false;
-
         private int ImportantCounter = 0;
         private long ImporantTimeCount = 0;
         private Stopwatch ImportantTimer = new Stopwatch();
@@ -316,6 +91,7 @@ namespace interoperability
         bool Obstacles_Downloaded = false;                  //Used to tell the map control thread we can access obstaclesList 
         bool resetUploadStats = false;                      //Used to reset telemetry upload stats
         bool resetFlightTimer = false;                      //Used to reset the flight timer
+        bool usePlaneSimulator = false;                     //Used for the plane simulator
 
         Obstacles obstaclesList;                            //Instance that holds all SDA Obstacles 
         public Interoperability_Settings Settings;          //Instance that holds all Interoperability Settings
@@ -329,7 +105,7 @@ namespace interoperability
         public static Mutex Interoperability_Mutex = new Mutex();
 
         //Instantiate windows forms
-        global::Interoperability_GUI_Forms.Interoperability_GUI_Main Interoperability_GUI;
+        Interoperability_GUI_Main Interoperability_GUI;
 
         override public string Name
         {
@@ -337,7 +113,7 @@ namespace interoperability
         }
         override public string Version
         {
-            get { return ("0.7.1"); }
+            get { return ("0.7.3"); }
         }
         override public string Author
         {
@@ -371,7 +147,6 @@ namespace interoperability
             SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
             SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
 
-
             //Instantiate Mission_List
             Mission_List = new List<Mission>();
             Current_Mission = new Mission();
@@ -401,96 +176,142 @@ namespace interoperability
 
             return (true);
         }
+
+        /// <summary>
+        /// Returns the current interoperability instance
+        /// </summary>
+        /// <returns></returns>
         public static Interoperability getinstance()
         {
             return Instance;
         }
 
-        public void interoperabilityAction(int action)
+        public enum Interop_Action
         {
+            Telemtry_Thread_Start,
+            Telemtry_Thread_Stop,
+            Obstacle_SDA_Thread_Start,
+            Obstacle_SDA_Thread_Stop,
+            Mission_Download_Run,
+            Telemetry_Thread_Reset_Stats,
+            Restart_Threads_Settings,
+            Stop_All_Threads_Quit,
+            Show_Interop_GUI,
+            Easter_Egg_Action,
+            Callout_Thread_Start,
+            Callout_Thread_Stop,
+            Map_Thread_Restart_Flight_Timer,
+            Clear_Cur_Mission,
+            SDA_Plane_Simulator_Thread_Start,
+            SDA_Plane_Simulator_Thread_Stop,
+            SDA_Avoidance_Algorithm_Thread_Start,
+            SDA_Avoidance_Algorithm_Thread_Stop
+        }
+
+        /// <summary>
+        /// Allows other functions to control the interoperability threads.
+        /// </summary>
+        /// <param name="action"></param>
+        public void interoperabilityAction(Interop_Action action)
+        {
+            Interoperability_Action_Mutex.WaitOne();
             switch (action)
             {
                 //Start Telemetry_Upload Thread
-                case 0:
+                case Interop_Action.Telemtry_Thread_Start:
+                    Stop_Thread(ref Telemetry_Thread, ref Telemetry_Thread_shouldStop);
                     Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
                     Telemetry_Thread_shouldStop = false;
                     Telemetry_Thread.Start();
                     break;
+
+                //Stop telemtry upload thread
+                case Interop_Action.Telemtry_Thread_Stop:
+                    Stop_Thread(ref Telemetry_Thread, ref Telemetry_Thread_shouldStop);
+                    break;
+
                 //Start Obstacle_SDA Thread
-                case 1:
+                case Interop_Action.Obstacle_SDA_Thread_Start:
+                    Stop_Thread(ref Obstacle_SDA_Thread, ref Obstacle_SDA_Thread_shouldStop);
                     Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
                     Obstacle_SDA_Thread_shouldStop = false;
                     Obstacle_SDA_Thread.Start();
                     break;
+
                 //Stop Obstacle_SDA Thread
-                case 2:
-                    Obstacle_SDA_Thread_shouldStop = true;
+                case Interop_Action.Obstacle_SDA_Thread_Stop:
+                    Stop_Thread(ref Obstacle_SDA_Thread, ref Obstacle_SDA_Thread_shouldStop);
                     break;
-                //Start mission download thread
-                case 3:
+
+                //Run mission download thread
+                case Interop_Action.Mission_Download_Run:
+                    Stop_Thread(ref Mission_Thread, ref Mission_Thread_shouldStop);
                     Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
                     Mission_Thread_shouldStop = false;
                     Mission_Thread.Start();
                     break;
+
                 //Reset Telemetry Upload Rate Stats
-                case 4:
+                case Interop_Action.Telemetry_Thread_Reset_Stats:
                     resetUploadStats = true;
-                    if (!Telemetry_Thread_isAlive)
+                    if (Telemetry_Thread.IsAlive == false)
                     {
                         Interoperability_GUI.setAvgTelUploadText("0Hz");
                         Interoperability_GUI.setUniqueTelUploadText("0Hz");
                         Interoperability_GUI.setTotalTelemUpload(0);
                     }
                     break;
-                //Stop telemtry upload thread
-                case 5:
-                    Telemetry_Thread_shouldStop = true;
-                    break;
+
                 //Restart all running threads that rely on server credentials or unit settings
-                case 6:
+                case Interop_Action.Restart_Threads_Settings:
                     getSettings();
                     //No need to reset the map control thread
-                    if (Map_Thread_isAlive == false)
+                    if (Map_Control_Thread.IsAlive == false)
                     {
-                        Map_Control_Thread_shouldStop = true;
+                        Stop_Thread(ref Map_Control_Thread, ref Map_Control_Thread_shouldStop);
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
                         Map_Control_Thread_shouldStop = false;
                         Map_Control_Thread.Start();
                     }
-                    //If GUI format is not AUVSI, disable all server threads
-                    bool isAUVSI = true;
+                    //If GUI format is not AUVSI, disable all AUVSI Threads
                     if (Settings["gui_format"] != "AUVSI")
                     {
-                        isAUVSI = false;
-                        Telemetry_Thread_shouldStop = true;
-                        Obstacle_SDA_Thread_shouldStop = true;
-                        Mission_Thread_shouldStop = true;
+                        Stop_Thread(ref Telemetry_Thread, ref Telemetry_Thread_shouldStop);
+                        Stop_Thread(ref Obstacle_SDA_Thread, ref Obstacle_SDA_Thread_shouldStop);
+                        Stop_Thread(ref Mission_Thread, ref Mission_Thread_shouldStop);
+                        Stop_Thread(ref SDA_Avoidance_Algorithm_Thread, ref SDA_Avoidance_Algorithm_Thread_shouldStop);
+                        Stop_Thread(ref SDA_Plane_Simulator_Thread, ref SDA_Plane_Simulator_Thread_shouldStop);
+                    }
+                    else
+                    {
+                        if (Telemetry_Thread.IsAlive)
+                        {
+                            Stop_Thread(ref Telemetry_Thread, ref Telemetry_Thread_shouldStop);
+                            Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
+                            Telemetry_Thread_shouldStop = false;
+                            Telemetry_Thread.Start();
+                        }
+                        if (Obstacle_SDA_Thread.IsAlive)
+                        {
+                            Stop_Thread(ref Obstacle_SDA_Thread, ref Obstacle_SDA_Thread_shouldStop);
+                            Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
+                            Obstacle_SDA_Thread_shouldStop = false;
+                            Obstacle_SDA_Thread.Start();
+                        }
+                        if (Mission_Thread.IsAlive)
+                        {
+                            Stop_Thread(ref Mission_Thread, ref Mission_Thread_shouldStop);
+                            Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
+                            Mission_Thread_shouldStop = false;
+                            Mission_Thread.Start();
+                        }
                     }
 
-                    if (Telemetry_Thread_isAlive && isAUVSI)
-                    {
-                        Telemetry_Thread_shouldStop = true;
-                        Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
-                        Telemetry_Thread_shouldStop = false;
-                        Telemetry_Thread.Start();
-                    }
-                    if (Obstacle_SDA_Thread_isAlive && isAUVSI)
-                    {
-                        Obstacle_SDA_Thread_shouldStop = true;
-                        Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
-                        Obstacle_SDA_Thread_shouldStop = false;
-                        Obstacle_SDA_Thread.Start();
-                    }
-                    if (Mission_Thread_isAlive && isAUVSI)
-                    {
-                        Mission_Thread_shouldStop = true;
-                        Mission_Thread = new Thread(new ThreadStart(this.Mission_Download));
-                        Mission_Thread_shouldStop = false;
-                        Mission_Thread.Start();
-                    }
                     break;
+
                 //Stop all threads, when loop until all threads are done
-                case 7:
+                case Interop_Action.Stop_All_Threads_Quit:
+
                     Telemetry_Thread_shouldStop = true;
                     Mission_Thread_shouldStop = true;
                     Obstacle_SDA_Thread_shouldStop = true;
@@ -498,19 +319,36 @@ namespace interoperability
                     Callout_Thread_shouldStop = true;
                     SDA_Plane_Simulator_Thread_shouldStop = true;
                     SDA_Avoidance_Algorithm_Thread_shouldStop = true;
-                    while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive || 
+
+                    Stopwatch t = new Stopwatch();
+                    t.Start();
+                    while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive ||
                         Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive || SDA_Avoidance_Algorithm_Thread.IsAlive)
                     {
+                        //If all threads haven't quit in 1 seconds, force quit
+                        if (t.ElapsedMilliseconds > 1000)
+                        {
+                            Telemetry_Thread.Abort();
+                            Mission_Thread.Abort();
+                            Obstacle_SDA_Thread.Abort();
+                            Map_Control_Thread.Abort();
+                            Callout_Thread.Abort();
+                            SDA_Avoidance_Algorithm_Thread.Abort();
+                            SDA_Plane_Simulator_Thread.Abort();
+                            break;
+                        }
                         //Wait until all threads have stopped
                     }
                     break;
+
                 //Show the interoperability control panel
-                case 8:
+                case Interop_Action.Show_Interop_GUI:
                     if (!Interoperability_GUI.isOpened)
                     {
                         Interoperability_GUI = new Interoperability_GUI_Forms.Interoperability_GUI_Main(this.interoperabilityAction, Settings);
                         Interoperability_GUI.Show();
                         //Start map thread
+                        Stop_Thread(ref Map_Control_Thread, ref Map_Control_Thread_shouldStop);
                         Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
                         Map_Control_Thread_shouldStop = false;
                         Map_Control_Thread.Start();
@@ -524,8 +362,9 @@ namespace interoperability
                         }
                     }
                     break;
+
                 //Easter egg
-                case 9:
+                case Interop_Action.Easter_Egg_Action:
                     if (ImportantTimer.ElapsedMilliseconds - ImporantTimeCount > 100)
                     {
                         switch (ImportantCounter)
@@ -554,48 +393,71 @@ namespace interoperability
                         ImportantCounter++;
                     }
                     break;
+
                 //Start callout thread
-                case 10:
+                case Interop_Action.Callout_Thread_Start:
+                    Stop_Thread(ref Callout_Thread, ref Callout_Thread_shouldStop);
                     Callout_Thread = new Thread(new ThreadStart(this.Callouts));
                     Callout_Thread_shouldStop = false;
                     Callout_Thread.Start();
                     break;
-                case 11:
+
+                //Stop callout thread
+                case Interop_Action.Callout_Thread_Stop:
+                    Stop_Thread(ref Callout_Thread, ref Callout_Thread_shouldStop);
+                    break;
+
+                //Reset Flight Timer
+                case Interop_Action.Map_Thread_Restart_Flight_Timer:
                     resetFlightTimer = true;
                     break;
+
                 //Clear current mission
-                case 12:
+                case Interop_Action.Clear_Cur_Mission:
                     Current_Mission = new Mission();
                     Current_Mission.name = "TEST RESET";
                     break;
-                //Start or stop simulator
-                case 13:
-                    if (SDA_Plane_Simulator_Thread_isAlive == true)
-                    {
-                        SDA_Plane_Simulator_Thread_shouldStop = true;
-                    }
-                    else
-                    {
-                        SDA_Plane_Simulator_Thread_shouldStop = false;
-                        SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
-                        SDA_Plane_Simulator_Thread.Start();
-                    }
+
+                //Start simulator
+                case Interop_Action.SDA_Plane_Simulator_Thread_Start:
+                    Stop_Thread(ref SDA_Plane_Simulator_Thread, ref SDA_Plane_Simulator_Thread_shouldStop);
+                    SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
+                    SDA_Plane_Simulator_Thread.Start();
                     break;
-                case 14:
-                    if (SDA_Avoidance_Algorithm_Thread_isAlive == true)
-                    {
-                        SDA_Avoidance_Algorithm_Thread_shouldStop = true;
-                    }
-                    else
-                    {
-                        SDA_Avoidance_Algorithm_Thread_shouldStop = false;
-                        SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
-                        SDA_Avoidance_Algorithm_Thread.Start();
-                    }
+
+                //Stop simulator
+                case Interop_Action.SDA_Plane_Simulator_Thread_Stop:
+                    Stop_Thread(ref SDA_Plane_Simulator_Thread, ref SDA_Plane_Simulator_Thread_shouldStop);
                     break;
+
+                //Start or stop SDA avoidance algorithm
+                case Interop_Action.SDA_Avoidance_Algorithm_Thread_Start:
+                    Stop_Thread(ref SDA_Avoidance_Algorithm_Thread, ref SDA_Avoidance_Algorithm_Thread_shouldStop);
+                    SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
+                    SDA_Avoidance_Algorithm_Thread_shouldStop = false;
+                    SDA_Avoidance_Algorithm_Thread.Start();
+                    break;
+
+                case Interop_Action.SDA_Avoidance_Algorithm_Thread_Stop:
+                    Stop_Thread(ref SDA_Avoidance_Algorithm_Thread, ref SDA_Avoidance_Algorithm_Thread_shouldStop);
+                    break;
+
                 default:
                     break;
             }
+            Interoperability_Action_Mutex.ReleaseMutex();
+            return;
+        }
+
+        private void Stop_Thread(ref Thread _thread, ref bool shouldStop_Variable)
+        {
+            shouldStop_Variable = true;
+            _thread.Join(50);
+            if (_thread.IsAlive)
+            {
+                _thread.Abort();
+            }
+            return;
         }
 
 
@@ -610,6 +472,10 @@ namespace interoperability
             //this.Host.FDMenuMap.
         }
 
+
+        /// <summary>
+        /// Loads all the settings from the Interoperability_Config.xml
+        /// </summary>
         public void getSettings()
         {
             if (Settings.ContainsKey("dist_units") && Settings.ContainsKey("airspd_units") && Settings.ContainsKey("geo_cords"))
@@ -641,12 +507,13 @@ namespace interoperability
                 Settings["showInteroperability_GUI"] = false.ToString();
             }
             Settings.Save();
-
         }
 
+        /// <summary>
+        /// Runs in a loop, uploading telemtry data to the interoperability server
+        /// </summary>
         public async void Telemetry_Upload()
         {
-            Telemetry_Thread_isAlive = true;
             Console.WriteLine("Telemetry_Upload Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -680,15 +547,16 @@ namespace interoperability
                         Console.WriteLine("Invalid Credentials");
                         Interoperability_GUI.setAvgTelUploadText("Error, Invalid Credentials.");
                         Interoperability_GUI.setUniqueTelUploadText("Error, Invalid Credentials");
-                        Interoperability_GUI.TelemResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.setTelemResp(resp.Content.ReadAsStringAsync().Result);
                         Interoperability_GUI.Telem_Start_Stop_Button_Off();
-                        Telemetry_Thread_shouldStop = true;
+                        //interoperabilityAction(Interop_Action.Telemtry_Thread_Stop);
+                        return;
 
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
-                        Telemetry_Thread_shouldStop = false;
+                        //interoperabilityAction(Interop_Action.Telemtry_Thread_Stop);
                     }
 
                     CurrentState csl = this.Host.cs;
@@ -747,7 +615,7 @@ namespace interoperability
                             var telem = new FormUrlEncodedContent(telemData);
                             HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
                             Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
-                            Interoperability_GUI.TelemResp(telemresp.Content.ReadAsStringAsync().Result);
+                            Interoperability_GUI.setTelemResp(telemresp.Content.ReadAsStringAsync().Result);
                             count++;
                             Interoperability_GUI.setTotalTelemUpload(count);
                         }
@@ -762,24 +630,20 @@ namespace interoperability
                 //<h1>403 Forbidden</h1> 
                 Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
                 Interoperability_GUI.setUniqueTelUploadText("Error, Unable to Connect to Server");
-                Interoperability_GUI.TelemResp("Error, Unable to Connect to Server");
+                Interoperability_GUI.setTelemResp("Error, Unable to Connect to Server");
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
             }
-            Telemetry_Thread_isAlive = false;
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
 
-        //This is where we periodically download the obstacles from the server 
+        /// <summary>
+        /// Runs in a loop, downloading current obstacle locaitons from the server 
+        /// </summary>
         public async void Obstacle_SDA()
         {
-            Obstacle_SDA_Thread_isAlive = true;
             Console.WriteLine("Obstacle_SDA Thread Started");
-            Stopwatch t = new Stopwatch();
-            t.Start();
-
-            int count = 0;
             CookieContainer cookies = new CookieContainer();
 
             try
@@ -798,37 +662,31 @@ namespace interoperability
                     var auth = new FormUrlEncodedContent(v);
                     HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
                     Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
-                    Console.WriteLine("---LOGIN FINISHED---");
-                    //resp.IsSuccessStatusCode;
+
+
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine("Invalid Credentials");
-                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.setSDAResp(resp.Content.ReadAsStringAsync().Result);
                         Interoperability_GUI.SetSDAStart_StopButton_Off();
-                        Obstacle_SDA_Thread_shouldStop = true;
+                        //interoperabilityAction(Interop_Action.Obstacle_SDA_Thread_Stop);
+                        return;
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
-                        Interoperability_GUI.SDAResp(resp.Content.ReadAsStringAsync().Result);
-                        Obstacle_SDA_Thread_shouldStop = false;
+                        Interoperability_GUI.setSDAResp(resp.Content.ReadAsStringAsync().Result);
                     }
+                    Console.WriteLine("---LOGIN FINISHED---");
 
                     while (!Obstacle_SDA_Thread_shouldStop)
                     {
                         HttpResponseMessage SDAresp = await client.GetAsync("/api/obstacles");
-                        //Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
-                        count++;
 
-                        Console.WriteLine("outputting formatted data");
                         obstaclesList = new JavaScriptSerializer().Deserialize<Obstacles>(SDAresp.Content.ReadAsStringAsync().Result);
-
                         Obstacles_Downloaded = true;
-                        Interoperability_GUI.setObstacles(obstaclesList);
+                        Interoperability_GUI.WriteObstacles(obstaclesList);
 
-                        System.Threading.Thread.Sleep(100);
-
-                        t.Restart();
                         Thread.Sleep(1000 / Interoperability_GUI.getsdaPollRate());
                     }
                 }
@@ -836,11 +694,10 @@ namespace interoperability
             catch
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
-                Interoperability_GUI.SDAResp("Error, Unable to Connect to Server");
+                Interoperability_GUI.setSDAResp("Error, Unable to Connect to Server");
                 Interoperability_GUI.SetSDAStart_StopButton_Off();
 
             }
-            Obstacle_SDA_Thread_isAlive = false;
             Interoperability_GUI.SetSDAStart_StopButton_Off();
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
@@ -848,11 +705,13 @@ namespace interoperability
 
         private List<Waypoint> SplineWP;
 
+
+        /// <summary>
+        /// SDA algorithm. Runs periodically to avoid obstacles
+        /// </summary>
         public void SDA_Avoidance_Algorithm()
         {
-            SDA_Avoidance_Algorithm_Thread_isAlive = true;
-
-            while(SDA_Plane_Simulator_Thread_shouldStop == false)
+            while (SDA_Plane_Simulator_Thread_shouldStop == false)
             {
                 /*Write your algorithm here
                 You have access to: 
@@ -871,14 +730,10 @@ namespace interoperability
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
             }
-
-            SDA_Avoidance_Algorithm_Thread_isAlive = false;
         }
 
         public void SDA_Plane_Simulator()
         {
-            SDA_Plane_Simulator_Thread_isAlive = true;
-
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
             Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
@@ -921,7 +776,7 @@ namespace interoperability
 
             if (Current_Mission.all_waypoints.Count() < 3)
             {
-                SDA_Plane_Simulator_Thread_isAlive = false;
+                Console.WriteLine("Error, not enough waypoints to start simulator (Minimum 3)");
                 return;
             }
 
@@ -952,7 +807,7 @@ namespace interoperability
             CubicSpline.FitParametric(x, y, 1000, out xs, out ys);
 
             SplineWP = new List<Waypoint>();
-            for(int i = 0; i < xs.Count(); i++)
+            for (int i = 0; i < xs.Count(); i++)
             {
                 SplineWP.Add(new Waypoint(ys[i], xs[i]));
             }
@@ -961,10 +816,10 @@ namespace interoperability
 
             //Start calculating altitude spline... kinda
             int altitude_count = 0;
-            for(int i = 0; i < xs.Count(); i++)
+            for (int i = 0; i < xs.Count(); i++)
             {
                 double dd;
-                if(altitude_count < Current_Mission.all_waypoints.Count())
+                if (altitude_count < Current_Mission.all_waypoints.Count())
                 {
                     double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[altitude_count].longitude - SplineWP[i].longitude);
                     double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[altitude_count].latitude - SplineWP[i].latitude);
@@ -984,14 +839,14 @@ namespace interoperability
                 }
             }
 
-            for(int i = 0; i <= total_waypoints-2; i++)
+            for (int i = 0; i <= total_waypoints - 2; i++)
             {
                 //Get number of indexes between start and end altitude
                 int delta_index = altitude_array[i + 1] - altitude_array[i];
                 double delta_altitude = (Current_Mission.all_waypoints[i + 1].altitude_msl - Current_Mission.all_waypoints[i].altitude_msl) / delta_index;
                 for (int j = altitude_array[i]; j < altitude_array[i + 1]; j++)
                 {
-                    SplineWP[j].altitude_msl = (float)(Current_Mission.all_waypoints[i].altitude_msl + (j-altitude_array[i]) * delta_altitude);
+                    SplineWP[j].altitude_msl = (float)(Current_Mission.all_waypoints[i].altitude_msl + (j - altitude_array[i]) * delta_altitude);
                 }
 
             }
@@ -1004,7 +859,7 @@ namespace interoperability
                 double dy = MercatorProjection.latToY(SplineWP[i + 1].latitude) - MercatorProjection.latToY(SplineWP[i].latitude);
                 Total_Distance += Math.Sqrt(dx * dx + dy * dy);
             }
-            
+
             double current_dist = 0;
 
             //-------------------------------------------------------------------------------------------
@@ -1067,9 +922,9 @@ namespace interoperability
                     ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
                     current_dist += ddist;
 
-                    int spline_index = (int)Math.Ceiling(current_dist / (Total_Distance/SplineWP.Count()));
+                    int spline_index = (int)Math.Ceiling(current_dist / (Total_Distance / SplineWP.Count()));
 
-                    if(current_dist >= Total_Distance || spline_index >= SplineWP.Count() - 1)
+                    if (current_dist >= Total_Distance || spline_index >= SplineWP.Count() - 1)
                     {
                         current_dist = 0;
                         spline_index = 0;
@@ -1080,14 +935,14 @@ namespace interoperability
                     sim_alt = SplineWP[spline_index].altitude_msl;
 
                     //Very stupid way of calculating target waypoint 
-                    for(int i = 0; i <= total_waypoints; i++)
+                    for (int i = 0; i <= total_waypoints; i++)
                     {
-                        if(spline_index < altitude_array[i])
+                        if (spline_index < altitude_array[i])
                         {
                             sim_next_wp = i;
                             break;
                         }
-                        else if(spline_index > altitude_array[total_waypoints - 1])
+                        else if (spline_index > altitude_array[total_waypoints - 1])
                         {
                             sim_next_wp = 0;
                             break;
@@ -1097,7 +952,7 @@ namespace interoperability
 
                     Console.WriteLine("Target Waypoint: " + sim_next_wp.ToString());
 
-                    double dy = SplineWP[spline_index + 1].latitude - sim_lat; 
+                    double dy = SplineWP[spline_index + 1].latitude - sim_lat;
                     double dx = SplineWP[spline_index + 1].longitude - sim_lng;
 
                     sim_yaw = (float)(90 - Math.Atan2(dy, dx) * 180 / Math.PI);
@@ -1108,11 +963,10 @@ namespace interoperability
 
 
                 }
-                
+
 
                 Thread.Sleep(100);
             }
-            SDA_Plane_Simulator_Thread_isAlive = false;
         }
 
         //Will be used to export to something. Is used to 
@@ -1125,7 +979,6 @@ namespace interoperability
 
         public async void Mission_Download()
         {
-            Mission_Thread_isAlive = true;
             Console.WriteLine("Mission_Download Thread Started");
             Stopwatch t = new Stopwatch();
             t.Start();
@@ -1135,7 +988,6 @@ namespace interoperability
             {
                 using (var client = new HttpClient())
                 {
-
                     client.BaseAddress = new Uri(address); // This seems to change every time
 
                     // Log in.
@@ -1153,37 +1005,30 @@ namespace interoperability
                         Console.WriteLine("Credentials Valid");
                         Mission_Thread_shouldStop = false;
                     }
+                    HttpResponseMessage SDAresp = await client.GetAsync("/api/missions");
+                    Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
 
-                    while (!Mission_Thread_shouldStop)
+                    List<Mission> Server_Mission = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
+
+                    int count = Mission_List.Count();
+                    //Add obtained missions to the current list of missions 
+                    for (int i = 0; i < Server_Mission.Count(); i++)
                     {
-                        HttpResponseMessage SDAresp = await client.GetAsync("/api/missions");
-                        Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result);
-
-                        List<Mission> Server_Mission = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
-
-                        int count = Mission_List.Count();
-                        //Add obtained missions to the current list of missions 
-                        for (int i = 0; i < Server_Mission.Count(); i++)
-                        {
-                            Server_Mission[i].name = "Server Mission_" + Convert.ToString(i + count);
-                            Mission_List.Add(Server_Mission[i]);
-                        }
-
-                        Mission_Thread_shouldStop = true;
+                        Server_Mission[i].name = "Server Mission_" + Convert.ToString(i + count);
+                        Mission_List.Add(Server_Mission[i]);
                     }
+
                 }
             }
             catch
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
             }
-            Mission_Thread_isAlive = false;
             Console.WriteLine("Mission_Download Thread Stopped");
         }
 
         public void Map_Control()
         {
-            Map_Thread_isAlive = true;
             Console.WriteLine("Map_Control Thread Started");
             Stopwatch t = new Stopwatch();
             Stopwatch FlightTime = new Stopwatch();
@@ -1255,14 +1100,14 @@ namespace interoperability
                         {
                             Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
                                 obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
-                                obstaclesList.stationary_obstacles[i].longitude);
+                                obstaclesList.stationary_obstacles[i].longitude, "Static_Obstacle" + i.ToString());
                         }
 
                         for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
                         {
                             Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
                                obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
-                               obstaclesList.moving_obstacles[i].longitude, "polygon");
+                               obstaclesList.moving_obstacles[i].longitude, "Moving_Obstacle" + i.ToString());
                         }
                     }
                 }
@@ -1283,7 +1128,7 @@ namespace interoperability
                 //Draw plane location                   
                 if (Interoperability_GUI.getDrawPlane())
                 {
-                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    if (usePlaneSimulator == true)
                     {
                         Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(sim_lat, sim_lng), sim_alt, sim_yaw, sim_yaw, sim_yaw, sim_yaw, 0);
                     }
@@ -1297,38 +1142,38 @@ namespace interoperability
 
                 if (Interoperability_GUI.getDrawWP())
                 {
-                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    if (usePlaneSimulator == true)
                     {
-                        Interoperability_GUI.MAP_updateWP(Current_Mission.all_waypoints);
+                        Interoperability_GUI.MAP_addWP(Current_Mission.all_waypoints);
                         //Interoperability_GUI.MAP_updateWPRoute(Current_Mission.all_waypoints);
-                        Interoperability_GUI.MAP_updateWPRoute(SplineWP);
+                        Interoperability_GUI.MAP_addWPRoute(SplineWP);
                     }
                     else
                     {
                         //Draw waypoints
-                        Interoperability_GUI.MAP_updateWP(Waypoints);
+                        Interoperability_GUI.MAP_addWP(Waypoints);
                         //Draw lines between waypoints
-                        Interoperability_GUI.MAP_updateWPRoute(Waypoints);
+                        Interoperability_GUI.MAP_addWPRoute(Waypoints);
                     }
 
                 }
                 //Draw off axis targets, emergent targets, and air drop location
                 if (Interoperability_GUI.getDrawOFAT_EN_DROP())
                 {
-                    Interoperability_GUI.MAP_updateOFAT_EN_DROP(Current_Mission);
-                } 
+                    Interoperability_GUI.MAP_updateOFAT_EM_DROP(Current_Mission);
+                }
 
                 if (Interoperability_GUI.getAutopan())
                 {
-                    if (SDA_Plane_Simulator_Thread_isAlive)
+                    if (usePlaneSimulator == true)
                     {
-                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(sim_lat, sim_lng));
+                        Interoperability_GUI.MAP_Update_Loc(new PointLatLng(sim_lat, sim_lng));
                     }
                     else
                     {
-                        Interoperability_GUI.MAP_ChangeLoc(new PointLatLng(Host.cs.lat, Host.cs.lng));
+                        Interoperability_GUI.MAP_Update_Loc(new PointLatLng(Host.cs.lat, Host.cs.lng));
                     }
-                    
+
                 }
 
                 Interoperability_GUI.MAP_Update_Overlay();
@@ -1384,7 +1229,6 @@ namespace interoperability
                 }
                 Thread.Sleep(1000 / Interoperability_GUI.getMapRefreshRate());
             }
-            Map_Thread_isAlive = false;
             Console.WriteLine("Map_Control Thread Stopped");
         }
 
@@ -1395,7 +1239,6 @@ namespace interoperability
             //Set up speech output 
             SpeechSynthesizer Speech = new SpeechSynthesizer();
 
-            Callout_Thread_isAlive = true;
             Console.WriteLine("Callout Thread Started");
 
             using (SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US")))
@@ -1449,7 +1292,6 @@ namespace interoperability
 
             }
             Console.WriteLine("Callout thread has stopped");
-            Callout_Thread_isAlive = false;
         }
 
         private void recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
@@ -1458,6 +1300,12 @@ namespace interoperability
         }
 
 
+        /// <summary>
+        /// Returns Degree Minute Seconds string given Decimal Degrees
+        /// </summary>
+        /// <param name="lat">Latitude</param>
+        /// <param name="lng">Longitude</param>
+        /// <returns></returns>
         public static string DDtoDMS(double lat, double lng)
         {
             string DMS;
@@ -1494,8 +1342,8 @@ namespace interoperability
         /// <summary>
         /// Returns Decimal Degrees given a Degree Minute Seconds string
         /// </summary>
-        /// <param name="lat">Latitude in DMS</param>
-        /// <param name="lng">Longitude in DMS</param>
+        /// <param name="lat">Latitude in DMS "W36-28-45.67"</param>
+        /// <param name="lng">Longitude in DMS "S038-94-12.89"</param>
         /// <returns></returns>
         public static Waypoint DMStoDD(string lat, string lng)
         {
@@ -1604,212 +1452,8 @@ namespace interoperability
         /// <returns></returns>
         override public bool Exit()
         {
-            interoperabilityAction(7);
+            interoperabilityAction(Interop_Action.Stop_All_Threads_Quit);
             return (true);
         }
-    }
-
-
-    public class Interoperability_Settings
-    {
-        static Interoperability_Settings _instance;
-        private static Mutex Settings_XML_Mutex = new Mutex(); //So we only write settings one at a time;
-
-        public static Interoperability_Settings Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new Interoperability_Settings();
-                }
-                return _instance;
-            }
-        }
-
-        public Interoperability_Settings()
-        {
-        }
-
-        /// <summary>
-        /// use to store all internal config
-        /// </summary>
-        public static Dictionary<string, string> config = new Dictionary<string, string>();
-
-        const string FileName = "Interoperability_Config.xml";
-
-        public string this[string key]
-        {
-            get
-            {
-                string value = null;
-                config.TryGetValue(key, out value);
-                return value;
-            }
-
-            set
-            {
-                config[key] = value;
-            }
-        }
-
-        public IEnumerable<string> Keys
-        {
-            // the "ToArray" makes this safe for someone to add items while enumerating.
-            get { return config.Keys.ToArray(); }
-        }
-        public bool ContainsKey(string key)
-        {
-            return config.ContainsKey(key);
-        }
-
-
-
-        public int Count { get { return config.Count; } }
-
-
-        internal int GetInt32(string key)
-        {
-            int result = 0;
-            string value = null;
-            if (config.TryGetValue(key, out value))
-            {
-                int.TryParse(value, out result);
-            }
-            return result;
-        }
-
-        internal bool GetBoolean(string key)
-        {
-            bool result = false;
-            string value = null;
-            if (config.TryGetValue(key, out value))
-            {
-                bool.TryParse(value, out result);
-            }
-            return result;
-        }
-
-        internal float GetFloat(string key)
-        {
-            float result = 0f;
-            string value = null;
-            if (config.TryGetValue(key, out value))
-            {
-                float.TryParse(value, out result);
-            }
-            return result;
-        }
-
-        internal double GetDouble(string key)
-        {
-            double result = 0D;
-            string value = null;
-            if (config.TryGetValue(key, out value))
-            {
-                double.TryParse(value, out result);
-            }
-            return result;
-        }
-
-        internal byte GetByte(string key)
-        {
-            byte result = 0;
-            string value = null;
-            if (config.TryGetValue(key, out value))
-            {
-                byte.TryParse(value, out result);
-            }
-            return result;
-        }
-
-        public static string GetFullPath()
-        {
-            string directory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-            return Path.Combine(directory, FileName);
-        }
-
-        public void Load()
-        {
-            if (File.Exists(GetFullPath()))
-            {
-                Settings_XML_Mutex.WaitOne();
-                using (XmlTextReader xmlreader = new XmlTextReader(GetFullPath()))
-                {
-                    while (xmlreader.Read())
-                    {
-                        if (xmlreader.NodeType == XmlNodeType.Element)
-                        {
-                            try
-                            {
-                                switch (xmlreader.Name)
-                                {
-                                    case "Config":
-                                        break;
-                                    case "xml":
-                                        break;
-                                    default:
-                                        config[xmlreader.Name] = xmlreader.ReadString();
-                                        break;
-                                }
-                            }
-                            // silent fail on bad entry
-                            catch (Exception)
-                            {
-                            }
-                        }
-                    }
-                }
-                Settings_XML_Mutex.ReleaseMutex();
-            }
-
-        }
-
-        public void Save()
-        {
-            string filename = GetFullPath();
-            Settings_XML_Mutex.WaitOne();
-            using (XmlTextWriter xmlwriter = new XmlTextWriter(filename, Encoding.UTF8))
-            {
-                xmlwriter.Formatting = Formatting.Indented;
-
-                xmlwriter.WriteStartDocument();
-
-                xmlwriter.WriteStartElement("Config");
-
-                foreach (string key in config.Keys)
-                {
-                    try
-                    {
-                        if (key == "" || key.Contains("/")) // "/dev/blah"
-                            continue;
-
-                        xmlwriter.WriteElementString(key, "" + config[key]);
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                xmlwriter.WriteEndElement();
-
-                xmlwriter.WriteEndDocument();
-                xmlwriter.Close();
-            }
-            Settings_XML_Mutex.ReleaseMutex();
-        }
-
-        public void Remove(string key)
-        {
-            if (config.ContainsKey(key))
-            {
-                config.Remove(key);
-            }
-        }
-
     }
 }

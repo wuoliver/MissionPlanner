@@ -43,9 +43,22 @@ Need to finish thread
 
 ------------------------------------------------------------------------
 
-
 Server to listen for requests: 
 	Take in a timestamp, then return GPS coordinates + Plane bank and pitch angles 
+
+
+Rewrite Code: 
+	Ensure Waypoints use the "order" member, such that if somebody calls sort(), it doesn't break the code
+	Get rid of commented code 
+	Get rid of giant switch statement, and replace it with something better
+	Break up large code into other files 
+	That thread killing loop, set it on a timer, so we forcefully kill the threads if they hang 
+	Use Locks and Mutexes for the _alive and _should_stop bools 
+
+	Read these links: 
+	http://stackoverflow.com/questions/660621/threading-best-practices
+	https://msdn.microsoft.com/en-us/library/aa260844(v=vs.60).aspx
+	http://stackoverflow.com/questions/1584062/how-to-wait-for-thread-to-finish-with-net/2228508#2228508
 
 
 
