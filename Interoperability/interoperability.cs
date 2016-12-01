@@ -146,6 +146,7 @@ namespace interoperability
             Callout_Thread = new Thread(new ThreadStart(this.Callouts));
             SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
             SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
+            Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
 
             //Instantiate Mission_List
             Mission_List = new List<Mission>();
@@ -451,8 +452,12 @@ namespace interoperability
 
         private void Stop_Thread(ref Thread _thread, ref bool shouldStop_Variable)
         {
-            shouldStop_Variable = true;
-            _thread.Join(50);
+            if(_thread.IsAlive)
+            {
+                shouldStop_Variable = true;
+                _thread.Join(50);
+            }
+
             if (_thread.IsAlive)
             {
                 _thread.Abort();
