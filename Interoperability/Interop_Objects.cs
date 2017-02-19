@@ -111,6 +111,11 @@ namespace interoperability
             latitude = 0;
             longitude = 0;
         }
+        public GPS_Position(GPS_Position _GPS_Position)
+        {
+            latitude = _GPS_Position.latitude;
+            longitude = _GPS_Position.longitude;
+        }
         public GPS_Position(float _latitude, float _longitude)
         {
             latitude = _latitude;
@@ -130,11 +135,26 @@ namespace interoperability
         public float altitude_msl_min { get; set; }
         public List<Waypoint> boundary_pts { get; set; }
         public string name { get; set; }
+
+        public Color border_color { get; set; }
+        public Color fill_color { get; set; }
+
         public FlyZone(float _altitude_msl_max, float _altitude_msl_min, List<Waypoint> _boundary_pts)
         {
             altitude_msl_max = _altitude_msl_max;
             altitude_msl_min = _altitude_msl_min;
             boundary_pts = _boundary_pts;
+            border_color = Color.Red;
+            fill_color = Color.White;
+            name = "Geofence";
+        }
+        public FlyZone(float _altitude_msl_max, float _altitude_msl_min, List<Waypoint> _boundary_pts, Color _border_color, Color _fill_color)
+        {
+            altitude_msl_max = _altitude_msl_max;
+            altitude_msl_min = _altitude_msl_min;
+            boundary_pts = _boundary_pts;
+            border_color = _border_color;
+            fill_color = _fill_color;
             name = "Geofence";
         }
         public FlyZone(float _altitude_msl_max, float _altitude_msl_min, string _name, List<Waypoint> _boundary_pts)
@@ -142,6 +162,8 @@ namespace interoperability
             altitude_msl_max = _altitude_msl_max;
             altitude_msl_min = _altitude_msl_min;
             name = _name;
+            border_color = Color.Red;
+            fill_color = Color.White;
             boundary_pts = _boundary_pts;
         }
         public FlyZone()
@@ -150,6 +172,8 @@ namespace interoperability
             altitude_msl_min = 0;
             name = "Geofence";
             boundary_pts = new List<Waypoint>();
+            border_color = Color.Red;
+            fill_color = Color.White;
         }
     }
 
@@ -192,6 +216,22 @@ namespace interoperability
             all_waypoints = new List<Waypoint>();
             off_axis_target_pos = new GPS_Position();
             search_grid_points = new List<Waypoint>();
+        }
+
+        public Mission(Mission _Mission)
+        {
+            id = 0;
+            name = _Mission.name;
+            unedited = _Mission.unedited;
+            active = _Mission.active;
+            air_drop_pos = new GPS_Position(_Mission.air_drop_pos);
+            emergent_lkp = new GPS_Position(_Mission.emergent_lkp);
+            fly_zones = new List<FlyZone>(_Mission.fly_zones);
+            home_pos = new GPS_Position(_Mission.home_pos);
+            mission_waypoints = new List<Waypoint>(_Mission.mission_waypoints);
+            all_waypoints = new List<Waypoint>(_Mission.all_waypoints);
+            off_axis_target_pos = new GPS_Position(_Mission.off_axis_target_pos);
+            search_grid_points = new List<Waypoint>(_Mission.search_grid_points);
         }
     }
 

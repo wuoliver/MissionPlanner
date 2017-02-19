@@ -34,6 +34,8 @@ namespace interoperability
         List<string> FlyZone_List = new List<string>();
         List<float> Max_Alt_MSL_List = new List<float>();
         List<float> Min_Alt_MSL_List = new List<float>();
+        List<Color> Border_Colour_List = new List<Color>();
+        List<Color> Fill_Colour_List = new List<Color>();
 
         bool FlyZone_Index_Changed_doNothing = false;
 
@@ -62,6 +64,9 @@ namespace interoperability
                     FlyZone_Select_Combobox.Items.Insert(i, Interoperability.getinstance().Current_Mission.fly_zones[i].name);
                     Max_Alt_MSL_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].altitude_msl_max);
                     Min_Alt_MSL_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].altitude_msl_min);
+                    Border_Colour_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].border_color);
+                    Fill_Colour_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].fill_color);
+
                     FlyZone_List.Add("");
                     for (int j = 0; j < Interoperability.getinstance().Current_Mission.fly_zones[0].boundary_pts.Count; j++)
                     {
@@ -107,6 +112,8 @@ namespace interoperability
                     FlyZone_Select_Combobox.Items.Insert(i, Interoperability.getinstance().Current_Mission.fly_zones[i].name);
                     Max_Alt_MSL_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].altitude_msl_max);
                     Min_Alt_MSL_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].altitude_msl_min);
+                    Border_Colour_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].border_color);
+                    Fill_Colour_List.Add(Interoperability.getinstance().Current_Mission.fly_zones[i].fill_color);
                     FlyZone_List.Add("");
                     for (int j = 0; j < Interoperability.getinstance().Current_Mission.fly_zones[0].boundary_pts.Count; j++)
                     {
@@ -162,6 +169,8 @@ namespace interoperability
                 FlyZone_List[FlyZone_Index] = FlyZone_Textbox.Text;
                 Max_Alt_MSL_List[Max_Alt_MSL_Index] = (float)Max_Alt_MSL_Box.Value;
                 Min_Alt_MSL_List[Min_Alt_MSL_Index] = (float)Min_Alt_MSL_Box.Value;
+                Border_Colour_List[FlyZone_Index] = Border_Colour_Button.BackColor;
+                Fill_Colour_List[FlyZone_Index] = Fill_Colour_Button.BackColor;
 
                 //Set new selected index 
                 FlyZone_Index = FlyZone_Select_Combobox.SelectedIndex;
@@ -177,6 +186,8 @@ namespace interoperability
                     FlyZone_Select_Combobox.Items.Insert(FlyZone_Index, "New Flyzone " + FlyZone_Index.ToString());
                     Max_Alt_MSL_List.Add(0);
                     Min_Alt_MSL_List.Add(0);
+                    Border_Colour_List.Add(Color.Red);
+                    Fill_Colour_List.Add(Color.White);   
                     Max_Alt_MSL_Box.Value = 0;
                     Min_Alt_MSL_Box.Value = 0;
                     FlyZone_Select_Combobox.SelectedIndex = FlyZone_Index;
@@ -188,6 +199,8 @@ namespace interoperability
                     FlyZone_Textbox.Text = FlyZone_List[FlyZone_Index];
                     Max_Alt_MSL_Box.Value = Convert.ToDecimal(Max_Alt_MSL_List[Max_Alt_MSL_Index]);
                     Min_Alt_MSL_Box.Value = Convert.ToDecimal(Min_Alt_MSL_List[Min_Alt_MSL_Index]);
+                    Border_Colour_Button.BackColor = Border_Colour_List[FlyZone_Index];
+                    Fill_Colour_Button.BackColor = Fill_Colour_List [FlyZone_Index];
                 }
                 FlyZone_Index_Changed_doNothing = false;
             }
@@ -201,8 +214,9 @@ namespace interoperability
         private void Save_Button_Click(object sender, EventArgs e)
         {
             isOpened = false;
-            //Parse the fields, verify coordinate format, and save to Current_Mission
 
+            //Parse the fields, verify coordinate format, and save to Current_Mission
+            Interoperability.getinstance().Current_Mission = new Mission(Parse_Mission());
 
             this.Close();
         }
@@ -322,8 +336,12 @@ namespace interoperability
             MAP_Update_Overlay();
             MAP_Clear_Overlays();
 
-            //Using first boundary point (assuming there is only one geofence) COME BACK TO THIS LATER
-            MAP_addStaticPoly(Temporary_Mission.fly_zones[0].boundary_pts, "Geofence", Color.Red, Color.Transparent, 3, 50);
+
+            for (int i = 0; i < Temporary_Mission.fly_zones.Count; i++)
+            {
+                MAP_addStaticPoly(Temporary_Mission.fly_zones[i].boundary_pts, "Geofence" + i.ToString(), Temporary_Mission.fly_zones[i].border_color,
+                    Temporary_Mission.fly_zones[i].fill_color, 3, 50);
+            }
 
             MAP_addStaticPoly(Temporary_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
 
@@ -336,12 +354,14 @@ namespace interoperability
 
             List<double> lat = new List<double>();
             List<double> lng = new List<double>();
-
-            for (int i = 0; i < Temporary_Mission.fly_zones[0].boundary_pts.Count; i++)
+            for (int i = 0; i < Temporary_Mission.fly_zones.Count; i++)
             {
-                lat.Add(Temporary_Mission.fly_zones[0].boundary_pts[i].latitude);
-                lng.Add(Temporary_Mission.fly_zones[0].boundary_pts[i].longitude);
-            }
+                for (int j = 0; j < Temporary_Mission.fly_zones[i].boundary_pts.Count; j++)
+                {
+                    lat.Add(Temporary_Mission.fly_zones[i].boundary_pts[j].latitude);
+                    lng.Add(Temporary_Mission.fly_zones[i].boundary_pts[j].longitude);
+                }
+            }   
             for (int i = 0; i < Temporary_Mission.search_grid_points.Count; i++)
             {
                 lat.Add(Temporary_Mission.search_grid_points[i].latitude);
@@ -394,7 +414,8 @@ namespace interoperability
                 Parsed_Misison.fly_zones.Clear();
                 for (int i = 0; i < FlyZone_List.Count; i++)
                 {
-                    Parsed_Misison.fly_zones.Add(new FlyZone(Max_Alt_MSL_List[i], Min_Alt_MSL_List[i], DDtoWaypoints(FlyZone_List[i])));
+                    Parsed_Misison.fly_zones.Add(new FlyZone(Max_Alt_MSL_List[i], Min_Alt_MSL_List[i], DDtoWaypoints(FlyZone_List[i]),
+                        Border_Colour_List[i], Fill_Colour_List[i]));
                 }
 
                 //Add Search Areas
@@ -403,14 +424,23 @@ namespace interoperability
                 //Add Waypoints
                 //Skip for now
 
-                Parsed_Misison.emergent_lkp.latitude = DDtoWaypoints(Emergent_Target_Text)[0].latitude;
-                Parsed_Misison.emergent_lkp.longitude = DDtoWaypoints(Emergent_Target_Text)[0].longitude;
+                if(DDtoWaypoints(Emergent_Target_Text).Count != 0)
+                {
+                    Parsed_Misison.emergent_lkp.latitude = DDtoWaypoints(Emergent_Target_Text)[0].latitude;
+                    Parsed_Misison.emergent_lkp.longitude = DDtoWaypoints(Emergent_Target_Text)[0].longitude;
+                }
+                if (DDtoWaypoints(Airdrop_Text).Count != 0)
+                {
+                    Parsed_Misison.air_drop_pos.latitude = DDtoWaypoints(Airdrop_Text)[0].latitude;
+                    Parsed_Misison.air_drop_pos.longitude = DDtoWaypoints(Airdrop_Text)[0].longitude;
+                }
+                if (DDtoWaypoints(Off_Axis_target_Text).Count != 0)
+                {
+                    Parsed_Misison.off_axis_target_pos.latitude = DDtoWaypoints(Off_Axis_target_Text)[0].latitude;
+                    Parsed_Misison.off_axis_target_pos.longitude = DDtoWaypoints(Off_Axis_target_Text)[0].longitude;
+                }
 
-                Parsed_Misison.air_drop_pos.latitude = DDtoWaypoints(Airdrop_Text)[0].latitude;
-                Parsed_Misison.air_drop_pos.longitude = DDtoWaypoints(Airdrop_Text)[0].longitude;
-
-                Parsed_Misison.off_axis_target_pos.latitude = DDtoWaypoints(Off_Axis_target_Text)[0].latitude;
-                Parsed_Misison.off_axis_target_pos.longitude = DDtoWaypoints(Off_Axis_target_Text)[0].longitude;
+                
             }
             else
             {
@@ -427,14 +457,21 @@ namespace interoperability
                 //Add Waypoints
                 //Skip for now
 
-                Parsed_Misison.emergent_lkp.latitude = DMStoWaypoints(Emergent_Target_Text)[0].latitude;
-                Parsed_Misison.emergent_lkp.longitude = DMStoWaypoints(Emergent_Target_Text)[0].longitude;
-
-                Parsed_Misison.air_drop_pos.latitude = DMStoWaypoints(Airdrop_Text)[0].latitude;
-                Parsed_Misison.air_drop_pos.longitude = DMStoWaypoints(Airdrop_Text)[0].longitude;
-
-                Parsed_Misison.off_axis_target_pos.latitude = DMStoWaypoints(Off_Axis_target_Text)[0].latitude;
-                Parsed_Misison.off_axis_target_pos.longitude = DMStoWaypoints(Off_Axis_target_Text)[0].longitude;
+                if (DMStoWaypoints(Emergent_Target_Text).Count != 0)
+                {
+                    Parsed_Misison.emergent_lkp.latitude = DMStoWaypoints(Emergent_Target_Text)[0].latitude;
+                    Parsed_Misison.emergent_lkp.longitude = DMStoWaypoints(Emergent_Target_Text)[0].longitude;
+                }
+                if (DMStoWaypoints(Airdrop_Text).Count != 0)
+                {
+                    Parsed_Misison.air_drop_pos.latitude = DMStoWaypoints(Airdrop_Text)[0].latitude;
+                    Parsed_Misison.air_drop_pos.longitude = DMStoWaypoints(Airdrop_Text)[0].longitude;
+                }
+                if (DMStoWaypoints(Off_Axis_target_Text).Count != 0)
+                {
+                    Parsed_Misison.off_axis_target_pos.latitude = DMStoWaypoints(Off_Axis_target_Text)[0].latitude;
+                    Parsed_Misison.off_axis_target_pos.longitude = DMStoWaypoints(Off_Axis_target_Text)[0].longitude;
+                }
             }
 
             return Parsed_Misison;
@@ -443,6 +480,11 @@ namespace interoperability
         private List<Waypoint> DMStoWaypoints(string DMS)
         {
             List<Waypoint> Waypoint_List = new List<Waypoint>();
+            if (DMS.Replace(" ", "") == "")
+            {
+                return Waypoint_List;
+            }
+
             Waypoint Temp_Waypoint;
             char[] delimiterChars = { ' ' };
             DMS = DMS.Replace("\r\n", " ").Replace("\r", "").Replace("\n", " ");
@@ -475,6 +517,10 @@ namespace interoperability
         private List<Waypoint> DDtoWaypoints(String DD)
         {
             List<Waypoint> Waypoint_List = new List<Waypoint>();
+            if (DD.Replace(" ", "") == "")
+            {
+                return Waypoint_List;
+            }
             Waypoint Temp_Waypoint;
             char[] delimiterChars = { ' ' };
             DD = DD.Replace("\r\n", " ").Replace("\r", "").Replace("\n", " ");
@@ -547,6 +593,8 @@ namespace interoperability
                 FlyZone_List.RemoveAt(index_to_be_deleted);
                 Max_Alt_MSL_List.RemoveAt(index_to_be_deleted);
                 Min_Alt_MSL_List.RemoveAt(index_to_be_deleted);
+                Border_Colour_List.RemoveAt(index_to_be_deleted);
+                Fill_Colour_List.RemoveAt(index_to_be_deleted);
 
                 //First and not only
                 //First and only
@@ -560,6 +608,10 @@ namespace interoperability
                     FlyZone_Select_Combobox.Items.Insert(0, "New Flyzone 0");
                     Max_Alt_MSL_List.Add(0);
                     Min_Alt_MSL_List.Add(0);
+                    Border_Colour_List.Add(Color.Red);
+                    Fill_Colour_List.Add(Color.White);
+                    Border_Colour_Button.BackColor = Border_Colour_List[0];
+                    Fill_Colour_Button.BackColor = Fill_Colour_List[0];
                     FlyZone_Select_Combobox.SelectedIndex = 0;
                 }
                 else
@@ -567,6 +619,8 @@ namespace interoperability
                     FlyZone_Index = 0;
                     Max_Alt_MSL_Index = 0;
                     Min_Alt_MSL_Index = 0;
+                    Border_Colour_Button.BackColor = Border_Colour_List[FlyZone_Index];
+                    Fill_Colour_Button.BackColor = Fill_Colour_List[FlyZone_Index];
                     FlyZone_Select_Combobox.SelectedIndex = 0;
                 }
 
@@ -581,6 +635,24 @@ namespace interoperability
                 //Do nothing
             }
 
+        }
+
+        private void Border_Button_Click(object sender, EventArgs e)
+        {
+            if(colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Border_Colour_Button.BackColor = colorDialog1.Color;
+                Border_Colour_List[FlyZone_Index] = colorDialog1.Color;
+            }
+        }
+
+        private void Fill_Colour_Button_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Fill_Colour_Button.BackColor = colorDialog1.Color;
+                Fill_Colour_List[FlyZone_Index] = colorDialog1.Color;
+            }
         }
     }
 }

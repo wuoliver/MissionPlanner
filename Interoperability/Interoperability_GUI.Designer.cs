@@ -138,6 +138,15 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.Goose_Tab = new System.Windows.Forms.TabPage();
+            this.label22 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label23 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.checkBox7 = new System.Windows.Forms.CheckBox();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -149,6 +158,7 @@
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
             this.Interop_GUI_menuStrip.SuspendLayout();
+            this.Goose_Tab.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -237,6 +247,7 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.Map_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Callout_Tab);
+            this.Interoperability_GUI_Tab.Controls.Add(this.Goose_Tab);
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 27);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
@@ -1008,7 +1019,7 @@
             // 
             this.MissionPlannerMenuAddon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.InteropGUIButton});
-            this.MissionPlannerMenuAddon.Location = new System.Drawing.Point(0, 0);
+            this.MissionPlannerMenuAddon.Location = new System.Drawing.Point(0, 24);
             this.MissionPlannerMenuAddon.Name = "MissionPlannerMenuAddon";
             this.MissionPlannerMenuAddon.Size = new System.Drawing.Size(1178, 67);
             this.MissionPlannerMenuAddon.TabIndex = 16;
@@ -1104,7 +1115,7 @@
             // openSettingsToolStripMenuItem
             // 
             this.openSettingsToolStripMenuItem.Name = "openSettingsToolStripMenuItem";
-            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openSettingsToolStripMenuItem.Text = "Options";
             this.openSettingsToolStripMenuItem.Click += new System.EventHandler(this.openSettingsToolStripMenuItem_Click);
             // 
@@ -1121,7 +1132,7 @@
             // editMissionToolStripMenuItem
             // 
             this.editMissionToolStripMenuItem.Name = "editMissionToolStripMenuItem";
-            this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editMissionToolStripMenuItem.Text = "Edit Mission";
             this.editMissionToolStripMenuItem.Click += new System.EventHandler(this.editMissionToolStripMenuItem_Click);
             // 
@@ -1131,13 +1142,13 @@
             this.entireMissionToolStripMenuItem,
             this.itemToolStripMenuItem});
             this.serverImportToolStripMenuItem.Name = "serverImportToolStripMenuItem";
-            this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.serverImportToolStripMenuItem.Text = "Server Import";
             // 
             // entireMissionToolStripMenuItem
             // 
             this.entireMissionToolStripMenuItem.Name = "entireMissionToolStripMenuItem";
-            this.entireMissionToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.entireMissionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.entireMissionToolStripMenuItem.Text = "Mission";
             // 
             // itemToolStripMenuItem
@@ -1150,7 +1161,7 @@
             this.offAxisTargetToolStripMenuItem1,
             this.emergentTargetToolStripMenuItem1});
             this.itemToolStripMenuItem.Name = "itemToolStripMenuItem";
-            this.itemToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.itemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.itemToolStripMenuItem.Text = "Item";
             // 
             // geofenceToolStripMenuItem1
@@ -1246,6 +1257,99 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
+            // Goose_Tab
+            // 
+            this.Goose_Tab.Controls.Add(this.button5);
+            this.Goose_Tab.Controls.Add(this.button4);
+            this.Goose_Tab.Controls.Add(this.checkBox7);
+            this.Goose_Tab.Controls.Add(this.checkBox6);
+            this.Goose_Tab.Controls.Add(this.button3);
+            this.Goose_Tab.Controls.Add(this.label23);
+            this.Goose_Tab.Controls.Add(this.button2);
+            this.Goose_Tab.Controls.Add(this.label22);
+            this.Goose_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Goose_Tab.Name = "Goose_Tab";
+            this.Goose_Tab.Padding = new System.Windows.Forms.Padding(3);
+            this.Goose_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Goose_Tab.TabIndex = 6;
+            this.Goose_Tab.Text = "Goose Control";
+            this.Goose_Tab.UseVisualStyleBackColor = true;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(10, 13);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(189, 31);
+            this.label22.TabIndex = 4;
+            this.label22.Text = "Goose Control";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(16, 194);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(197, 23);
+            this.button2.TabIndex = 5;
+            this.button2.Text = "Enable Goose Mode";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(13, 44);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(232, 130);
+            this.label23.TabIndex = 6;
+            this.label23.Text = resources.GetString("label23.Text");
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(16, 223);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(197, 23);
+            this.button3.TabIndex = 7;
+            this.button3.Text = "Calculate Nest Locations";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Location = new System.Drawing.Point(16, 324);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(136, 17);
+            this.checkBox6.TabIndex = 8;
+            this.checkBox6.Text = "Show Goose Locations";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            // 
+            // checkBox7
+            // 
+            this.checkBox7.AutoSize = true;
+            this.checkBox7.Location = new System.Drawing.Point(16, 347);
+            this.checkBox7.Name = "checkBox7";
+            this.checkBox7.Size = new System.Drawing.Size(127, 17);
+            this.checkBox7.TabIndex = 9;
+            this.checkBox7.Text = "Show Nest Locations";
+            this.checkBox7.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(16, 281);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(197, 23);
+            this.button4.TabIndex = 10;
+            this.button4.Text = "Export Geese Data to CSV";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(16, 252);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(197, 23);
+            this.button5.TabIndex = 11;
+            this.button5.Text = "Calculate K Factor";
+            this.button5.UseVisualStyleBackColor = true;
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1289,6 +1393,8 @@
             this.MissionPlannerMenuAddon.PerformLayout();
             this.Interop_GUI_menuStrip.ResumeLayout(false);
             this.Interop_GUI_menuStrip.PerformLayout();
+            this.Goose_Tab.ResumeLayout(false);
+            this.Goose_Tab.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1404,5 +1510,14 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.NumericUpDown Plane_Simulated_Airspeed_Select;
+        private System.Windows.Forms.TabPage Goose_Tab;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.CheckBox checkBox7;
+        private System.Windows.Forms.CheckBox checkBox6;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label label23;
     }
 }

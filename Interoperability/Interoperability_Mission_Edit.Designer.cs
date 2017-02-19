@@ -55,13 +55,16 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.Min_Alt_MSL_Box = new System.Windows.Forms.NumericUpDown();
+            this.Border_Colour_Button = new System.Windows.Forms.Button();
+            this.Fill_Colour_Button = new System.Windows.Forms.Button();
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             ((System.ComponentModel.ISupportInitialize)(this.Max_Alt_MSL_Box)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Min_Alt_MSL_Box)).BeginInit();
             this.SuspendLayout();
             // 
             // Save_Button
             // 
-            this.Save_Button.Location = new System.Drawing.Point(233, 562);
+            this.Save_Button.Location = new System.Drawing.Point(233, 579);
             this.Save_Button.Name = "Save_Button";
             this.Save_Button.Size = new System.Drawing.Size(75, 23);
             this.Save_Button.TabIndex = 9;
@@ -108,7 +111,7 @@
             // Search_Area_Textbox
             // 
             this.Search_Area_Textbox.AcceptsReturn = true;
-            this.Search_Area_Textbox.Location = new System.Drawing.Point(15, 225);
+            this.Search_Area_Textbox.Location = new System.Drawing.Point(15, 242);
             this.Search_Area_Textbox.Multiline = true;
             this.Search_Area_Textbox.Name = "Search_Area_Textbox";
             this.Search_Area_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -119,7 +122,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(12, 209);
+            this.label3.Location = new System.Drawing.Point(12, 226);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 13);
             this.label3.TabIndex = 15;
@@ -129,7 +132,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(12, 321);
+            this.label4.Location = new System.Drawing.Point(12, 338);
             this.label4.Name = "label4";
             this.label4.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.label4.Size = new System.Drawing.Size(112, 13);
@@ -140,7 +143,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(12, 434);
+            this.label5.Location = new System.Drawing.Point(12, 451);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(106, 13);
             this.label5.TabIndex = 17;
@@ -150,7 +153,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(12, 473);
+            this.label6.Location = new System.Drawing.Point(12, 490);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(101, 13);
             this.label6.TabIndex = 18;
@@ -160,7 +163,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(12, 512);
+            this.label7.Location = new System.Drawing.Point(12, 529);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(92, 13);
             this.label7.TabIndex = 19;
@@ -168,28 +171,28 @@
             // 
             // Off_Axis_Target_Textbox
             // 
-            this.Off_Axis_Target_Textbox.Location = new System.Drawing.Point(15, 528);
+            this.Off_Axis_Target_Textbox.Location = new System.Drawing.Point(15, 545);
             this.Off_Axis_Target_Textbox.Name = "Off_Axis_Target_Textbox";
             this.Off_Axis_Target_Textbox.Size = new System.Drawing.Size(293, 20);
             this.Off_Axis_Target_Textbox.TabIndex = 20;
             // 
             // Emergent_Target_Textbox
             // 
-            this.Emergent_Target_Textbox.Location = new System.Drawing.Point(15, 489);
+            this.Emergent_Target_Textbox.Location = new System.Drawing.Point(15, 506);
             this.Emergent_Target_Textbox.Name = "Emergent_Target_Textbox";
             this.Emergent_Target_Textbox.Size = new System.Drawing.Size(293, 20);
             this.Emergent_Target_Textbox.TabIndex = 21;
             // 
             // Airdrop_Textbox
             // 
-            this.Airdrop_Textbox.Location = new System.Drawing.Point(15, 450);
+            this.Airdrop_Textbox.Location = new System.Drawing.Point(15, 467);
             this.Airdrop_Textbox.Name = "Airdrop_Textbox";
             this.Airdrop_Textbox.Size = new System.Drawing.Size(293, 20);
             this.Airdrop_Textbox.TabIndex = 22;
             // 
             // Waypoint_Textbox
             // 
-            this.Waypoint_Textbox.Location = new System.Drawing.Point(15, 337);
+            this.Waypoint_Textbox.Location = new System.Drawing.Point(15, 354);
             this.Waypoint_Textbox.Multiline = true;
             this.Waypoint_Textbox.Name = "Waypoint_Textbox";
             this.Waypoint_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -201,7 +204,7 @@
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label8.Location = new System.Drawing.Point(563, 562);
+            this.label8.Location = new System.Drawing.Point(573, 584);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(340, 26);
             this.label8.TabIndex = 24;
@@ -209,7 +212,7 @@
             // 
             // Cancel_Button
             // 
-            this.Cancel_Button.Location = new System.Drawing.Point(15, 562);
+            this.Cancel_Button.Location = new System.Drawing.Point(15, 579);
             this.Cancel_Button.Name = "Cancel_Button";
             this.Cancel_Button.Size = new System.Drawing.Size(75, 23);
             this.Cancel_Button.TabIndex = 25;
@@ -242,14 +245,14 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(856, 522);
+            this.gMapControl1.Size = new System.Drawing.Size(856, 547);
             this.gMapControl1.TabIndex = 26;
             this.gMapControl1.Zoom = 0D;
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             // 
             // Refresh_Map_Button
             // 
-            this.Refresh_Map_Button.Location = new System.Drawing.Point(1092, 562);
+            this.Refresh_Map_Button.Location = new System.Drawing.Point(1092, 579);
             this.Refresh_Map_Button.Name = "Refresh_Map_Button";
             this.Refresh_Map_Button.Size = new System.Drawing.Size(78, 23);
             this.Refresh_Map_Button.TabIndex = 27;
@@ -291,7 +294,7 @@
             // 
             // Max_Alt_MSL_Box
             // 
-            this.Max_Alt_MSL_Box.Location = new System.Drawing.Point(91, 175);
+            this.Max_Alt_MSL_Box.Location = new System.Drawing.Point(91, 176);
             this.Max_Alt_MSL_Box.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -304,7 +307,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(15, 177);
+            this.label9.Location = new System.Drawing.Point(15, 178);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(70, 13);
             this.label9.TabIndex = 32;
@@ -313,7 +316,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(172, 177);
+            this.label10.Location = new System.Drawing.Point(15, 202);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(67, 13);
             this.label10.TabIndex = 33;
@@ -321,7 +324,7 @@
             // 
             // Min_Alt_MSL_Box
             // 
-            this.Min_Alt_MSL_Box.Location = new System.Drawing.Point(245, 175);
+            this.Min_Alt_MSL_Box.Location = new System.Drawing.Point(91, 202);
             this.Min_Alt_MSL_Box.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -331,11 +334,35 @@
             this.Min_Alt_MSL_Box.Size = new System.Drawing.Size(63, 20);
             this.Min_Alt_MSL_Box.TabIndex = 34;
             // 
+            // Border_Colour_Button
+            // 
+            this.Border_Colour_Button.BackColor = System.Drawing.Color.Red;
+            this.Border_Colour_Button.Location = new System.Drawing.Point(197, 176);
+            this.Border_Colour_Button.Name = "Border_Colour_Button";
+            this.Border_Colour_Button.Size = new System.Drawing.Size(111, 21);
+            this.Border_Colour_Button.TabIndex = 35;
+            this.Border_Colour_Button.Text = "Border Colour";
+            this.Border_Colour_Button.UseVisualStyleBackColor = false;
+            this.Border_Colour_Button.Click += new System.EventHandler(this.Border_Button_Click);
+            // 
+            // Fill_Colour_Button
+            // 
+            this.Fill_Colour_Button.BackColor = System.Drawing.Color.White;
+            this.Fill_Colour_Button.Location = new System.Drawing.Point(197, 202);
+            this.Fill_Colour_Button.Name = "Fill_Colour_Button";
+            this.Fill_Colour_Button.Size = new System.Drawing.Size(111, 21);
+            this.Fill_Colour_Button.TabIndex = 36;
+            this.Fill_Colour_Button.Text = "Fill Colour";
+            this.Fill_Colour_Button.UseVisualStyleBackColor = false;
+            this.Fill_Colour_Button.Click += new System.EventHandler(this.Fill_Colour_Button_Click);
+            // 
             // Interoperability_Mission_Edit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1182, 594);
+            this.ClientSize = new System.Drawing.Size(1182, 614);
+            this.Controls.Add(this.Fill_Colour_Button);
+            this.Controls.Add(this.Border_Colour_Button);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.Min_Alt_MSL_Box);
             this.Controls.Add(this.label10);
@@ -403,5 +430,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.NumericUpDown Min_Alt_MSL_Box;
+        private System.Windows.Forms.Button Border_Colour_Button;
+        private System.Windows.Forms.Button Fill_Colour_Button;
+        private System.Windows.Forms.ColorDialog colorDialog1;
     }
 }

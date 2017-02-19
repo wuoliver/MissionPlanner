@@ -177,6 +177,7 @@ namespace Interoperability_GUI_Forms
                     }
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[5]); //Geese Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (USC) - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 default:

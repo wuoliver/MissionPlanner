@@ -423,11 +423,14 @@ namespace interoperability
                 case Interop_Action.SDA_Plane_Simulator_Thread_Start:
                     Stop_Thread(ref SDA_Plane_Simulator_Thread, ref SDA_Plane_Simulator_Thread_shouldStop);
                     SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
+                    SDA_Plane_Simulator_Thread_shouldStop = false;
+                    usePlaneSimulator = true;
                     SDA_Plane_Simulator_Thread.Start();
                     break;
 
                 //Stop simulator
                 case Interop_Action.SDA_Plane_Simulator_Thread_Stop:
+                    usePlaneSimulator = false;
                     Stop_Thread(ref SDA_Plane_Simulator_Thread, ref SDA_Plane_Simulator_Thread_shouldStop);
                     break;
 

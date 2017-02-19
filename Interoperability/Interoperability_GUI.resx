@@ -117,6 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label23.Text" xml:space="preserve">
+    <value>Instructions: 
+To add a goose: 
+1. Click on the map using the key combinations:
+
+     Shift+ Click = Canada Goose
+     Ctrl  + Click = Grey Goose
+     Alt   + Click = White Goose
+
+2. Cntl + Z to undo goose addition
+3. Select, then press delete to delete goose
+</value>
+  </data>
   <metadata name="InteropMap_ContextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
