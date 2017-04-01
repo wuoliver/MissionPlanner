@@ -646,6 +646,12 @@ namespace interoperability
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
         }
 
+
+        public void addImage()
+        {
+
+        }
+
         /// <summary>
         /// Runs in a loop, downloading current obstacle locaitons from the server 
         /// </summary>
@@ -711,7 +717,7 @@ namespace interoperability
         }
 
 
-        private List<Waypoint> SplineWP;
+        private List<Waypoint> Simulator_Path;
 
 
         /// <summary>
@@ -719,6 +725,7 @@ namespace interoperability
         /// </summary>
         public void SDA_Avoidance_Algorithm()
         {
+
             while (SDA_Plane_Simulator_Thread_shouldStop == false)
             {
                 /*Write your algorithm here
@@ -736,12 +743,76 @@ namespace interoperability
                     Interoperability_GUI.getPlaneSimulationAirspeed() --The plane's simulated airspeed (in meters per second)
                 */
 
+
+
+
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
             }
         }
 
+        private struct Vertex
+        {
+            public int x; //Vertex Coordinate
+            public int y; //Vertex Coordinate
+            public int p_x; //Parent X Coordinate
+            public int p_y; //Parent Y Coordinate
+            public double value; //Shortest distance from parent to this vertex 
+        }
+
+        /// <summary>
+        /// Calculates the optimal path between two points given stationary obstacles and geofence
+        /// </summary>
+        public void Lazy_Theta(PointLatLng Start, PointLatLng End, Obstacles Mission_Obstacles, List<PointLatLng> Geofence)
+        {
+            /*Issues: 
+                Doesn't check for illegal angles (>90 degrees)
+                Doesn't check if we start in an occupied block? 
+
+              ToDo: 
+              Create a array or something to represent the map. Grid size to be determined. 
+              Figure out how to mark a grid as occupied or blocked, so we don't go through that 
+              Actually make the code
+            */
+
+            int gridsize = 10; //How far apart each vertex is in the x or y direction (in metres)
+
+            double startX = MercatorProjection.lonToX(Start.Lng);
+            double startY = MercatorProjection.latToY(Start.Lat);
+            double endX = MercatorProjection.lonToX(End.Lng);
+            double endY = MercatorProjection.latToY(End.Lat);
+
+            double deltaX = endX - startX;
+            double deltaY = endY - endY;
+
+            List<List<Vertex>> Verticies = new List<List<Vertex>>();
+            
+            for(int i = 0; i < gridsize; i++)
+            {
+                List<Vertex> VertexList = new List<Vertex>();
+                Vertex TempVertex = new Vertex;
+                VertexList.Clear();
+                
+                for (int j = 0; j < gridsize; j++)
+                {
+                    TempVertex.x = 0;
+                    TempVertex.y = 0;
+                    TempVertex.p_x = 0;
+                    TempVertex.p_y = 0;
+                    TempVertex.value = 0;
+                    VertexList.Add(TempVertex);
+                }
+            }
+
+            List<Tuple<Tuple<int, int>, float>> open;
+            List<Tuple<Tuple<int, int>, float>> closed;
+        }
+
         public void SDA_Plane_Simulator()
         {
+            //Save current waypoints stored
+            List<Waypoint> Current_Waypoints = Current_Mission.all_waypoints;
+
+
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
             Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
@@ -814,10 +885,10 @@ namespace interoperability
 
             CubicSpline.FitParametric(x, y, 1000, out xs, out ys);
 
-            SplineWP = new List<Waypoint>();
+            Simulator_Path = new List<Waypoint>();
             for (int i = 0; i < xs.Count(); i++)
             {
-                SplineWP.Add(new Waypoint(ys[i], xs[i]));
+                Simulator_Path.Add(new Waypoint(ys[i], xs[i]));
             }
 
             int[] altitude_array = new int[total_waypoints + 1];
@@ -829,14 +900,14 @@ namespace interoperability
                 double dd;
                 if (altitude_count < Current_Mission.all_waypoints.Count())
                 {
-                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[altitude_count].longitude - SplineWP[i].longitude);
-                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[altitude_count].latitude - SplineWP[i].latitude);
+                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[altitude_count].longitude - Simulator_Path[i].longitude);
+                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[altitude_count].latitude - Simulator_Path[i].latitude);
                     dd = Math.Sqrt(dx * dx + dy * dy);
                 }
                 else
                 {
-                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[0].longitude - SplineWP[i].longitude);
-                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[0].latitude - SplineWP[i].latitude);
+                    double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[0].longitude - Simulator_Path[i].longitude);
+                    double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[0].latitude - Simulator_Path[i].latitude);
                     dd = Math.Sqrt(dx * dx + dy * dy);
                 }
 
@@ -854,17 +925,17 @@ namespace interoperability
                 double delta_altitude = (Current_Mission.all_waypoints[i + 1].altitude_msl - Current_Mission.all_waypoints[i].altitude_msl) / delta_index;
                 for (int j = altitude_array[i]; j < altitude_array[i + 1]; j++)
                 {
-                    SplineWP[j].altitude_msl = (float)(Current_Mission.all_waypoints[i].altitude_msl + (j - altitude_array[i]) * delta_altitude);
+                    Simulator_Path[j].altitude_msl = (float)(Current_Mission.all_waypoints[i].altitude_msl + (j - altitude_array[i]) * delta_altitude);
                 }
 
             }
 
             double Total_Distance = 0;
             //Get total distance of spline 
-            for (int i = 0; i < SplineWP.Count() - 1; i++)
+            for (int i = 0; i < Simulator_Path.Count() - 1; i++)
             {
-                double dx = MercatorProjection.lonToX(SplineWP[i + 1].longitude) - MercatorProjection.lonToX(SplineWP[i].longitude);
-                double dy = MercatorProjection.latToY(SplineWP[i + 1].latitude) - MercatorProjection.latToY(SplineWP[i].latitude);
+                double dx = MercatorProjection.lonToX(Simulator_Path[i + 1].longitude) - MercatorProjection.lonToX(Simulator_Path[i].longitude);
+                double dy = MercatorProjection.latToY(Simulator_Path[i + 1].latitude) - MercatorProjection.latToY(Simulator_Path[i].latitude);
                 Total_Distance += Math.Sqrt(dx * dx + dy * dy);
             }
 
@@ -876,8 +947,14 @@ namespace interoperability
             while (SDA_Plane_Simulator_Thread_shouldStop == false)
             {
                 //If using straight moving lines
-                if (false)
+                if (true)
                 {
+                    Simulator_Path.Clear();
+                    foreach (Waypoint i in Current_Mission.all_waypoints)
+                    {
+                        Simulator_Path.Add(i);
+                    }
+                    
                     if (target_waypoint == total_waypoints)
                     {
                         sim_next_wp = 0;
@@ -930,17 +1007,17 @@ namespace interoperability
                     ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
                     current_dist += ddist;
 
-                    int spline_index = (int)Math.Ceiling(current_dist / (Total_Distance / SplineWP.Count()));
+                    int spline_index = (int)Math.Ceiling(current_dist / (Total_Distance / Simulator_Path.Count()));
 
-                    if (current_dist >= Total_Distance || spline_index >= SplineWP.Count() - 1)
+                    if (current_dist >= Total_Distance || spline_index >= Simulator_Path.Count() - 1)
                     {
                         current_dist = 0;
                         spline_index = 0;
                     }
 
-                    sim_lat = SplineWP[spline_index].latitude;
-                    sim_lng = SplineWP[spline_index].longitude;
-                    sim_alt = SplineWP[spline_index].altitude_msl;
+                    sim_lat = Simulator_Path[spline_index].latitude;
+                    sim_lng = Simulator_Path[spline_index].longitude;
+                    sim_alt = Simulator_Path[spline_index].altitude_msl;
 
                     //Very stupid way of calculating target waypoint 
                     for (int i = 0; i <= total_waypoints; i++)
@@ -960,8 +1037,8 @@ namespace interoperability
 
                     Console.WriteLine("Target Waypoint: " + sim_next_wp.ToString());
 
-                    double dy = SplineWP[spline_index + 1].latitude - sim_lat;
-                    double dx = SplineWP[spline_index + 1].longitude - sim_lng;
+                    double dy = Simulator_Path[spline_index + 1].latitude - sim_lat;
+                    double dx = Simulator_Path[spline_index + 1].longitude - sim_lng;
 
                     sim_yaw = (float)(90 - Math.Atan2(dy, dx) * 180 / Math.PI);
                     if (sim_yaw < 0)
@@ -971,10 +1048,9 @@ namespace interoperability
 
 
                 }
-
-
                 Thread.Sleep(100);
             }
+            Current_Mission.all_waypoints = Current_Waypoints;
         }
 
         //Will be used to export to something. Is used to 
@@ -1147,14 +1223,14 @@ namespace interoperability
                     }
 
                 }
-
+                //Draw Waypoints
                 if (Interoperability_GUI.getDrawWP())
                 {
                     if (usePlaneSimulator == true)
                     {
                         Interoperability_GUI.MAP_addWP(Current_Mission.all_waypoints);
                         //Interoperability_GUI.MAP_updateWPRoute(Current_Mission.all_waypoints);
-                        Interoperability_GUI.MAP_addWPRoute(SplineWP);
+                        Interoperability_GUI.MAP_addWPRoute(Simulator_Path);
                     }
                     else
                     {
@@ -1165,6 +1241,7 @@ namespace interoperability
                     }
 
                 }
+
                 //Draw off axis targets, emergent targets, and air drop location
                 if (Interoperability_GUI.getDrawOFAT_EN_DROP())
                 {
@@ -1185,6 +1262,10 @@ namespace interoperability
                 }
 
                 Interoperability_GUI.MAP_Update_Overlay();
+
+                //Draw Images if preset
+
+                //foreach 
 
 
                 //Update GPS Location label at bottom of interface

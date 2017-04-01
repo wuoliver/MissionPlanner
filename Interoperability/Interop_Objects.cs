@@ -266,6 +266,26 @@ namespace interoperability
     }
 
 
+    public class imageOverlay
+    {
+        public string imagePath;
+        public float heading;
+        public float size;
+
+
+        public imageOverlay()
+        {
+            imagePath = "";
+            heading = 0;
+            size = 0;
+        }
+        public imageOverlay(string _imagePath, float _heading, float _size){
+            imagePath = _imagePath;
+            heading = _heading;
+            size = _size;
+        }
+    }
+
     //Marker so we can add payload images to the map
     [Serializable]
     public class GMapMarkerImage : GMapMarker

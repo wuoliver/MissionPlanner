@@ -44,6 +44,7 @@ namespace Interoperability_GUI_Forms
 
         //Put on top or something afterwards
         GMapOverlay g_Static_Overlay;
+        GMapOverlay g_Image_Overlay;
         GMapOverlay g_Stationary_Obstacle_Overlay;
         GMapOverlay g_Moving_Obstacle_Overlay;
         GMapOverlay g_Plane_Overlay;
@@ -109,6 +110,7 @@ namespace Interoperability_GUI_Forms
             Map_RefreshRateInput.Text = mapRefreshRate.ToString();
 
             g_Static_Overlay = new GMapOverlay("Static_Overlays");
+            g_Image_Overlay = new GMapOverlay("Image Overlay");
             g_Stationary_Obstacle_Overlay = new GMapOverlay("Stationary_Obstacles");
             g_Plane_Overlay = new GMapOverlay("Plane_Overlay");
             g_Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
@@ -992,6 +994,17 @@ namespace Interoperability_GUI_Forms
             });
         }
 
+        public void MAP_addImage(PointLatLng p, float heading, float altitude, string path)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                GMapMarkerImage marker;
+                marker = new GMapMarkerImage(p, heading, altitude, path);
+                g_WP_Overlay.Markers.Add(marker);
+                
+            });
+        }
+
         /// <summary>
         /// Adds a route on the map, given a list of waypoints
         /// </summary>
@@ -1067,6 +1080,7 @@ namespace Interoperability_GUI_Forms
             {
                 gMapControl1.Overlays.Clear();
                 gMapControl1.Overlays.Add(g_Static_Overlay);
+                gMapControl1.Overlays.Add(g_Image_Overlay);
                 gMapControl1.Overlays.Add(g_WP_Overlay);
                 gMapControl1.Overlays.Add(g_Moving_Obstacle_Overlay);
                 gMapControl1.Overlays.Add(g_Stationary_Obstacle_Overlay);
@@ -1081,6 +1095,7 @@ namespace Interoperability_GUI_Forms
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
                 g_Moving_Obstacle_Overlay.Clear();
+                g_Image_Overlay.Clear();
                 g_Static_Overlay.Clear();
                 g_Stationary_Obstacle_Overlay.Clear();
                 g_OFAT_EN_DROP_Overlay.Clear();
