@@ -1008,10 +1008,11 @@ namespace Interoperability_GUI_Forms
         /// <summary>
         /// Adds a route on the map, given a list of waypoints
         /// </summary>
-        public void MAP_addWPRoute(List<Waypoint> waypoints)
+        public void MAP_addWPRoute(List<Waypoint> _waypoints)
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
+                List<Waypoint> waypoints = new List<Waypoint>(_waypoints);
                 for (int i = 0; i < waypoints.Count() - 1; i++)
                 {
                     List<PointLatLng> list = new List<PointLatLng>();

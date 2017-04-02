@@ -37,6 +37,13 @@ namespace interoperability
         public float latitude { get; set; }
         public float longitude { get; set; }
 
+        public Stationary_Obstacle(float _cylinder_height, float _cylinder_radius, float _latitude, float _longitude)
+        {
+            cylinder_height = _cylinder_height;
+            cylinder_radius = _cylinder_radius;
+            latitude = _latitude;
+            longitude = _longitude;
+        }
         public void printall()
         {
             Console.WriteLine("Cylinder Height: " + cylinder_height + "\nLatitude: " + latitude +
@@ -68,6 +75,11 @@ namespace interoperability
             latitude = _latitude;
             longitude = _longitude;
             empty = false;
+        }
+        public Waypoint(PointLatLng coordinates)
+        {
+            latitude = (float)coordinates.Lat;
+            longitude = (float)coordinates.Lng;
         }
         public Waypoint(double _latitude, double _longitude)
         {
@@ -232,6 +244,71 @@ namespace interoperability
             all_waypoints = new List<Waypoint>(_Mission.all_waypoints);
             off_axis_target_pos = new GPS_Position(_Mission.off_axis_target_pos);
             search_grid_points = new List<Waypoint>(_Mission.search_grid_points);
+        }
+    }
+
+    //SDA Vertex Classes
+    public class Vertex
+    {
+        public VertexCoords selfCoords; //Coordinates of this vertex
+        public VertexGPSCoords gpsCoords; //GPS coordinates of the vertex
+        public VertexCoords parentCoords; //Coordinates of the parent vertex
+        public double g; //Goal Value - Shortest distance from start vertex the current vertex
+        public double h; //Heuristic - distance from vertex to end vertex
+        public bool closed = false;
+        public bool open = false;
+        public bool isStart = false;
+        public Vertex(VertexCoords _selfCoords, VertexGPSCoords _gpsCoords, VertexCoords _parentCoords, double _g, double _h)
+        {
+            selfCoords = _selfCoords;
+            gpsCoords = _gpsCoords;
+            parentCoords = _parentCoords;
+            g = _g;
+            h = _h;
+        }
+
+        public Vertex(double _g, double _h)
+        {
+            g = _g;
+            h = _h;
+        }
+    }
+
+    public class VertexCoords
+    {
+        public int x;
+        public int y;
+        public VertexCoords(int _x, int _y)
+        {
+            x = _x;
+            y = _y;
+        }
+    }
+
+    public class VertexGPSCoords
+    {
+        public double lngX;
+        public double latY;
+        public VertexGPSCoords(double _lngX, double _latY)
+        {
+            lngX = _lngX;
+            latY = _latY;
+        }
+    }
+
+    public class VertexComp : IComparer<Vertex>
+    {
+        // Compares by Height, Length, and Width.
+        public int Compare(Vertex x, Vertex y)
+        {
+            if (x.g + x.h > y.g + y.h)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 

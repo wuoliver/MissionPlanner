@@ -37,6 +37,9 @@ using System.IO; // For logging
 using System.Threading; // Trololo
 using System.Diagnostics; // For stopwatch
 
+//For Priority Queues
+using C5;
+
 
 /* NOTES TO SELF
  * 
@@ -93,7 +96,7 @@ namespace interoperability
         bool resetFlightTimer = false;                      //Used to reset the flight timer
         bool usePlaneSimulator = false;                     //Used for the plane simulator
 
-        Obstacles obstaclesList;                            //Instance that holds all SDA Obstacles 
+        Obstacles obstaclesList = new Obstacles();          //Instance that holds all SDA Obstacles 
         public Interoperability_Settings Settings;          //Instance that holds all Interoperability Settings
 
         public List<Mission> Mission_List { get; set; }   //Holds a list of all missions from interoperability + Server
@@ -455,7 +458,7 @@ namespace interoperability
 
         private void Stop_Thread(ref Thread _thread, ref bool shouldStop_Variable)
         {
-            if(_thread.IsAlive)
+            if (_thread.IsAlive)
             {
                 shouldStop_Variable = true;
                 _thread.Join(50);
@@ -726,7 +729,7 @@ namespace interoperability
         public void SDA_Avoidance_Algorithm()
         {
 
-            while (SDA_Plane_Simulator_Thread_shouldStop == false)
+            while (SDA_Avoidance_Algorithm_Thread_shouldStop == false)
             {
                 /*Write your algorithm here
                 You have access to: 
@@ -744,74 +747,321 @@ namespace interoperability
                 */
 
 
+                List<int> intersectingWaypoints = new List<int>();
 
+                for (int i = 0; i < Current_Mission.all_waypoints.Count() - 1; i++)
+                {
+                    foreach (Stationary_Obstacle o in obstaclesList.stationary_obstacles)
+                    {
+                        if (Math.Abs((Current_Mission.all_waypoints[i].latitude - Current_Mission.all_waypoints[i + 1].latitude) * o.latitude + o.longitude * (Current_Mission.all_waypoints[i + 1].longitude -
+                            Current_Mission.all_waypoints[i].longitude) + (Current_Mission.all_waypoints[i + 1].latitude - Current_Mission.all_waypoints[i].latitude) * Current_Mission.all_waypoints[i + 1].longitude +
+                            (Current_Mission.all_waypoints[i + 1].longitude - Current_Mission.all_waypoints[i].longitude) * o.latitude) / Math.Sqrt((Math.Pow(Current_Mission.all_waypoints[i].latitude - Current_Mission.all_waypoints[i + 1].latitude, 2) +
+                            Math.Pow((Current_Mission.all_waypoints[i + 1].longitude - Current_Mission.all_waypoints[i].longitude), 2))) <= o.cylinder_radius)
+                        {
+                            intersectingWaypoints.Add(i);
+                        }
+
+                    }
+                }
+
+                List<PointLatLng> path = Lazy_Theta(new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[0]].latitude, Current_Mission.all_waypoints[intersectingWaypoints[0]].longitude),
+                    new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].latitude, Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].longitude),
+                    obstaclesList, new List<PointLatLng>());
+
+                for(int i=0; i< path.Count(); i++)
+                {
+                    Current_Mission.all_waypoints.Insert(intersectingWaypoints[0]+i, new Waypoint(path[i]));
+                }
+                
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
+                SDA_Avoidance_Algorithm_Thread_shouldStop = true;
             }
         }
 
-        private struct Vertex
-        {
-            public int x; //Vertex Coordinate
-            public int y; //Vertex Coordinate
-            public int p_x; //Parent X Coordinate
-            public int p_y; //Parent Y Coordinate
-            public double value; //Shortest distance from parent to this vertex 
-        }
+
+        List<List<Vertex>> verticies = new List<List<Vertex>>();
+        IntervalHeap<Vertex> open;
+        IntervalHeap<Vertex> closed;
 
         /// <summary>
         /// Calculates the optimal path between two points given stationary obstacles and geofence
         /// </summary>
-        public void Lazy_Theta(PointLatLng Start, PointLatLng End, Obstacles Mission_Obstacles, List<PointLatLng> Geofence)
+        public List<PointLatLng> Lazy_Theta(PointLatLng Start, PointLatLng End, Obstacles Mission_Obstacles, List<PointLatLng> Geofence)
         {
+
+            //http://aigamedev.com/open/tutorial/lazy-theta-star/
             /*Issues: 
                 Doesn't check for illegal angles (>90 degrees)
                 Doesn't check if we start in an occupied block? 
 
               ToDo: 
-              Create a array or something to represent the map. Grid size to be determined. 
-              Figure out how to mark a grid as occupied or blocked, so we don't go through that 
-              Actually make the code
+              Create a array or something to represent the map. Grid size to be determined. Done
+              Figure out how to mark a grid as occupied or blocked, so we don't go through that. done.
+              Actually make the code. In progress 
             */
 
-            int gridsize = 10; //How far apart each vertex is in the x or y direction (in metres)
+            int gridSize = 10; //How far apart each vertex is in the x or y direction (in metres)
+            double distanceMultiplier = 1.5; //Multiplier to make the search area bigger
 
             double startX = MercatorProjection.lonToX(Start.Lng);
             double startY = MercatorProjection.latToY(Start.Lat);
             double endX = MercatorProjection.lonToX(End.Lng);
             double endY = MercatorProjection.latToY(End.Lat);
 
-            double deltaX = endX - startX;
+            double deltaX = endX - MercatorProjection.lonToX(Start.Lng); ;
             double deltaY = endY - endY;
 
-            List<List<Vertex>> Verticies = new List<List<Vertex>>();
-            
-            for(int i = 0; i < gridsize; i++)
+            double distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+            double centreX = startX + endX / 2;
+            double centreY = startY + endY / 2;
+
+            double gridStartX = centreX - distance / 2 * distanceMultiplier; //Want to make the search area bigger so we can see eveything
+            double gridStartY = centreY - distance / 2 * distanceMultiplier; //Same as above comment
+
+            double searchSize = distance * distanceMultiplier;
+
+            //Index starts at 0,0 at top left corner, and increaess to the right and down
+            // E is start, and S is end
+            // 5 X E X X X 
+            // 4 X X X X X 
+            // 3 X X X X X 
+            // 2 X X X X X 
+            // 1 X X X S X 
+            // 0 1 2 3 4 5
+
+            //Need to map the start and end to the grid we made
+            int indexStartX = (int)((startX - gridStartX) / gridSize);
+            int indexStartY = (int)((startY - gridStartY) / gridSize);
+            int indexEndX = (int)((endX - gridStartX) / gridSize);
+            int indexEndY = (int)((endY - gridStartY) / gridSize);
+
+
+
+            VertexCoords vertexStart = new VertexCoords(indexStartX, indexStartY);
+            VertexCoords vertexEnd = new VertexCoords(indexEndX, indexEndY);
+
+            //Iterate through all the X indicies and and Y
+            for (int i = 0; i < searchSize / gridSize; i++)
             {
-                List<Vertex> VertexList = new List<Vertex>();
-                Vertex TempVertex = new Vertex;
-                VertexList.Clear();
-                
-                for (int j = 0; j < gridsize; j++)
+                List<Vertex> vertexList = new List<Vertex>();
+                vertexList.Clear();
+                double X = gridStartX + gridSize * i;
+                double Y = gridStartY;
+                double h = 0;
+                double g = 0;
+
+                //Adds the rows (Y) starting from top to bottom
+                for (int j = 0; j < gridSize; j++)
                 {
-                    TempVertex.x = 0;
-                    TempVertex.y = 0;
-                    TempVertex.p_x = 0;
-                    TempVertex.p_y = 0;
-                    TempVertex.value = 0;
-                    VertexList.Add(TempVertex);
+                    Y = gridStartY + gridSize * j;
+                    g = 10000000000; //magic number. Bad. Should not use but don't know yet. 
+                    h = Math.Sqrt(Math.Pow(vertexStart.x - vertexEnd.x, 2) + Math.Pow(vertexStart.y - vertexEnd.y, 2));
+                    vertexList.Add(new Vertex(new VertexCoords(i, j), new VertexGPSCoords(Y, X), new VertexCoords(0, 0), g, h));
                 }
             }
 
-            List<Tuple<Tuple<int, int>, float>> open;
-            List<Tuple<Tuple<int, int>, float>> closed;
+
+            //Start algorithm
+
+            VertexComp compare = new VertexComp();
+            open = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
+            closed = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
+
+            verticies[vertexStart.x][vertexStart.y].parentCoords = vertexStart;
+            verticies[vertexStart.x][vertexStart.y].isStart = true;
+            open.Add(verticies[vertexStart.x][vertexStart.y]);
+
+
+            Vertex currentVertex;
+            bool pathFound = false;
+            while (open.Count != 0)
+            {
+                do
+                {
+                    currentVertex = open.Max();
+                    open.DeleteMax();
+                    verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].open = false;
+                } while (verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed == true);
+
+                currentVertex = SetVertex(currentVertex);
+                if (currentVertex.selfCoords.x == indexEndX && currentVertex.selfCoords.y == indexEndY)
+                {
+                    pathFound = true;
+                    break;
+                }
+                closed.Add(currentVertex);
+                verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed = true;
+                foreach (Vertex v in getNeighboursVis(currentVertex))
+                {
+                    if (!v.closed)
+                    {
+                        if (!v.open)
+                        {
+                            v.g = 10000000000000000000;
+                            v.parentCoords = null;
+                        }
+                        Update_Vertex(currentVertex, v);
+                    }
+                }
+            }
+
+            if (pathFound)
+            {
+                return getThetaStarPath(new VertexCoords(indexEndX, indexEndY));
+            }
+
+            return null;
         }
+
+        public List<PointLatLng> getThetaStarPath(VertexCoords v)
+        {
+            if (verticies[v.x][v.y].isStart)
+            {
+                List<PointLatLng> path = new List<PointLatLng>();
+                path.Add(new PointLatLng(verticies[v.x][v.y].gpsCoords.latY, verticies[v.x][v.y].gpsCoords.lngX));
+                return path;
+            }
+            List<PointLatLng> tempPath = getThetaStarPath(verticies[v.x][v.y].parentCoords);
+            tempPath.Add(new PointLatLng(verticies[v.x][v.y].gpsCoords.latY, verticies[v.x][v.y].gpsCoords.lngX));
+            return tempPath;
+        }
+
+        public List<Vertex> getNeighboursVis(Vertex S)
+        {
+            int x = S.selfCoords.x;
+            int y = S.selfCoords.y;
+
+            List<VertexCoords> list = new List<VertexCoords>();
+            list.Add(new VertexCoords(x, y + 1)); //N
+            list.Add(new VertexCoords(x + 1, y + 1)); //NE
+            list.Add(new VertexCoords(x + 1, y)); //E
+            list.Add(new VertexCoords(x + 1, y - 1)); //SE
+            list.Add(new VertexCoords(x, y - 1)); //S
+            list.Add(new VertexCoords(x - 1, y - 1)); //SW
+            list.Add(new VertexCoords(x - 1, y)); //W
+            list.Add(new VertexCoords(x - 1, y = 1)); //NW
+
+            for (int i = 0; i < list.Count(); i++)
+            {
+                if (list[i].x >= verticies.Count() || list[i].x < 0)
+                {
+                    list.RemoveAt(i);
+                    i--;
+                }
+                else if (list[i].y >= verticies.Count() || list[i].x < 0)
+                {
+                    list.RemoveAt(i);
+                    i--;
+                }
+            }
+            List<Vertex> neighbours = new List<Vertex>();
+            foreach (VertexCoords v in list)
+            {
+                if (LOS(S, verticies[v.x][v.y]) == true)
+                {
+                    neighbours.Add(verticies[v.x][v.y]);
+                }
+            }
+
+            return neighbours;
+        }
+
+        public void Update_Vertex(Vertex S, Vertex S_prime)
+        {
+            Vertex oldVertex = S_prime;
+            ComputeCost(ref S, ref S_prime);
+            if (S_prime.g < oldVertex.g)
+            {
+                //We don't remove things from the top queue because it's too difficult
+                open.Add(S_prime);
+                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].open = true;
+            }
+        }
+
+        public void ComputeCost(ref Vertex S, ref Vertex S_prime)
+        {
+            if (verticies[S.parentCoords.x][S.parentCoords.x].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2)) < S_prime.g)
+            {
+                S_prime.parentCoords = S.parentCoords;
+                S_prime.g = verticies[S.parentCoords.x][S.parentCoords.x].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2));
+            }
+        }
+
+        public Vertex SetVertex(Vertex S)
+        {
+            if (!LOS(S, verticies[S.parentCoords.x][S.parentCoords.y]))
+            {
+                double minCost = 10000000000000000000;
+                Vertex minVertex = null;
+                foreach (Vertex v in getNeighboursVis(S))
+                {
+                    if (v.closed)
+                    {
+                        if (v.g + Math.Sqrt(Math.Pow(S.parentCoords.x - v.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - v.selfCoords.y, 2)) < minCost)
+                        {
+                            minVertex = v;
+                            minCost = v.g + Math.Sqrt(Math.Pow(S.parentCoords.x - v.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - v.selfCoords.y, 2));
+                        }
+                    }
+                }
+                if (minVertex != null)
+                {
+                    S.parentCoords = minVertex.selfCoords;
+                    S.g = minCost;
+                }
+            }
+            return null;
+        }
+
+        public bool LOS(Vertex S, Vertex S_prime)
+        {
+            //Check if line crosses obstacles
+            foreach (Stationary_Obstacle o in obstaclesList.stationary_obstacles)
+            {
+                if (Math.Abs((verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY - S.gpsCoords.latY) * o.latitude +
+                    o.longitude * (S.gpsCoords.lngX - verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX) + (S.gpsCoords.latY -
+                    verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY) * S.gpsCoords.lngX + (S.gpsCoords.lngX - verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX)
+                    * o.latitude) / Math.Sqrt(Math.Pow((verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY - S.gpsCoords.latY), 2) + (Math.Pow(S.gpsCoords.lngX -
+                    verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX, 2))) <= o.cylinder_radius)
+                {
+                    return false;
+                }
+            }
+
+            int count = Current_Mission.fly_zones[0].boundary_pts.Count();
+            LineIntersect.Vector intersectPoint;
+
+            //Check if lines cross geofence. We make it easier by checking each line segment instead of the entire polygon
+            for (int i = 0; i < count; i++)
+            {
+                if (LineIntersect.LineSegementsIntersect(new LineIntersect.Vector(S.selfCoords.x, S.selfCoords.y), new LineIntersect.Vector(S.parentCoords.x, S.parentCoords.y),
+                new LineIntersect.Vector(Current_Mission.fly_zones[0].boundary_pts[i % count].longitude, Current_Mission.fly_zones[0].boundary_pts[i % count].latitude),
+                new LineIntersect.Vector(Current_Mission.fly_zones[0].boundary_pts[(i + 1) % count].longitude, Current_Mission.fly_zones[0].boundary_pts[(i + 1) % count].latitude),
+                out intersectPoint, false))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
 
         public void SDA_Plane_Simulator()
         {
             //Save current waypoints stored
             List<Waypoint> Current_Waypoints = Current_Mission.all_waypoints;
 
+            //Save all obstacles
+            Obstacles Current_Obstacles = obstaclesList;
+            bool obstacleDownloadState = Obstacles_Downloaded;
+
+            obstaclesList.stationary_obstacles = new List<Stationary_Obstacle>();
+            obstaclesList.moving_obstacles = new List<Moving_Obstacle>();
+            Obstacles_Downloaded = true;
+
+            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)38.146782, (float)-76.428893));
 
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
@@ -954,7 +1204,7 @@ namespace interoperability
                     {
                         Simulator_Path.Add(i);
                     }
-                    
+
                     if (target_waypoint == total_waypoints)
                     {
                         sim_next_wp = 0;
@@ -1051,6 +1301,8 @@ namespace interoperability
                 Thread.Sleep(100);
             }
             Current_Mission.all_waypoints = Current_Waypoints;
+            Obstacles_Downloaded = obstacleDownloadState;
+            obstaclesList = Current_Obstacles;
         }
 
         //Will be used to export to something. Is used to 
