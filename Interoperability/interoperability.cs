@@ -37,8 +37,6 @@ using System.IO; // For logging
 using System.Threading; // Trololo
 using System.Diagnostics; // For stopwatch
 
-//For Priority Queues
-using C5;
 
 
 /* NOTES TO SELF
@@ -751,16 +749,51 @@ namespace interoperability
 
                 for (int i = 0; i < Current_Mission.all_waypoints.Count() - 1; i++)
                 {
+                    double y1 = MercatorProjection.latToY(Current_Mission.all_waypoints[i].latitude);
+                    double y2 = MercatorProjection.latToY(Current_Mission.all_waypoints[i+1].latitude);
+                    double x1 = MercatorProjection.lonToX(Current_Mission.all_waypoints[i].longitude);
+                    double x2 = MercatorProjection.lonToX(Current_Mission.all_waypoints[i+1].longitude);
+                    //Centre of the obstacle
+                    double y0 = 0;
+                    double x0 = 0;
+                    double distance = 0;
+
+
                     foreach (Stationary_Obstacle o in obstaclesList.stationary_obstacles)
                     {
-                        if (Math.Abs((Current_Mission.all_waypoints[i].latitude - Current_Mission.all_waypoints[i + 1].latitude) * o.latitude + o.longitude * (Current_Mission.all_waypoints[i + 1].longitude -
-                            Current_Mission.all_waypoints[i].longitude) + (Current_Mission.all_waypoints[i + 1].latitude - Current_Mission.all_waypoints[i].latitude) * Current_Mission.all_waypoints[i + 1].longitude +
-                            (Current_Mission.all_waypoints[i + 1].longitude - Current_Mission.all_waypoints[i].longitude) * o.latitude) / Math.Sqrt((Math.Pow(Current_Mission.all_waypoints[i].latitude - Current_Mission.all_waypoints[i + 1].latitude, 2) +
-                            Math.Pow((Current_Mission.all_waypoints[i + 1].longitude - Current_Mission.all_waypoints[i].longitude), 2))) <= o.cylinder_radius)
-                        {
-                            intersectingWaypoints.Add(i);
-                        }
+                        double length = 0;
+                        double currX =x1;
+                        double currY =y1;
+                        double dx = x2 - currX;
+                        double dy = y2 - currY;
 
+                        y0 = MercatorProjection.latToY(o.latitude);
+                        x0 = MercatorProjection.lonToX(o.longitude);
+
+                        do
+                        {
+                            dx = x2 - currX;
+                            dy = y2 - currY;
+                            length = Math.Sqrt(dx * dx + dy * dy);
+
+                            double conversionRatio = 1 / length;
+
+                            if (1 < length)
+                            {
+                                dx = dx * conversionRatio;
+                                dy = dy * conversionRatio;
+                            }
+
+                            currY += dy;
+                            currX += dx;
+
+                            distance = Math.Sqrt(Math.Pow(currY - y0, 2) + Math.Pow(currX - x0, 2));
+                            if (distance <= (o.cylinder_radius * 0.3048))
+                            {
+                                intersectingWaypoints.Add(i);
+                                break;
+                            }
+                        } while (length > 1.5); 
                     }
                 }
 
@@ -768,11 +801,15 @@ namespace interoperability
                     new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].latitude, Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].longitude),
                     obstaclesList, new List<PointLatLng>());
 
-                for(int i=0; i< path.Count(); i++)
+                //Remove start and end points
+                path.RemoveAt(path.Count() - 1);
+                path.RemoveAt(0);
+
+                for (int i = 0; i < path.Count(); i++)
                 {
-                    Current_Mission.all_waypoints.Insert(intersectingWaypoints[0]+i, new Waypoint(path[i]));
+                    Current_Mission.all_waypoints.Insert(intersectingWaypoints[0] + i + 1, new Waypoint(path[i]));
                 }
-                
+
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
@@ -781,8 +818,8 @@ namespace interoperability
 
 
         List<List<Vertex>> verticies = new List<List<Vertex>>();
-        IntervalHeap<Vertex> open;
-        IntervalHeap<Vertex> closed;
+        PriorityQueue<Vertex> open;
+        PriorityQueue<Vertex> closed;
 
         /// <summary>
         /// Calculates the optimal path between two points given stationary obstacles and geofence
@@ -802,22 +839,22 @@ namespace interoperability
             */
 
             int gridSize = 10; //How far apart each vertex is in the x or y direction (in metres)
-            double distanceMultiplier = 1.5; //Multiplier to make the search area bigger
+            double distanceMultiplier = 5; //Multiplier to make the search area bigger
 
             double startX = MercatorProjection.lonToX(Start.Lng);
             double startY = MercatorProjection.latToY(Start.Lat);
             double endX = MercatorProjection.lonToX(End.Lng);
             double endY = MercatorProjection.latToY(End.Lat);
 
-            double deltaX = endX - MercatorProjection.lonToX(Start.Lng); ;
-            double deltaY = endY - endY;
+            double deltaX = endX - startX;
+            double deltaY = endY - startY;
 
             double distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-            double centreX = startX + endX / 2;
-            double centreY = startY + endY / 2;
+            double centreX = (startX + endX) / 2;
+            double centreY = (startY + endY) / 2;
 
-            double gridStartX = centreX - distance / 2 * distanceMultiplier; //Want to make the search area bigger so we can see eveything
-            double gridStartY = centreY - distance / 2 * distanceMultiplier; //Same as above comment
+            double gridStartX = centreX - (distance / 2 * distanceMultiplier); //Want to make the search area bigger so we can see eveything
+            double gridStartY = centreY - (distance / 2 * distanceMultiplier); //Same as above comment
 
             double searchSize = distance * distanceMultiplier;
 
@@ -841,6 +878,9 @@ namespace interoperability
             VertexCoords vertexStart = new VertexCoords(indexStartX, indexStartY);
             VertexCoords vertexEnd = new VertexCoords(indexEndX, indexEndY);
 
+            //test
+            //Current_Mission.all_waypoints.Clear();
+
             //Iterate through all the X indicies and and Y
             for (int i = 0; i < searchSize / gridSize; i++)
             {
@@ -852,45 +892,107 @@ namespace interoperability
                 double g = 0;
 
                 //Adds the rows (Y) starting from top to bottom
-                for (int j = 0; j < gridSize; j++)
+                for (int j = 0; j < searchSize / gridSize; j++)
                 {
                     Y = gridStartY + gridSize * j;
                     g = 10000000000; //magic number. Bad. Should not use but don't know yet. 
-                    h = Math.Sqrt(Math.Pow(vertexStart.x - vertexEnd.x, 2) + Math.Pow(vertexStart.y - vertexEnd.y, 2));
-                    vertexList.Add(new Vertex(new VertexCoords(i, j), new VertexGPSCoords(Y, X), new VertexCoords(0, 0), g, h));
+                    h = Math.Sqrt(Math.Pow(i - vertexEnd.x, 2) + Math.Pow(j - vertexEnd.y, 2));
+                    vertexList.Add(new Vertex(new VertexCoords(i, j), new VertexGPSCoords(X, Y), new VertexCoords(0, 0), g, h));
+                    //test
+                    //Current_Mission.all_waypoints.Add(new Waypoint(MercatorProjection.yToLat(Y), MercatorProjection.xToLon(X)));
                 }
+                verticies.Add(vertexList);
             }
 
+            if (false)
+            {
+                List<Waypoint> gridPointsX_Bottom = new List<Waypoint>();
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    gridPointsX_Bottom.Add(new Waypoint(MercatorProjection.yToLat(verticies[i][0].gpsCoords.latY), MercatorProjection.xToLon(verticies[i][0].gpsCoords.lngX)));
+                }
+                List<Waypoint> gridPointsX_Top = new List<Waypoint>();
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    gridPointsX_Top.Add(new Waypoint(MercatorProjection.yToLat(verticies[i][((int)searchSize / gridSize) - 1].gpsCoords.latY), MercatorProjection.xToLon(verticies[i][((int)searchSize / gridSize) - 1].gpsCoords.lngX)));
+                }
+
+                List<Waypoint> gridPointsY_Bottom = new List<Waypoint>();
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    gridPointsY_Bottom.Add(new Waypoint(MercatorProjection.yToLat(verticies[0][i].gpsCoords.latY), MercatorProjection.xToLon(verticies[0][i].gpsCoords.lngX)));
+                }
+                List<Waypoint> gridPointsY_Top = new List<Waypoint>();
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    gridPointsY_Top.Add(new Waypoint(MercatorProjection.yToLat(verticies[((int)searchSize / gridSize) - 1][i].gpsCoords.latY), MercatorProjection.xToLon(verticies[((int)searchSize / gridSize) - 1][i].gpsCoords.lngX)));
+                }
+
+                List<Waypoint> grid = new List<Waypoint>();
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    if (i % 1 == 1)
+                    {
+                        grid.Add(gridPointsX_Bottom[i]);
+                        grid.Add(gridPointsX_Top[i]);
+                    }
+                    else
+                    {
+                        grid.Add(gridPointsX_Top[i]);
+                        grid.Add(gridPointsX_Bottom[i]);
+                    }
+                }
+                for (int i = 0; i < searchSize / gridSize; i++)
+                {
+                    if (i % 1 == 1)
+                    {
+                        grid.Add(gridPointsY_Bottom[i]);
+                        grid.Add(gridPointsY_Top[i]);
+                    }
+                    else
+                    {
+                        grid.Add(gridPointsY_Top[i]);
+                        grid.Add(gridPointsY_Bottom[i]);
+                    }
+                }
+
+                FlyZone debugGrid = new FlyZone(100, 50, grid);
+                Simulator_Path.Clear();
+                Simulator_Path.AddRange(grid);
+            }
 
             //Start algorithm
 
             VertexComp compare = new VertexComp();
-            open = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
-            closed = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
+            //open = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
+            //closed = new C5.IntervalHeap<Vertex>(compare, MemoryType.Normal);
+            open = new PriorityQueue<Vertex>();
+            closed = new PriorityQueue<Vertex>();
+
 
             verticies[vertexStart.x][vertexStart.y].parentCoords = vertexStart;
             verticies[vertexStart.x][vertexStart.y].isStart = true;
-            open.Add(verticies[vertexStart.x][vertexStart.y]);
-
+            verticies[vertexStart.x][vertexStart.y].g = 0;
+            open.Enqueue(verticies[vertexStart.x][vertexStart.y]);
 
             Vertex currentVertex;
             bool pathFound = false;
-            while (open.Count != 0)
+            while (open.Count() != 0)
             {
                 do
                 {
-                    currentVertex = open.Max();
-                    open.DeleteMax();
+                    currentVertex = open.Dequeue();
                     verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].open = false;
                 } while (verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed == true);
 
-                currentVertex = SetVertex(currentVertex);
+                currentVertex = new Vertex(SetVertex(currentVertex));
                 if (currentVertex.selfCoords.x == indexEndX && currentVertex.selfCoords.y == indexEndY)
                 {
                     pathFound = true;
                     break;
                 }
-                closed.Add(currentVertex);
+                closed.Enqueue(currentVertex);
+                currentVertex.closed = true;
                 verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed = true;
                 foreach (Vertex v in getNeighboursVis(currentVertex))
                 {
@@ -900,6 +1002,9 @@ namespace interoperability
                         {
                             v.g = 10000000000000000000;
                             v.parentCoords = null;
+                            verticies[v.selfCoords.x][v.selfCoords.y].g = 10000000000000000000;
+                            verticies[v.selfCoords.x][v.selfCoords.y].parentCoords = null;
+
                         }
                         Update_Vertex(currentVertex, v);
                     }
@@ -919,11 +1024,18 @@ namespace interoperability
             if (verticies[v.x][v.y].isStart)
             {
                 List<PointLatLng> path = new List<PointLatLng>();
-                path.Add(new PointLatLng(verticies[v.x][v.y].gpsCoords.latY, verticies[v.x][v.y].gpsCoords.lngX));
+                path.Add(new PointLatLng(MercatorProjection.yToLat(verticies[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(verticies[v.x][v.y].gpsCoords.lngX)));
                 return path;
             }
-            List<PointLatLng> tempPath = getThetaStarPath(verticies[v.x][v.y].parentCoords);
-            tempPath.Add(new PointLatLng(verticies[v.x][v.y].gpsCoords.latY, verticies[v.x][v.y].gpsCoords.lngX));
+            if(verticies[v.x][v.y].parentCoords.x == v.x && verticies[v.x][v.y].parentCoords.y == v.y)
+            {
+                //Something broke. GG
+                return null;
+            }
+
+            List<PointLatLng> tempPath = new List<PointLatLng>();
+            tempPath.AddRange(getThetaStarPath(verticies[v.x][v.y].parentCoords));            
+            tempPath.Add(new PointLatLng(MercatorProjection.yToLat(verticies[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(verticies[v.x][v.y].gpsCoords.lngX)));
             return tempPath;
         }
 
@@ -940,7 +1052,7 @@ namespace interoperability
             list.Add(new VertexCoords(x, y - 1)); //S
             list.Add(new VertexCoords(x - 1, y - 1)); //SW
             list.Add(new VertexCoords(x - 1, y)); //W
-            list.Add(new VertexCoords(x - 1, y = 1)); //NW
+            list.Add(new VertexCoords(x - 1, y + 1)); //NW
 
             for (int i = 0; i < list.Count(); i++)
             {
@@ -949,7 +1061,7 @@ namespace interoperability
                     list.RemoveAt(i);
                     i--;
                 }
-                else if (list[i].y >= verticies.Count() || list[i].x < 0)
+                else if (list[i].y >= verticies.Count() || list[i].y < 0)
                 {
                     list.RemoveAt(i);
                     i--;
@@ -969,22 +1081,25 @@ namespace interoperability
 
         public void Update_Vertex(Vertex S, Vertex S_prime)
         {
-            Vertex oldVertex = S_prime;
+            Vertex oldVertex = new Vertex(S_prime);
             ComputeCost(ref S, ref S_prime);
             if (S_prime.g < oldVertex.g)
             {
                 //We don't remove things from the top queue because it's too difficult
-                open.Add(S_prime);
+                open.Enqueue(S_prime);
                 verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].open = true;
             }
         }
 
         public void ComputeCost(ref Vertex S, ref Vertex S_prime)
         {
-            if (verticies[S.parentCoords.x][S.parentCoords.x].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2)) < S_prime.g)
+            double newCost = verticies[S.parentCoords.x][S.parentCoords.y].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2));
+            if (newCost < S_prime.g)
             {
                 S_prime.parentCoords = S.parentCoords;
-                S_prime.g = verticies[S.parentCoords.x][S.parentCoords.x].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2));
+                S_prime.g = newCost;
+                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].parentCoords = new VertexCoords(S.parentCoords.x, S.parentCoords.y);
+                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].g = newCost;
             }
         }
 
@@ -1009,25 +1124,64 @@ namespace interoperability
                 {
                     S.parentCoords = minVertex.selfCoords;
                     S.g = minCost;
+                    verticies[S.selfCoords.x][S.selfCoords.y].parentCoords = minVertex.selfCoords;
+                    verticies[S.selfCoords.x][S.selfCoords.y].g = minCost;
                 }
             }
-            return null;
+            return S;
         }
 
         public bool LOS(Vertex S, Vertex S_prime)
         {
+            //Points of S and S_prime
+            double y1 = S.gpsCoords.latY;
+            double x1 = S.gpsCoords.lngX;
+            double y2 = S_prime.gpsCoords.latY;
+            double x2 = S_prime.gpsCoords.lngX;
+
+            //Centre of the obstacle
+            double y0 = 0;
+            double x0 = 0;
+
+            double distance = 0;
+
             //Check if line crosses obstacles
             foreach (Stationary_Obstacle o in obstaclesList.stationary_obstacles)
             {
-                if (Math.Abs((verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY - S.gpsCoords.latY) * o.latitude +
-                    o.longitude * (S.gpsCoords.lngX - verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX) + (S.gpsCoords.latY -
-                    verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY) * S.gpsCoords.lngX + (S.gpsCoords.lngX - verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX)
-                    * o.latitude) / Math.Sqrt(Math.Pow((verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.latY - S.gpsCoords.latY), 2) + (Math.Pow(S.gpsCoords.lngX -
-                    verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].gpsCoords.lngX, 2))) <= o.cylinder_radius)
+                double length = 0;
+                double currX = x1;
+                double currY = y1;
+                double dx = x2 - currX;
+                double dy = y2 - currY;
+
+                y0 = MercatorProjection.latToY(o.latitude);
+                x0 = MercatorProjection.lonToX(o.longitude);
+
+                do
                 {
-                    return false;
-                }
+                    dx = x2 - currX;
+                    dy = y2 - currY;
+                    length = Math.Sqrt(dx * dx + dy * dy);
+
+                    double conversionRatio = 1 / length;
+
+                    if (1 < length)
+                    {
+                        dx = dx * conversionRatio;
+                        dy = dy * conversionRatio;
+                    }
+
+                    currY += dy;
+                    currX += dx;
+
+                    distance = Math.Sqrt(Math.Pow(currY - y0, 2) + Math.Pow(currX - x0, 2));
+                    if (distance <= (o.cylinder_radius * 0.3048 * 1.3))
+                    {
+                        return false;
+                    }
+                } while (length > 1.5);
             }
+
 
             int count = Current_Mission.fly_zones[0].boundary_pts.Count();
             LineIntersect.Vector intersectPoint;
@@ -1061,7 +1215,7 @@ namespace interoperability
             obstaclesList.moving_obstacles = new List<Moving_Obstacle>();
             Obstacles_Downloaded = true;
 
-            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)38.146782, (float)-76.428893));
+            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 150, (float)38.146782, (float)-76.428893));
 
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
@@ -1319,7 +1473,6 @@ namespace interoperability
             Stopwatch t = new Stopwatch();
             t.Start();
             CookieContainer cookies = new CookieContainer();
-
             try
             {
                 using (var client = new HttpClient())
@@ -1455,11 +1608,18 @@ namespace interoperability
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.fly_zones[0].boundary_pts, "Geofence", Color.Red, Color.Transparent, 3, 50);
                 }
 
+                if (Current_Mission.fly_zones.Count() > 1)
+                {
+                    //Interoperability_GUI.MAP_addWPRoute(Current_Mission.fly_zones[1].boundary_pts);
+                    //Interoperability_GUI.MAP_addStaticPoly(Current_Mission.fly_zones[1].boundary_pts, "gridDebug", Color.Cyan, Color.Transparent, 3, 50);
+                }
+
                 //Draw search area
                 if (Interoperability_GUI.getDrawSearchArea())
                 {
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
                 }
+
 
                 //Draw plane location                   
                 if (Interoperability_GUI.getDrawPlane())

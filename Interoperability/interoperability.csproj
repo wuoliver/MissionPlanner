@@ -59,10 +59,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ExtLibs\BSE.Windows.Forms\bin\Release\BSE.Windows.Forms.dll</HintPath>
     </Reference>
-    <Reference Include="C5, Version=2.4.5947.17248, Culture=neutral, PublicKeyToken=282361b99ded7e8e, processorArchitecture=MSIL">
-      <HintPath>..\packages\C5.2.4.5947.17249\lib\net45\C5.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="GeoUtility, Version=3.1.7.5, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ExtLibs\GeoUtility\bin\Release\GeoUtility.dll</HintPath>
@@ -169,7 +165,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="UT-X2B.png" />
   </ItemGroup>
   <ItemGroup>
