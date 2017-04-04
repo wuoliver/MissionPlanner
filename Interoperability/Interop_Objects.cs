@@ -333,6 +333,10 @@ namespace interoperability
         {
             // assumes pq is not empty; up to calling code
             int li = data.Count - 1; // last index (before removal)
+            if(li < 0)
+            {
+                return default(T);
+            }
             T frontItem = data[0];   // fetch the front
             data[0] = data[li];
             data.RemoveAt(li);

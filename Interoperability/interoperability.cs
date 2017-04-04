@@ -797,20 +797,55 @@ namespace interoperability
                     }
                 }
 
-                List<PointLatLng> path = Lazy_Theta(new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[0]].latitude, Current_Mission.all_waypoints[intersectingWaypoints[0]].longitude),
-                    new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].latitude, Current_Mission.all_waypoints[intersectingWaypoints[0] + 1].longitude),
-                    obstaclesList, new List<PointLatLng>());
+                
 
-                //Remove start and end points
-                path.RemoveAt(path.Count() - 1);
-                path.RemoveAt(0);
-
-                for (int i = 0; i < path.Count(); i++)
+                List<List<PointLatLng>> newPaths = new List<List<PointLatLng>>();
+                for (int w = 0; w < intersectingWaypoints.Count(); w++)
                 {
-                    Current_Mission.all_waypoints.Insert(intersectingWaypoints[0] + i + 1, new Waypoint(path[i]));
+                    List<PointLatLng> path = Lazy_Theta(new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[w]].latitude, Current_Mission.all_waypoints[intersectingWaypoints[w]].longitude),
+                      new PointLatLng(Current_Mission.all_waypoints[intersectingWaypoints[w] + 1].latitude, Current_Mission.all_waypoints[intersectingWaypoints[w] + 1].longitude),
+                      obstaclesList, new List<PointLatLng>());
+                    newPaths.Add(path);
                 }
 
+                int oldSize = Current_Mission.all_waypoints.Count();
+                for (int i = 0; i < newPaths.Count(); i++)
+                {
+                    //if path not found, figure something out
+                    if (newPaths[i] != null)
+                    {
 
+                        int delta = Current_Mission.all_waypoints.Count() - oldSize;
+
+                        //Calculate altitude differences between the two waypoints that we're adding waypoints
+                        float dAlt = Current_Mission.all_waypoints[intersectingWaypoints[i] + delta + 1].altitude_msl - Current_Mission.all_waypoints[intersectingWaypoints[i] + delta].altitude_msl;
+                        float distance = 0;
+                        List<float> altitudes = new List<float>();
+                        float prevAlt = Current_Mission.all_waypoints[intersectingWaypoints[i] + delta].altitude_msl;
+
+                        for (int j = 0; j < newPaths[i].Count() - 1; j++)
+                        {
+                             distance += (float)Math.Sqrt(Math.Pow(newPaths[i][j].Lat - newPaths[i][j + 1].Lat, 2) + Math.Pow(newPaths[i][j].Lng - newPaths[i][j + 1].Lng, 2));
+                        }
+                        for (int j = 0; j < newPaths[i].Count() - 1; j++)
+                        {
+                            float temp = (float)Math.Sqrt(Math.Pow(newPaths[i][j].Lat - newPaths[i][j + 1].Lat, 2) + Math.Pow(newPaths[i][j].Lng - newPaths[i][j + 1].Lng, 2));
+                            altitudes.Add((temp/distance * dAlt) + prevAlt);
+                            prevAlt = altitudes[j];
+                        }
+
+                        //Remove start and end points becuase they will be slightly off due to how we do the grid
+                        newPaths[i].RemoveAt(newPaths[i].Count() - 1);
+                        newPaths[i].RemoveAt(0);
+
+                        //Insert new waypoints into the flight path
+                        for (int j = 0; j < newPaths[i].Count(); j++)
+                        {
+                            Current_Mission.all_waypoints.Insert(intersectingWaypoints[i] + j + 1 + delta, new Waypoint(altitudes[j], newPaths[i][j].Lat, newPaths[i][j].Lng));
+                        }
+                    }
+                }
+                
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
             }
@@ -838,8 +873,9 @@ namespace interoperability
               Actually make the code. In progress 
             */
 
-            int gridSize = 10; //How far apart each vertex is in the x or y direction (in metres)
-            double distanceMultiplier = 5; //Multiplier to make the search area bigger
+            //Default 10, 5
+            int gridSize = 20; //How far apart each vertex is in the x or y direction (in metres)
+            double distanceMultiplier = 20; //Multiplier to make the search area bigger
 
             double startX = MercatorProjection.lonToX(Start.Lng);
             double startY = MercatorProjection.latToY(Start.Lat);
@@ -881,6 +917,7 @@ namespace interoperability
             //test
             //Current_Mission.all_waypoints.Clear();
 
+            verticies.Clear();
             //Iterate through all the X indicies and and Y
             for (int i = 0; i < searchSize / gridSize; i++)
             {
@@ -982,6 +1019,10 @@ namespace interoperability
                 do
                 {
                     currentVertex = open.Dequeue();
+                    if(currentVertex == null)
+                    {
+                        return null;
+                    }
                     verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].open = false;
                 } while (verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed == true);
 
@@ -1175,7 +1216,7 @@ namespace interoperability
                     currX += dx;
 
                     distance = Math.Sqrt(Math.Pow(currY - y0, 2) + Math.Pow(currX - x0, 2));
-                    if (distance <= (o.cylinder_radius * 0.3048 * 1.3))
+                    if (distance <= (o.cylinder_radius * 0.3048 + 15)) //Add 50 feed safety radius 
                     {
                         return false;
                     }
@@ -1215,7 +1256,7 @@ namespace interoperability
             obstaclesList.moving_obstacles = new List<Moving_Obstacle>();
             Obstacles_Downloaded = true;
 
-            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 150, (float)38.146782, (float)-76.428893));
+            
 
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
@@ -1256,7 +1297,13 @@ namespace interoperability
             Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146674, -76.423473));
             Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143451, -76.426735));
 
+            for (int i=0;i<Current_Mission.all_waypoints.Count()-1;i++)
+            {
+                obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, 
+                    (Current_Mission.all_waypoints[i].latitude + Current_Mission.all_waypoints[i+1].latitude)/2, (Current_Mission.all_waypoints[i].longitude + Current_Mission.all_waypoints[i + 1].longitude) / 2));
+            }
 
+           
             if (Current_Mission.all_waypoints.Count() < 3)
             {
                 Console.WriteLine("Error, not enough waypoints to start simulator (Minimum 3)");
@@ -1353,6 +1400,7 @@ namespace interoperability
                 //If using straight moving lines
                 if (true)
                 {
+                    total_waypoints = Current_Mission.all_waypoints.Count();
                     Simulator_Path.Clear();
                     foreach (Waypoint i in Current_Mission.all_waypoints)
                     {
