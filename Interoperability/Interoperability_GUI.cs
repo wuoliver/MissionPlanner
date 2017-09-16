@@ -50,7 +50,7 @@ namespace Interoperability_GUI_Forms
         GMapOverlay g_Plane_Overlay;
         GMapOverlay g_WP_Overlay;
         GMapOverlay g_OFAT_EM_DROP_Overlay;
-
+        
 
         //Used for map control thread
         protected bool MAP_Bool_DrawWP = true;
@@ -550,6 +550,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawGeofence"] = Map_Bool_DrawGeofence.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void SearchArea_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -566,6 +567,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawSearchArea"] = Map_Bool_DrawSearchArea.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void Obstacles_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -582,6 +584,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawObstacles"] = Map_Bool_DrawObstacles.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void UASLoc_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -598,6 +601,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawPlane"] = Map_Bool_DrawPlane.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void Waypoints_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -614,6 +618,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawWP"] = MAP_Bool_DrawWP.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void OFAT_EM_DROP_CheckBox_CheckedChanged(object sender, EventArgs e)
@@ -630,6 +635,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EM_DROP.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void UAS_Trackbar_Scroll(object sender, EventArgs e)
@@ -637,6 +643,7 @@ namespace Interoperability_GUI_Forms
             UAS_Scale = UAS_Trackbar.Value;
             Settings["UAS_Scale"] = UAS_Scale.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void Fixed_UAS_Size_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -644,6 +651,7 @@ namespace Interoperability_GUI_Forms
             Map_Bool_UAS_FixedSize = Fixed_UAS_Size_Checkbox.Checked;
             Settings["UAS_Fixedsize"] = Map_Bool_UAS_FixedSize.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void AutoPan_Checkbox_CheckedChanged(object sender, EventArgs e)
@@ -651,6 +659,7 @@ namespace Interoperability_GUI_Forms
             MAP_Bool_Autopan_Enable = AutoPan_Checkbox.Checked;
             Settings["MAP_Autopan"] = MAP_Bool_Autopan_Enable.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void gMapControl1_OnMapDrag()
@@ -659,6 +668,7 @@ namespace Interoperability_GUI_Forms
             AutoPan_Checkbox.Checked = false;
             Settings["MAP_Autopan"] = MAP_Bool_Autopan_Enable.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void Mission_Download_Click(object sender, EventArgs e)
@@ -1077,11 +1087,9 @@ namespace Interoperability_GUI_Forms
 
         public void MAP_Update_Overlay()
         {
-            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            IAsyncResult result = this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-
                 Interoperability instance = Interoperability.getinstance();
-                //If Obstacles are invalidated 
                 if (instance.mapinvalidateObstacle)
                 {
                     gMapControl1.Overlays.Remove(g_Moving_Obstacle_Overlay);
@@ -1126,21 +1134,52 @@ namespace Interoperability_GUI_Forms
 
                 //gMapControl1.Overlays.Clear();   We don't clear all anymore to save CPU power
                 gMapControl1.Invalidate();
+
             });
+
+            //We call this to block returning to the function until the changes are applied. 
+            //This prevents race conditions resulting from calling this too fast 
+            this.gMapControl1.EndInvoke(result);
+
         }
 
         public void MAP_Clear_Overlays()
         {
-            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            IAsyncResult result = this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                g_Moving_Obstacle_Overlay.Clear();
-                g_Image_Overlay.Clear();
-                g_Static_Overlay.Clear();
-                g_Stationary_Obstacle_Overlay.Clear();
-                g_OFAT_EM_DROP_Overlay.Clear();
+
+                Interoperability instance = Interoperability.getinstance();
+                if (instance.mapinvalidateObstacle)
+                {
+                    g_Moving_Obstacle_Overlay.Clear();
+                    g_Stationary_Obstacle_Overlay.Clear();
+
+                }
+
+                if (instance.mapinvalidateWaypoints)
+                {
+                    g_WP_Overlay.Clear();
+                }
+
+                if (instance.mapinvalidateSearchArea || instance.mapinvalidateGeofence)
+                {
+                    g_Static_Overlay.Clear();
+                }
+
+                if (instance.mapinvalidateOFAT_EM_DROP)
+                {
+                    g_OFAT_EM_DROP_Overlay.Clear();
+                }
+
+                if (instance.mapinvalidateImage)
+                {
+                    g_Image_Overlay.Clear();
+                }
+
                 g_Plane_Overlay.Clear();
-                g_WP_Overlay.Clear();
             });
+
+            this.gMapControl1.EndInvoke(result);
         }
 
         public void MAP_Update_Loc(PointLatLng point)
@@ -1168,7 +1207,41 @@ namespace Interoperability_GUI_Forms
                 InteroperabilityCallback(7);
             }*/
 
-            Console.Beep(433, 100);
+            int freq = 0;
+            switch (e.KeyChar)
+            {
+                case 'a':
+                    freq = 523;
+                    break;
+                case 's':
+                    freq = 587;
+                    break;
+                case 'd':
+                    freq = 659;
+                    break;
+                case 'f':
+                    freq = 698;
+                    break;
+                case 'g':
+                    freq = 784;
+                    break;
+                case 'h':
+                    freq = 880;
+                    break;
+                case 'j':
+                    freq = 988;
+                    break;
+                case 'k':
+                    freq = 1046;
+                    break;
+                case 'l':
+                    freq = 1174; 
+                    break;
+                default:
+                    freq = 433;
+                    break;
+            }
+            Console.Beep(freq, 100);
 
         }
 
@@ -1211,6 +1284,8 @@ namespace Interoperability_GUI_Forms
                 Interoperability.Interoperability_Mutex.ReleaseMutex();
 
             }
+
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1270,6 +1345,7 @@ namespace Interoperability_GUI_Forms
 
                 }
             }
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void saveMissionAsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1302,6 +1378,7 @@ namespace Interoperability_GUI_Forms
                 Interoperability_Mission_Edit_Instance = new Interoperability_Mission_Edit();
                 Interoperability_Mission_Edit_Instance.ShowDialog();
             }
+            Interoperability.getinstance().Invalidate_Map();
         }
 
 
@@ -1325,6 +1402,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawGeofence"] = Map_Bool_DrawGeofence.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showSearchAreaToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1343,6 +1421,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawSearchArea"] = Map_Bool_DrawSearchArea.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showSRICEmergentDropToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1361,6 +1440,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EM_DROP.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showObstaclesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1379,6 +1459,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawObstacles"] = Map_Bool_DrawObstacles.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showPlaneToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1397,6 +1478,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawPlane"] = Map_Bool_DrawPlane.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showWaypointsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1415,6 +1497,7 @@ namespace Interoperability_GUI_Forms
             }
             Settings["DrawWP"] = MAP_Bool_DrawWP.ToString();
             Settings.Save();
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void showCameraTriggerLocation_Click(object sender, EventArgs e)
@@ -1436,6 +1519,7 @@ namespace Interoperability_GUI_Forms
                 }
                 catch { }
             }
+            Interoperability.getinstance().Invalidate_Map();
         }
 
         private void Update_FP_Button_Click(object sender, EventArgs e)

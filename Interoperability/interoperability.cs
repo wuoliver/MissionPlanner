@@ -98,12 +98,12 @@ namespace interoperability
         bool usePlaneSimulator = false;                     //Used for the plane simulator
 
 
-        public bool mapinvalidateWaypoints;
-        public bool mapinvalidateGeofence;
-        public bool mapinvalidateSearchArea;
-        public bool mapinvalidateObstacle;
-        public bool mapinvalidateOFAT_EM_DROP;
-        public bool mapinvalidateImage;
+        public bool mapinvalidateWaypoints = true;
+        public bool mapinvalidateGeofence = true;
+        public bool mapinvalidateSearchArea = true;
+        public bool mapinvalidateObstacle = true;
+        public bool mapinvalidateOFAT_EM_DROP = true;
+        public bool mapinvalidateImage = true;
 
         Obstacles obstaclesList = new Obstacles();          //Instance that holds all SDA Obstacles 
         public Interoperability_Settings Settings;          //Instance that holds all Interoperability Settings
@@ -143,7 +143,7 @@ namespace interoperability
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
-                + "*                            Interoperability 0.3.1                           *\n"
+                + "*                            Interoperability 0.3.3                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 
             //Set up settings object, and load from xml file
@@ -725,6 +725,8 @@ namespace interoperability
                         Obstacles_Downloaded = true;
                         Interoperability_GUI.WriteObstacles(obstaclesList);
 
+                        mapinvalidateObstacle = true;
+
                         Thread.Sleep(1000 / Interoperability_GUI.getsdaPollRate());
                     }
                 }
@@ -873,6 +875,8 @@ namespace interoperability
                         }
                     }
                 }
+
+                mapinvalidateWaypoints = true;
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
@@ -1277,7 +1281,6 @@ namespace interoperability
             obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835270, (float)-79.240780));
             obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835711, (float)-79.238709));
 
-
             /*Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
             Current_Mission.all_waypoints.Add(new Waypoint(30, 38.146336, -76.428495));
             Current_Mission.all_waypoints.Add(new Waypoint(50, 38.147551, -76.429503));
@@ -1420,17 +1423,28 @@ namespace interoperability
             //-------------------------------------------------------------------------------------------
             //End Spline Algorithm
 
+
+            bool useSpline = false;
+
+            if (!useSpline)
+            {
+                Simulator_Path.Clear();
+                foreach (Waypoint i in Current_Mission.all_waypoints)
+                {
+                    Simulator_Path.Add(i);
+                }
+            }
+
+            //Invalidate waypoints and obstacles, to update for new paths
+            mapinvalidateWaypoints = true;
+            mapinvalidateObstacle = true;
+
             while (SDA_Plane_Simulator_Thread_shouldStop == false)
             {
                 //If using straight moving lines
-                if (true)
+                if (!useSpline)
                 {
                     total_waypoints = Current_Mission.all_waypoints.Count();
-                    Simulator_Path.Clear();
-                    foreach (Waypoint i in Current_Mission.all_waypoints)
-                    {
-                        Simulator_Path.Add(i);
-                    }
 
                     if (target_waypoint == total_waypoints)
                     {
@@ -1599,6 +1613,13 @@ namespace interoperability
                         Mission_List.Add(Server_Mission[i]);
                     }
                     Current_Mission = Server_Mission[0];
+
+                    mapinvalidateWaypoints = true;
+                    mapinvalidateGeofence = true;
+                    mapinvalidateSearchArea = true;
+                    mapinvalidateObstacle = true;
+                    mapinvalidateOFAT_EM_DROP = true;
+                    mapinvalidateImage = true;
                 }
             }
             catch
@@ -1608,7 +1629,15 @@ namespace interoperability
             Console.WriteLine("Mission_Download Thread Stopped");
         }
 
-
+        public void Invalidate_Map()
+        {
+            mapinvalidateWaypoints = true;
+            mapinvalidateGeofence = true;
+            mapinvalidateSearchArea = true;
+            mapinvalidateObstacle = true;
+            mapinvalidateOFAT_EM_DROP = true;
+            mapinvalidateImage = true;
+        }
 
         public void Map_Control()
         {
@@ -1677,17 +1706,17 @@ namespace interoperability
                 //an object. For now, we will invalidate everything so performance will be the same. Once we enable invalidation,
                 //it should reduce CPU usage
 
-                mapinvalidateWaypoints = true;
+                /*mapinvalidateWaypoints = true;
                 mapinvalidateGeofence = true;
                 mapinvalidateSearchArea = true;
                 mapinvalidateObstacle = true;
                 mapinvalidateOFAT_EM_DROP = true;
-                mapinvalidateImage = true;
+                mapinvalidateImage = true;*/
 
                 Interoperability_GUI.MAP_Clear_Overlays();
                 //Draw Obstacles 
                 if (Obstacles_Downloaded)
-                {
+                { 
                     if (Interoperability_GUI.getDrawObstacles() && mapinvalidateObstacle)
                     {
                         for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
@@ -1703,7 +1732,6 @@ namespace interoperability
                                obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
                                obstaclesList.moving_obstacles[i].longitude, "Moving_Obstacle" + i.ToString());
                         }
-                        mapinvalidateObstacle = false;
                     }
                 }
 
@@ -1712,7 +1740,6 @@ namespace interoperability
                 {
                     //Using first boundary point (assuming there is only one geofence) COME BACK TO THIS LATER
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.fly_zones[0].boundary_pts, "Geofence", Color.Red, Color.Transparent, 3, 50);
-                    mapinvalidateGeofence = false;
                 }
 
                 if (Current_Mission.fly_zones.Count() > 1)
@@ -1725,7 +1752,6 @@ namespace interoperability
                 if (Interoperability_GUI.getDrawSearchArea() && mapinvalidateSearchArea)
                 {
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
-                    mapinvalidateSearchArea = false;
                 }
 
                 //Draw plane location                   
@@ -1755,6 +1781,7 @@ namespace interoperability
                 {
                     if (usePlaneSimulator == true)
                     {
+                        Console.WriteLine("HELLO I AM SIMULATOR");
                         Interoperability_GUI.MAP_addWP(Current_Mission.all_waypoints);
                         Interoperability_GUI.MAP_addWPRoute(Simulator_Path);
                     }
@@ -1765,15 +1792,12 @@ namespace interoperability
                         //Draw lines between waypoints
                         Interoperability_GUI.MAP_addWPRoute(Current_Mission.all_waypoints);
                     }
-
-                    mapinvalidateWaypoints = false;
                 }
 
                 //Draw off axis targets, emergent targets, and air drop location
                 if (Interoperability_GUI.getDrawOFAT_EM_DROP() && mapinvalidateOFAT_EM_DROP)
                 {
                     Interoperability_GUI.MAP_updateOFAT_EM_DROP(Current_Mission);
-                    mapinvalidateOFAT_EM_DROP = false;
                 }
 
                 if (Interoperability_GUI.getAutopan())
@@ -1794,7 +1818,6 @@ namespace interoperability
                 //foreach 
 
                 Interoperability_GUI.MAP_Update_Overlay();
-
 
                 //Update GPS Location label at bottom of interface
                 switch (geo_cords)
