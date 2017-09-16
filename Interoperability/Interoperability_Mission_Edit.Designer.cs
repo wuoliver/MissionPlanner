@@ -102,6 +102,7 @@
             // FlyZone_Textbox
             // 
             this.FlyZone_Textbox.Location = new System.Drawing.Point(15, 81);
+            this.FlyZone_Textbox.MaxLength = 500000;
             this.FlyZone_Textbox.Multiline = true;
             this.FlyZone_Textbox.Name = "FlyZone_Textbox";
             this.FlyZone_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;

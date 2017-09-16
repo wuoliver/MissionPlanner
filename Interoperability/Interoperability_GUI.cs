@@ -49,7 +49,7 @@ namespace Interoperability_GUI_Forms
         GMapOverlay g_Moving_Obstacle_Overlay;
         GMapOverlay g_Plane_Overlay;
         GMapOverlay g_WP_Overlay;
-        GMapOverlay g_OFAT_EN_DROP_Overlay;
+        GMapOverlay g_OFAT_EM_DROP_Overlay;
 
 
         //Used for map control thread
@@ -58,7 +58,7 @@ namespace Interoperability_GUI_Forms
         protected bool Map_Bool_DrawPlane = true;
         protected bool Map_Bool_DrawGeofence = true;
         protected bool Map_Bool_DrawSearchArea = true;
-        protected bool Map_Bool_DrawOFAT_EN_DROP = true;
+        protected bool Map_Bool_DrawOFAT_EM_DROP = true;
         protected bool Map_Bool_UAS_FixedSize = false;
         protected bool MAP_Bool_Autopan_Enable = false;
 
@@ -88,7 +88,7 @@ namespace Interoperability_GUI_Forms
             MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_DrawPlane, "DrawPlane");
             MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_DrawGeofence, "DrawGeofence");
             MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_DrawSearchArea, "DrawSearchArea");
-            MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_DrawOFAT_EN_DROP, "DrawOFAT_EN_DROP");
+            MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_DrawOFAT_EM_DROP, "DrawOFAT_EN_DROP");
             MAP_Settings_Init_Bool(ref Settings, ref Map_Bool_UAS_FixedSize, "UAS_Fixedsize");
             MAP_Settings_Init_Bool(ref Settings, ref MAP_Bool_Autopan_Enable, "MAP_Autopan");
 
@@ -115,7 +115,7 @@ namespace Interoperability_GUI_Forms
             g_Plane_Overlay = new GMapOverlay("Plane_Overlay");
             g_Moving_Obstacle_Overlay = new GMapOverlay("Moving_Obstacle");
             g_WP_Overlay = new GMapOverlay("Waypoints");
-            g_OFAT_EN_DROP_Overlay = new GMapOverlay("OFAT_EN_DROP_Overlay");
+            g_OFAT_EM_DROP_Overlay = new GMapOverlay("OFAT_EN_DROP_Overlay");
 
         }
 
@@ -241,8 +241,8 @@ namespace Interoperability_GUI_Forms
             showWaypointsToolStripMenuItem.Checked = MAP_Bool_DrawWP;
             Waypoints_Checkbox.Checked = MAP_Bool_DrawWP;
 
-            showOFATEmergentDropToolStripMenuItem.Checked = Map_Bool_DrawOFAT_EN_DROP;
-            OFAT_EM_DROP_CheckBox.Checked = Map_Bool_DrawOFAT_EN_DROP;
+            showOFATEmergentDropToolStripMenuItem.Checked = Map_Bool_DrawOFAT_EM_DROP;
+            OFAT_EM_DROP_CheckBox.Checked = Map_Bool_DrawOFAT_EM_DROP;
 
             UAS_Trackbar.Value = UAS_Scale;
             Fixed_UAS_Size_Checkbox.Checked = Map_Bool_UAS_FixedSize;
@@ -621,14 +621,14 @@ namespace Interoperability_GUI_Forms
             if (!OFAT_EM_DROP_CheckBox.Checked)
             {
                 showOFATEmergentDropToolStripMenuItem.Checked = false;
-                Map_Bool_DrawOFAT_EN_DROP = false;
+                Map_Bool_DrawOFAT_EM_DROP = false;
             }
             else
             {
                 showOFATEmergentDropToolStripMenuItem.Checked = true;
-                Map_Bool_DrawOFAT_EN_DROP = true;
+                Map_Bool_DrawOFAT_EM_DROP = true;
             }
-            Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EN_DROP.ToString();
+            Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EM_DROP.ToString();
             Settings.Save();
         }
 
@@ -691,9 +691,9 @@ namespace Interoperability_GUI_Forms
             return Map_Bool_DrawSearchArea;
         }
 
-        public bool getDrawOFAT_EN_DROP()
+        public bool getDrawOFAT_EM_DROP()
         {
-            return Map_Bool_DrawOFAT_EN_DROP;
+            return Map_Bool_DrawOFAT_EM_DROP;
         }
 
         public bool getAutopan()
@@ -1041,7 +1041,7 @@ namespace Interoperability_GUI_Forms
                     marker = new GMarkerGoogle(new PointLatLng(Current_Mission.off_axis_target_pos.latitude, Current_Mission.off_axis_target_pos.longitude), GMarkerGoogleType.yellow_pushpin);
                     marker.ToolTipMode = MarkerTooltipMode.Always;
                     marker.ToolTipText = "OFAT";
-                    g_OFAT_EN_DROP_Overlay.Markers.Add(marker);
+                    g_OFAT_EM_DROP_Overlay.Markers.Add(marker);
                 }
                 else
                 {
@@ -1054,7 +1054,7 @@ namespace Interoperability_GUI_Forms
                     marker = new GMarkerGoogle(new PointLatLng(Current_Mission.air_drop_pos.latitude, Current_Mission.air_drop_pos.longitude), GMarkerGoogleType.yellow_pushpin);
                     marker.ToolTipMode = MarkerTooltipMode.Always;
                     marker.ToolTipText = "Air Drop";
-                    g_OFAT_EN_DROP_Overlay.Markers.Add(marker);
+                    g_OFAT_EM_DROP_Overlay.Markers.Add(marker);
                 }
                 else
                 {
@@ -1063,10 +1063,10 @@ namespace Interoperability_GUI_Forms
 
                 if (Current_Mission.air_drop_pos.latitude != 0 || Current_Mission.air_drop_pos.longitude != 0)
                 {
-                    marker = new GMarkerGoogle(new PointLatLng(Current_Mission.emergent_lkp.latitude, Current_Mission.emergent_lkp.longitude), GMarkerGoogleType.yellow_pushpin);
+                    marker = new GMarkerGoogle(new PointLatLng(Current_Mission.emergent_last_known_pos.latitude, Current_Mission.emergent_last_known_pos.longitude), GMarkerGoogleType.yellow_pushpin);
                     marker.ToolTipMode = MarkerTooltipMode.Always;
                     marker.ToolTipText = "Emergent Target";
-                    g_OFAT_EN_DROP_Overlay.Markers.Add(marker);
+                    g_OFAT_EM_DROP_Overlay.Markers.Add(marker);
                 }
                 else
                 {
@@ -1079,14 +1079,52 @@ namespace Interoperability_GUI_Forms
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                gMapControl1.Overlays.Clear();
-                gMapControl1.Overlays.Add(g_Static_Overlay);
-                gMapControl1.Overlays.Add(g_Image_Overlay);
-                gMapControl1.Overlays.Add(g_WP_Overlay);
-                gMapControl1.Overlays.Add(g_Moving_Obstacle_Overlay);
-                gMapControl1.Overlays.Add(g_Stationary_Obstacle_Overlay);
-                gMapControl1.Overlays.Add(g_OFAT_EN_DROP_Overlay);
+
+                Interoperability instance = Interoperability.getinstance();
+                //If Obstacles are invalidated 
+                if (instance.mapinvalidateObstacle)
+                {
+                    gMapControl1.Overlays.Remove(g_Moving_Obstacle_Overlay);
+                    gMapControl1.Overlays.Remove(g_Stationary_Obstacle_Overlay);
+                    gMapControl1.Overlays.Add(g_Moving_Obstacle_Overlay);
+                    gMapControl1.Overlays.Add(g_Stationary_Obstacle_Overlay);
+                    instance.mapinvalidateObstacle = false;
+                }
+
+                if (instance.mapinvalidateWaypoints)
+                {
+                    gMapControl1.Overlays.Remove(g_WP_Overlay);
+                    gMapControl1.Overlays.Add(g_WP_Overlay);
+                    instance.mapinvalidateWaypoints = false;
+                }
+
+                if(instance.mapinvalidateSearchArea || instance.mapinvalidateGeofence)
+                {
+                    gMapControl1.Overlays.Remove(g_Static_Overlay);
+                    gMapControl1.Overlays.Add(g_Static_Overlay);
+                    instance.mapinvalidateGeofence = false;
+                    instance.mapinvalidateSearchArea = false;
+                }
+
+                if (instance.mapinvalidateOFAT_EM_DROP)
+                {
+                    gMapControl1.Overlays.Remove(g_OFAT_EM_DROP_Overlay);
+                    gMapControl1.Overlays.Add(g_OFAT_EM_DROP_Overlay);
+                    instance.mapinvalidateOFAT_EM_DROP = false;
+                }
+
+                if (instance.mapinvalidateImage)
+                {
+                    gMapControl1.Overlays.Remove(g_Image_Overlay);
+                    gMapControl1.Overlays.Add(g_Image_Overlay);
+                    instance.mapinvalidateImage = false;
+                }
+
+                //We always update the plane location, since it is always moving. Unlike everything else
+                gMapControl1.Overlays.Remove(g_Plane_Overlay);
                 gMapControl1.Overlays.Add(g_Plane_Overlay);
+
+                //gMapControl1.Overlays.Clear();   We don't clear all anymore to save CPU power
                 gMapControl1.Invalidate();
             });
         }
@@ -1099,7 +1137,7 @@ namespace Interoperability_GUI_Forms
                 g_Image_Overlay.Clear();
                 g_Static_Overlay.Clear();
                 g_Stationary_Obstacle_Overlay.Clear();
-                g_OFAT_EN_DROP_Overlay.Clear();
+                g_OFAT_EM_DROP_Overlay.Clear();
                 g_Plane_Overlay.Clear();
                 g_WP_Overlay.Clear();
             });
@@ -1313,15 +1351,15 @@ namespace Interoperability_GUI_Forms
             {
                 showOFATEmergentDropToolStripMenuItem.Checked = false;
                 OFAT_EM_DROP_CheckBox.Checked = false;
-                Map_Bool_DrawOFAT_EN_DROP = false;
+                Map_Bool_DrawOFAT_EM_DROP = false;
             }
             else
             {
                 showOFATEmergentDropToolStripMenuItem.Checked = true;
                 OFAT_EM_DROP_CheckBox.Checked = true;
-                Map_Bool_DrawOFAT_EN_DROP = true;
+                Map_Bool_DrawOFAT_EM_DROP = true;
             }
-            Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EN_DROP.ToString();
+            Settings["DrawOFAT_EN_DROP"] = Map_Bool_DrawOFAT_EM_DROP.ToString();
             Settings.Save();
         }
 
@@ -1379,7 +1417,71 @@ namespace Interoperability_GUI_Forms
             Settings.Save();
         }
 
-        
+        private void showCameraTriggerLocation_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            openFileDialog1.InitialDirectory = Directory.GetCurrentDirectory();
+            openFileDialog1.Filter = "txt files (*.txt)|*.txt";
+            openFileDialog1.FilterIndex = 2;
+            openFileDialog1.RestoreDirectory = true;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string lines = File.ReadAllText(openFileDialog1.FileName);
+                    Interoperability.getinstance().Current_Mission.all_waypoints.Clear();
+                    Interoperability.getinstance().Current_Mission.all_waypoints.AddRange(Interoperability_Mission_Edit.DDtoWaypoints(lines));
+                }
+                catch { }
+            }
+        }
+
+        private void Update_FP_Button_Click(object sender, EventArgs e)
+        {
+            //Do not draw if targets are at 0,0
+            GMapOverlay tempOverlay = new GMapOverlay();
+            GMarkerGoogle marker;
+            Mission Current_Mission = Interoperability.getinstance().Current_Mission;
+
+            //Off axis target
+            if (Current_Mission.off_axis_target_pos.latitude != 0 || Current_Mission.off_axis_target_pos.longitude != 0)
+            {
+                marker = new GMarkerGoogle(new PointLatLng(Current_Mission.off_axis_target_pos.latitude, Current_Mission.off_axis_target_pos.longitude), GMarkerGoogleType.yellow_pushpin);
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = "OFAT";
+                tempOverlay.Markers.Add(marker);
+            }
+            else
+            {
+                //Console.WriteLine("Did not display off axis because coordinate at 0,0");
+            }
+
+            //Air Drop Location
+            if (Current_Mission.air_drop_pos.latitude != 0 || Current_Mission.air_drop_pos.longitude != 0)
+            {
+                marker = new GMarkerGoogle(new PointLatLng(Current_Mission.air_drop_pos.latitude, Current_Mission.air_drop_pos.longitude), GMarkerGoogleType.yellow_pushpin);
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = "Air Drop";
+                tempOverlay.Markers.Add(marker);
+            }
+            else
+            { 
+                //Console.WriteLine("Did not display air drop because coordinate at 0,0");
+            }
+
+            if (Current_Mission.air_drop_pos.latitude != 0 || Current_Mission.air_drop_pos.longitude != 0)
+            {
+                marker = new GMarkerGoogle(new PointLatLng(Current_Mission.emergent_last_known_pos.latitude, Current_Mission.emergent_last_known_pos.longitude), GMarkerGoogleType.yellow_pushpin);
+                marker.ToolTipMode = MarkerTooltipMode.Always;
+                marker.ToolTipText = "Emergent Target";
+                tempOverlay.Markers.Add(marker);
+            }
+// Interoperability.getinstance().Host.FPGMapControl.Overlays.Remove(tempOverlay);
+            Interoperability.getinstance().Host.FPGMapControl.Overlays.Add(tempOverlay);
+        }
+
     }
 
 }

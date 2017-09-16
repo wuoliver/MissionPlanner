@@ -37,6 +37,8 @@ namespace interoperability
         public float latitude { get; set; }
         public float longitude { get; set; }
 
+        public Stationary_Obstacle() { }
+
         public Stationary_Obstacle(float _cylinder_height, float _cylinder_radius, float _latitude, float _longitude)
         {
             cylinder_height = _cylinder_height;
@@ -199,7 +201,7 @@ namespace interoperability
         //Position of the air drop location 
         public GPS_Position air_drop_pos { get; set; }
         //Last known position of the emergent target
-        public GPS_Position emergent_lkp { get; set; }
+        public GPS_Position emergent_last_known_pos { get; set; }
         //A list of flyzones (geofence)
         public List<FlyZone> fly_zones { get; set; }
         public GPS_Position home_pos { get; set; }
@@ -220,7 +222,7 @@ namespace interoperability
             unedited = true;
             active = false;
             air_drop_pos = new GPS_Position();
-            emergent_lkp = new GPS_Position();
+            emergent_last_known_pos = new GPS_Position();
             fly_zones = new List<FlyZone>();
             fly_zones.Add(new FlyZone());
             home_pos = new GPS_Position();
@@ -237,7 +239,7 @@ namespace interoperability
             unedited = _Mission.unedited;
             active = _Mission.active;
             air_drop_pos = new GPS_Position(_Mission.air_drop_pos);
-            emergent_lkp = new GPS_Position(_Mission.emergent_lkp);
+            emergent_last_known_pos = new GPS_Position(_Mission.emergent_last_known_pos);
             fly_zones = new List<FlyZone>(_Mission.fly_zones);
             home_pos = new GPS_Position(_Mission.home_pos);
             mission_waypoints = new List<Waypoint>(_Mission.mission_waypoints);

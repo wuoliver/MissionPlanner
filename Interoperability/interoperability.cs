@@ -60,6 +60,9 @@ namespace interoperability
         private string airspd_units = "Metres per Second";
         private string geo_cords = "DD.DDDDDD";
 
+        //Constants 
+        //public const double PositiveInfinity;
+
         //SDA Simulator Values
         private double sim_lat = 0;
         private double sim_lng = 0;
@@ -93,6 +96,14 @@ namespace interoperability
         bool resetUploadStats = false;                      //Used to reset telemetry upload stats
         bool resetFlightTimer = false;                      //Used to reset the flight timer
         bool usePlaneSimulator = false;                     //Used for the plane simulator
+
+
+        public bool mapinvalidateWaypoints;
+        public bool mapinvalidateGeofence;
+        public bool mapinvalidateSearchArea;
+        public bool mapinvalidateObstacle;
+        public bool mapinvalidateOFAT_EM_DROP;
+        public bool mapinvalidateImage;
 
         Obstacles obstaclesList = new Obstacles();          //Instance that holds all SDA Obstacles 
         public Interoperability_Settings Settings;          //Instance that holds all Interoperability Settings
@@ -535,8 +546,8 @@ namespace interoperability
                 using (var client = new HttpClient())
                 {
 
-                    TimeSpan timeout = new TimeSpan(0, 0, 0, 1);
-                    client.Timeout = timeout;
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 10);
+                    //client.Timeout = timeout;
 
                     client.BaseAddress = new Uri(address); // This seems to change every time
 
@@ -569,7 +580,9 @@ namespace interoperability
                     }
 
                     CurrentState csl = this.Host.cs;
-                    double lat = csl.lat, lng = csl.lng, alt = csl.altasl, yaw = csl.yaw;
+
+                    double lat = 0, lng = 0, alt = 0, yaw = 0;
+
                     double oldlat = 0, oldlng = 0, oldalt = 0, oldyaw = 0;
                     int uniquedata_count = 0;
                     double averagedata_count = 0;
@@ -585,6 +598,12 @@ namespace interoperability
                             lng = csl.lng;
                             alt = csl.altasl;
                             yaw = csl.yaw;
+
+                            if (Host.config["distunits"] == "Meters")
+                            {
+                                alt *= 3.28084;
+                            }
+
                             if (lat != oldlat || lng != oldlng || alt != oldalt || yaw != oldyaw)
                             {
                                 uniquedata_count++;
@@ -627,14 +646,16 @@ namespace interoperability
                             Interoperability_GUI.setTelemResp(telemresp.Content.ReadAsStringAsync().Result);
                             count++;
                             Interoperability_GUI.setTotalTelemUpload(count);
+
+                            Thread.Sleep(1000 / Interoperability_GUI.getTelemPollRate());
                         }
-                        Thread.Sleep(1000 / Interoperability_GUI.getTelemPollRate());
+                        Thread.Sleep(1000);
                     }
                 }
             }
 
             //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
-            catch//(HttpRequestException)
+            catch//(Exception e)
             {
                 //<h1>403 Forbidden</h1> 
                 Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
@@ -642,6 +663,8 @@ namespace interoperability
                 Interoperability_GUI.setTelemResp("Error, Unable to Connect to Server");
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
+                //Console.WriteLine(e.Message);
+                //Console.WriteLine(e.InnerException);
             }
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
@@ -665,8 +688,8 @@ namespace interoperability
             {
                 using (var client = new HttpClient())
                 {
-                    TimeSpan timeout = new TimeSpan(0, 0, 0, 1);
-                    client.Timeout = timeout;
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 10);
+                    //client.Timeout = timeout;
                     client.BaseAddress = new Uri(address); // This seems to change every time
 
                     // Log in.
@@ -706,9 +729,10 @@ namespace interoperability
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
+                Console.WriteLine(e.Message);
                 Interoperability_GUI.setSDAResp("Error, Unable to Connect to Server");
                 Interoperability_GUI.SetSDAStart_StopButton_Off();
 
@@ -751,9 +775,9 @@ namespace interoperability
                 for (int i = 0; i < Current_Mission.all_waypoints.Count() - 1; i++)
                 {
                     double y1 = MercatorProjection.latToY(Current_Mission.all_waypoints[i].latitude);
-                    double y2 = MercatorProjection.latToY(Current_Mission.all_waypoints[i+1].latitude);
+                    double y2 = MercatorProjection.latToY(Current_Mission.all_waypoints[i + 1].latitude);
                     double x1 = MercatorProjection.lonToX(Current_Mission.all_waypoints[i].longitude);
-                    double x2 = MercatorProjection.lonToX(Current_Mission.all_waypoints[i+1].longitude);
+                    double x2 = MercatorProjection.lonToX(Current_Mission.all_waypoints[i + 1].longitude);
                     //Centre of the obstacle
                     double y0 = 0;
                     double x0 = 0;
@@ -763,8 +787,8 @@ namespace interoperability
                     foreach (Stationary_Obstacle o in obstaclesList.stationary_obstacles)
                     {
                         double length = 0;
-                        double currX =x1;
-                        double currY =y1;
+                        double currX = x1;
+                        double currY = y1;
                         double dx = x2 - currX;
                         double dy = y2 - currY;
 
@@ -794,11 +818,11 @@ namespace interoperability
                                 intersectingWaypoints.Add(i);
                                 break;
                             }
-                        } while (length > 1.5); 
+                        } while (length > 1.5);
                     }
                 }
 
-                
+
 
                 List<List<PointLatLng>> newPaths = new List<List<PointLatLng>>();
                 for (int w = 0; w < intersectingWaypoints.Count(); w++)
@@ -828,13 +852,13 @@ namespace interoperability
                         //Calculate total distance of the new path
                         for (int j = 0; j < newPaths[i].Count() - 1; j++)
                         {
-                             distance += (float)Math.Sqrt(Math.Pow(newPaths[i][j].Lat - newPaths[i][j + 1].Lat, 2) + Math.Pow(newPaths[i][j].Lng - newPaths[i][j + 1].Lng, 2));
+                            distance += (float)Math.Sqrt(Math.Pow(newPaths[i][j].Lat - newPaths[i][j + 1].Lat, 2) + Math.Pow(newPaths[i][j].Lng - newPaths[i][j + 1].Lng, 2));
                         }
                         //Set the altitudes of the new generated waypoitns
                         for (int j = 0; j < newPaths[i].Count() - 1; j++)
                         {
                             float temp = (float)Math.Sqrt(Math.Pow(newPaths[i][j].Lat - newPaths[i][j + 1].Lat, 2) + Math.Pow(newPaths[i][j].Lng - newPaths[i][j + 1].Lng, 2));
-                            altitudes.Add((temp/distance * dAlt) + prevAlt);
+                            altitudes.Add((temp / distance * dAlt) + prevAlt);
                             prevAlt = altitudes[j];
                         }
 
@@ -849,14 +873,14 @@ namespace interoperability
                         }
                     }
                 }
-                
+
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
             }
         }
 
 
-        List<List<Vertex>> verticies = new List<List<Vertex>>();
+        List<List<Vertex>> vertices = new List<List<Vertex>>();
         PriorityQueue<Vertex> open;
         PriorityQueue<Vertex> closed;
 
@@ -876,6 +900,7 @@ namespace interoperability
             int gridSize = 10; //How far apart each vertex is in the x or y direction (in metres)
             double distanceMultiplier = 5; //Multiplier to make the search area bigger
 
+            //Get start and end coordinates for the two points
             double startX = MercatorProjection.lonToX(Start.Lng);
             double startY = MercatorProjection.latToY(Start.Lat);
             double endX = MercatorProjection.lonToX(End.Lng);
@@ -883,8 +908,9 @@ namespace interoperability
 
             double deltaX = endX - startX;
             double deltaY = endY - startY;
-
             double distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+
             double centreX = (startX + endX) / 2;
             double centreY = (startY + endY) / 2;
 
@@ -914,8 +940,8 @@ namespace interoperability
             VertexCoords vertexEnd = new VertexCoords(indexEndX, indexEndY);
 
 
-            verticies.Clear();
-            //Iterate through all the X indicies and and Y
+            vertices.Clear();
+            //Iterate through all the X indices and and Y
             for (int i = 0; i < searchSize / gridSize; i++)
             {
                 List<Vertex> vertexList = new List<Vertex>();
@@ -933,18 +959,18 @@ namespace interoperability
                     h = Math.Sqrt(Math.Pow(i - vertexEnd.x, 2) + Math.Pow(j - vertexEnd.y, 2));
                     vertexList.Add(new Vertex(new VertexCoords(i, j), new VertexGPSCoords(X, Y), new VertexCoords(0, 0), g, h));
                 }
-                verticies.Add(vertexList);
+                vertices.Add(vertexList);
             }
 
             //Used to help debug the grid search size
             if (true)
-            {   
+            {
                 List<Waypoint> grid = new List<Waypoint>();
-                int count = verticies.Count() - 1;
-                grid.Add(new Waypoint(verticies[0][0].gpsCoords.latY, verticies[0][0].gpsCoords.lngX));
-                grid.Add(new Waypoint(verticies[count][0].gpsCoords.latY, verticies[count][0].gpsCoords.lngX));
-                grid.Add(new Waypoint(verticies[0][count].gpsCoords.latY, verticies[0][count].gpsCoords.lngX));
-                grid.Add(new Waypoint(verticies[count][count].gpsCoords.latY, verticies[count][count].gpsCoords.lngX));
+                int count = vertices.Count() - 1;
+                grid.Add(new Waypoint(vertices[0][0].gpsCoords.latY, vertices[0][0].gpsCoords.lngX));
+                grid.Add(new Waypoint(vertices[count][0].gpsCoords.latY, vertices[count][0].gpsCoords.lngX));
+                grid.Add(new Waypoint(vertices[0][count].gpsCoords.latY, vertices[0][count].gpsCoords.lngX));
+                grid.Add(new Waypoint(vertices[count][count].gpsCoords.latY, vertices[count][count].gpsCoords.lngX));
 
                 FlyZone debugGrid = new FlyZone(100, 50, grid);
                 Simulator_Path.Clear();
@@ -958,10 +984,10 @@ namespace interoperability
             closed = new PriorityQueue<Vertex>();
 
 
-            verticies[vertexStart.x][vertexStart.y].parentCoords = vertexStart;
-            verticies[vertexStart.x][vertexStart.y].isStart = true;
-            verticies[vertexStart.x][vertexStart.y].g = 0;
-            open.Enqueue(verticies[vertexStart.x][vertexStart.y]);
+            vertices[vertexStart.x][vertexStart.y].parentCoords = vertexStart;
+            vertices[vertexStart.x][vertexStart.y].isStart = true;
+            vertices[vertexStart.x][vertexStart.y].g = 0;
+            open.Enqueue(vertices[vertexStart.x][vertexStart.y]);
 
             Vertex currentVertex;
             bool pathFound = false;
@@ -970,12 +996,12 @@ namespace interoperability
                 do
                 {
                     currentVertex = open.Dequeue();
-                    if(currentVertex == null)
+                    if (currentVertex == null)
                     {
                         return null;
                     }
-                    verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].open = false;
-                } while (verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed == true);
+                    vertices[currentVertex.selfCoords.x][currentVertex.selfCoords.y].open = false;
+                } while (vertices[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed == true);
 
                 currentVertex = new Vertex(SetVertex(currentVertex));
                 if (currentVertex.selfCoords.x == indexEndX && currentVertex.selfCoords.y == indexEndY)
@@ -985,7 +1011,7 @@ namespace interoperability
                 }
                 closed.Enqueue(currentVertex);
                 currentVertex.closed = true;
-                verticies[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed = true;
+                vertices[currentVertex.selfCoords.x][currentVertex.selfCoords.y].closed = true;
                 foreach (Vertex v in getNeighboursVis(currentVertex))
                 {
                     if (!v.closed)
@@ -994,8 +1020,8 @@ namespace interoperability
                         {
                             v.g = 10000000000000000000;
                             v.parentCoords = null;
-                            verticies[v.selfCoords.x][v.selfCoords.y].g = 10000000000000000000;
-                            verticies[v.selfCoords.x][v.selfCoords.y].parentCoords = null;
+                            vertices[v.selfCoords.x][v.selfCoords.y].g = 10000000000000000000;
+                            vertices[v.selfCoords.x][v.selfCoords.y].parentCoords = null;
 
                         }
                         Update_Vertex(currentVertex, v);
@@ -1013,13 +1039,13 @@ namespace interoperability
 
         public List<PointLatLng> getThetaStarPath(VertexCoords v)
         {
-            if (verticies[v.x][v.y].isStart)
+            if (vertices[v.x][v.y].isStart)
             {
                 List<PointLatLng> path = new List<PointLatLng>();
-                path.Add(new PointLatLng(MercatorProjection.yToLat(verticies[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(verticies[v.x][v.y].gpsCoords.lngX)));
+                path.Add(new PointLatLng(MercatorProjection.yToLat(vertices[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(vertices[v.x][v.y].gpsCoords.lngX)));
                 return path;
             }
-            if(verticies[v.x][v.y].parentCoords.x == v.x && verticies[v.x][v.y].parentCoords.y == v.y)
+            if (vertices[v.x][v.y].parentCoords.x == v.x && vertices[v.x][v.y].parentCoords.y == v.y)
             {
                 //Something broke in the algorithm. This should not happen
                 MessageBox.Show("Something went wrong in the Theta* algorithm. Algorithm say path found, but we cannot find a path");
@@ -1027,8 +1053,8 @@ namespace interoperability
             }
 
             List<PointLatLng> tempPath = new List<PointLatLng>();
-            tempPath.AddRange(getThetaStarPath(verticies[v.x][v.y].parentCoords));            
-            tempPath.Add(new PointLatLng(MercatorProjection.yToLat(verticies[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(verticies[v.x][v.y].gpsCoords.lngX)));
+            tempPath.AddRange(getThetaStarPath(vertices[v.x][v.y].parentCoords));
+            tempPath.Add(new PointLatLng(MercatorProjection.yToLat(vertices[v.x][v.y].gpsCoords.latY), MercatorProjection.xToLon(vertices[v.x][v.y].gpsCoords.lngX)));
             return tempPath;
         }
 
@@ -1037,24 +1063,35 @@ namespace interoperability
             int x = S.selfCoords.x;
             int y = S.selfCoords.y;
 
+            //According to harry, we only need to do 4 directions, and it'll be much faster. 8 neighbours -> 4
+            //X0X
+            //000
+            //X0X
+
+            //Can do the same thing in 3D, 26 neighbours -> 6. X is invalid, 0 is neighbour
+            //Top   Middle  Bottom
+            //XXX   X0X     XXX
+            //X0X   000     X0X
+            //XXX   X0X     XXX
+
             List<VertexCoords> list = new List<VertexCoords>();
             list.Add(new VertexCoords(x, y + 1)); //N
-            list.Add(new VertexCoords(x + 1, y + 1)); //NE
+            //list.Add(new VertexCoords(x + 1, y + 1)); //NE
             list.Add(new VertexCoords(x + 1, y)); //E
-            list.Add(new VertexCoords(x + 1, y - 1)); //SE
+            //list.Add(new VertexCoords(x + 1, y - 1)); //SE
             list.Add(new VertexCoords(x, y - 1)); //S
-            list.Add(new VertexCoords(x - 1, y - 1)); //SW
+            //list.Add(new VertexCoords(x - 1, y - 1)); //SW
             list.Add(new VertexCoords(x - 1, y)); //W
-            list.Add(new VertexCoords(x - 1, y + 1)); //NW
+            //list.Add(new VertexCoords(x - 1, y + 1)); //NW
 
             for (int i = 0; i < list.Count(); i++)
             {
-                if (list[i].x >= verticies.Count() || list[i].x < 0)
+                if (list[i].x >= vertices.Count() || list[i].x < 0)
                 {
                     list.RemoveAt(i);
                     i--;
                 }
-                else if (list[i].y >= verticies.Count() || list[i].y < 0)
+                else if (list[i].y >= vertices.Count() || list[i].y < 0)
                 {
                     list.RemoveAt(i);
                     i--;
@@ -1063,9 +1100,9 @@ namespace interoperability
             List<Vertex> neighbours = new List<Vertex>();
             foreach (VertexCoords v in list)
             {
-                if (LOS(S, verticies[v.x][v.y]) == true)
+                if (LOS(S, vertices[v.x][v.y]) == true)
                 {
-                    neighbours.Add(verticies[v.x][v.y]);
+                    neighbours.Add(vertices[v.x][v.y]);
                 }
             }
 
@@ -1081,25 +1118,25 @@ namespace interoperability
                 //We don't remove things from the queue because it's too difficult. 
                 //Instead we discard them when we pop them off the queue in the main algorithm
                 open.Enqueue(S_prime);
-                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].open = true;
+                vertices[S_prime.selfCoords.x][S_prime.selfCoords.y].open = true;
             }
         }
 
         public void ComputeCost(ref Vertex S, ref Vertex S_prime)
         {
-            double newCost = verticies[S.parentCoords.x][S.parentCoords.y].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2));
+            double newCost = vertices[S.parentCoords.x][S.parentCoords.y].g + Math.Sqrt(Math.Pow(S.parentCoords.x - S_prime.selfCoords.x, 2) + Math.Pow(S.parentCoords.y - S_prime.selfCoords.y, 2));
             if (newCost < S_prime.g)
             {
                 S_prime.parentCoords = S.parentCoords;
                 S_prime.g = newCost;
-                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].parentCoords = new VertexCoords(S.parentCoords.x, S.parentCoords.y);
-                verticies[S_prime.selfCoords.x][S_prime.selfCoords.y].g = newCost;
+                vertices[S_prime.selfCoords.x][S_prime.selfCoords.y].parentCoords = new VertexCoords(S.parentCoords.x, S.parentCoords.y);
+                vertices[S_prime.selfCoords.x][S_prime.selfCoords.y].g = newCost;
             }
         }
 
         public Vertex SetVertex(Vertex S)
         {
-            if (!LOS(S, verticies[S.parentCoords.x][S.parentCoords.y]))
+            if (!LOS(S, vertices[S.parentCoords.x][S.parentCoords.y]))
             {
                 double minCost = 10000000000000000000;
                 Vertex minVertex = null;
@@ -1118,8 +1155,8 @@ namespace interoperability
                 {
                     S.parentCoords = minVertex.selfCoords;
                     S.g = minCost;
-                    verticies[S.selfCoords.x][S.selfCoords.y].parentCoords = minVertex.selfCoords;
-                    verticies[S.selfCoords.x][S.selfCoords.y].g = minCost;
+                    vertices[S.selfCoords.x][S.selfCoords.y].parentCoords = minVertex.selfCoords;
+                    vertices[S.selfCoords.x][S.selfCoords.y].g = minCost;
                 }
             }
             return S;
@@ -1200,6 +1237,16 @@ namespace interoperability
         }
 
 
+        /// <summary>
+        /// Determines if the resulting path will collide with an obstacle or geofence
+        /// </summary>
+        /// <returns></returns>
+        public bool TurnRadius()
+        {
+            return true;
+        }
+
+
         public void SDA_Plane_Simulator()
         {
             //Save current waypoints stored
@@ -1213,10 +1260,25 @@ namespace interoperability
             obstaclesList.moving_obstacles = new List<Moving_Obstacle>();
             Obstacles_Downloaded = true;
 
-           
+
             //Add fake waypoints 
             Current_Mission.all_waypoints.Clear();
-            Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
+
+
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.834473, -79.238323));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.835200, -79.237374));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.835924, -79.237685));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.835490, -79.239801));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.835030, -79.241869));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.834093, -79.243033));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.833691, -79.242824));
+            Current_Mission.all_waypoints.Add(new Waypoint(100, 43.833664, -79.241896));
+
+            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835270, (float)-79.240780));
+            obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835711, (float)-79.238709));
+
+
+            /*Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
             Current_Mission.all_waypoints.Add(new Waypoint(30, 38.146336, -76.428495));
             Current_Mission.all_waypoints.Add(new Waypoint(50, 38.147551, -76.429503));
             Current_Mission.all_waypoints.Add(new Waypoint(100, 38.148463, -76.430297));
@@ -1252,7 +1314,7 @@ namespace interoperability
             Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144075, -76.421506));
             Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146674, -76.423473));
             Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143451, -76.426735));
-
+            
             //Add obstacles between each of the waypoints
             for (int i=0;i<Current_Mission.all_waypoints.Count()-1;i++)
             {
@@ -1260,8 +1322,8 @@ namespace interoperability
                     (Current_Mission.all_waypoints[i].latitude + Current_Mission.all_waypoints[i+1].latitude)/2, 
                     (Current_Mission.all_waypoints[i].longitude + Current_Mission.all_waypoints[i + 1].longitude) / 2));
             }
+            */
 
-           
             if (Current_Mission.all_waypoints.Count() < 3)
             {
                 Console.WriteLine("Error, not enough waypoints to start simulator (Minimum 3)");
@@ -1273,6 +1335,7 @@ namespace interoperability
 
             sim_lat = Current_Mission.all_waypoints[0].latitude;
             sim_lng = Current_Mission.all_waypoints[0].longitude;
+            sim_alt = 0;
 
             double ddist = 0;
 
@@ -1322,6 +1385,10 @@ namespace interoperability
 
                 if (dd < 5)
                 {
+                    if (altitude_count >= altitude_array.Count())
+                    {
+                        break;
+                    }
                     altitude_array[altitude_count] = i;
                     altitude_count++;
                 }
@@ -1376,8 +1443,17 @@ namespace interoperability
                     double currY = MercatorProjection.latToY(sim_lat);
                     double dx = MercatorProjection.lonToX(Current_Mission.all_waypoints[target_waypoint].longitude) - currX;
                     double dy = MercatorProjection.latToY(Current_Mission.all_waypoints[target_waypoint].latitude) - currY;
+                    double dalt = 0;
+                    if (Settings["dist_units"] == "Feet")
+                    {
+                        dalt = Current_Mission.all_waypoints[target_waypoint].altitude_msl * 3.28084 - sim_alt;
+                    }
+                    else
+                    {
+                        dalt = Current_Mission.all_waypoints[target_waypoint].altitude_msl - sim_alt;
+                    }
 
-                    double dalt = Current_Mission.all_waypoints[target_waypoint].altitude_msl - sim_alt;
+
                     //Since we're calling every 1/2 second, we move the plane AIRSPEED/2 meters per second
                     ddist = Interoperability_GUI.getPlaneSimulationAirspeed() / 10;
 
@@ -1427,7 +1503,17 @@ namespace interoperability
 
                     sim_lat = Simulator_Path[spline_index].latitude;
                     sim_lng = Simulator_Path[spline_index].longitude;
-                    sim_alt = Simulator_Path[spline_index].altitude_msl;
+
+                    if (Settings["dist_units"] == "Feet")
+                    {
+                        sim_alt = (int)(Simulator_Path[spline_index].altitude_msl * 3.28084);
+                    }
+                    else
+                    {
+                        sim_alt = Simulator_Path[spline_index].altitude_msl;
+                    }
+
+
 
                     //Very stupid way of calculating target waypoint 
                     for (int i = 0; i <= total_waypoints; i++)
@@ -1455,8 +1541,6 @@ namespace interoperability
                     {
                         sim_yaw += 360;
                     }
-
-
                 }
                 Thread.Sleep(100);
             }
@@ -1505,6 +1589,8 @@ namespace interoperability
 
                     List<Mission> Server_Mission = new JavaScriptSerializer().Deserialize<List<Mission>>(SDAresp.Content.ReadAsStringAsync().Result);
 
+                    Console.WriteLine(SDAresp.Content.ReadAsStringAsync().Result.ToString());
+
                     int count = Mission_List.Count();
                     //Add obtained missions to the current list of missions 
                     for (int i = 0; i < Server_Mission.Count(); i++)
@@ -1512,15 +1598,17 @@ namespace interoperability
                         Server_Mission[i].name = "Server Mission_" + Convert.ToString(i + count);
                         Mission_List.Add(Server_Mission[i]);
                     }
-
+                    Current_Mission = Server_Mission[0];
                 }
             }
             catch
             {
-                Console.WriteLine("Error, exception thrown in Obstacle_SDA Thread");
+                Console.WriteLine("Error, exception thrown in the Mission_Download Thread");
             }
             Console.WriteLine("Mission_Download Thread Stopped");
         }
+
+
 
         public void Map_Control()
         {
@@ -1560,11 +1648,11 @@ namespace interoperability
 
                 Current_Mission.air_drop_pos = new GPS_Position(38.145852, -76.426416);
                 Current_Mission.off_axis_target_pos = new GPS_Position(38.147408, -76.433651);
-                Current_Mission.emergent_lkp = new GPS_Position(38.144187, -76.423645);
+                Current_Mission.emergent_last_known_pos = new GPS_Position(38.144187, -76.423645);
             }
 
 
-            List<Waypoint> Waypoints = new List<Waypoint>();
+            /*List<Waypoint> Waypoints = new List<Waypoint>();
             Waypoints.Add(new Waypoint(38.147720, -76.429610));
             Waypoints.Add(new Waypoint(38.150893, -76.432056));
             Waypoints.Add(new Waypoint(38.149559, -76.434159));
@@ -1581,15 +1669,26 @@ namespace interoperability
             Waypoints.Add(new Waypoint(38.143029, -76.421692));
             Waypoints.Add(new Waypoint(38.142084, -76.423817));
             Waypoints.Add(new Waypoint(38.142016, -76.425469));
-            Waypoints.Add(new Waypoint(38.145189, -76.428537));
+            Waypoints.Add(new Waypoint(38.145189, -76.428537));*/
 
             while (!Map_Control_Thread_shouldStop)
             {
+                //Map invalidation not fully set up yet. Since we need to set the variable every time we update
+                //an object. For now, we will invalidate everything so performance will be the same. Once we enable invalidation,
+                //it should reduce CPU usage
+
+                mapinvalidateWaypoints = true;
+                mapinvalidateGeofence = true;
+                mapinvalidateSearchArea = true;
+                mapinvalidateObstacle = true;
+                mapinvalidateOFAT_EM_DROP = true;
+                mapinvalidateImage = true;
+
                 Interoperability_GUI.MAP_Clear_Overlays();
                 //Draw Obstacles 
                 if (Obstacles_Downloaded)
                 {
-                    if (Interoperability_GUI.getDrawObstacles())
+                    if (Interoperability_GUI.getDrawObstacles() && mapinvalidateObstacle)
                     {
                         for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
                         {
@@ -1604,14 +1703,16 @@ namespace interoperability
                                obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
                                obstaclesList.moving_obstacles[i].longitude, "Moving_Obstacle" + i.ToString());
                         }
+                        mapinvalidateObstacle = false;
                     }
                 }
 
                 //Draw geofence
-                if (Interoperability_GUI.getDrawGeofence())
+                if (Interoperability_GUI.getDrawGeofence() && mapinvalidateGeofence)
                 {
                     //Using first boundary point (assuming there is only one geofence) COME BACK TO THIS LATER
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.fly_zones[0].boundary_pts, "Geofence", Color.Red, Color.Transparent, 3, 50);
+                    mapinvalidateGeofence = false;
                 }
 
                 if (Current_Mission.fly_zones.Count() > 1)
@@ -1621,11 +1722,11 @@ namespace interoperability
                 }
 
                 //Draw search area
-                if (Interoperability_GUI.getDrawSearchArea())
+                if (Interoperability_GUI.getDrawSearchArea() && mapinvalidateSearchArea)
                 {
                     Interoperability_GUI.MAP_addStaticPoly(Current_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
+                    mapinvalidateSearchArea = false;
                 }
-
 
                 //Draw plane location                   
                 if (Interoperability_GUI.getDrawPlane())
@@ -1636,13 +1737,21 @@ namespace interoperability
                     }
                     else
                     {
-                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), Host.cs.alt, Host.cs.yaw,
+                        //Account for feet vs meters
+                        double alt = Host.cs.altasl;
+                        if (Host.config["distunits"] == "Meters")
+                        {
+                            alt *= 3.28084;
+                        }
+
+                        Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), (float)alt, Host.cs.yaw,
                                                 Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
                     }
 
                 }
+
                 //Draw Waypoints
-                if (Interoperability_GUI.getDrawWP())
+                if (Interoperability_GUI.getDrawWP() && mapinvalidateWaypoints)
                 {
                     if (usePlaneSimulator == true)
                     {
@@ -1652,17 +1761,19 @@ namespace interoperability
                     else
                     {
                         //Draw waypoints
-                        Interoperability_GUI.MAP_addWP(Waypoints);
+                        Interoperability_GUI.MAP_addWP(Current_Mission.all_waypoints);
                         //Draw lines between waypoints
-                        Interoperability_GUI.MAP_addWPRoute(Waypoints);
+                        Interoperability_GUI.MAP_addWPRoute(Current_Mission.all_waypoints);
                     }
 
+                    mapinvalidateWaypoints = false;
                 }
 
                 //Draw off axis targets, emergent targets, and air drop location
-                if (Interoperability_GUI.getDrawOFAT_EN_DROP())
+                if (Interoperability_GUI.getDrawOFAT_EM_DROP() && mapinvalidateOFAT_EM_DROP)
                 {
                     Interoperability_GUI.MAP_updateOFAT_EM_DROP(Current_Mission);
+                    mapinvalidateOFAT_EM_DROP = false;
                 }
 
                 if (Interoperability_GUI.getAutopan())
@@ -1678,11 +1789,11 @@ namespace interoperability
 
                 }
 
-                Interoperability_GUI.MAP_Update_Overlay();
-
                 //Draw Images if preset
 
                 //foreach 
+
+                Interoperability_GUI.MAP_Update_Overlay();
 
 
                 //Update GPS Location label at bottom of interface

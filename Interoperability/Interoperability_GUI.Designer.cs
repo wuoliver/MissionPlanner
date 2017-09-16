@@ -62,6 +62,7 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.Update_FP_Button = new System.Windows.Forms.Button();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.UAS_Trackbar = new System.Windows.Forms.TrackBar();
@@ -93,6 +94,16 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.Callout_StartStop_Button = new System.Windows.Forms.Button();
             this.label17 = new System.Windows.Forms.Label();
+            this.Goose_Tab = new System.Windows.Forms.TabPage();
+            this.showCameraTriggerLocation = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.checkBox7 = new System.Windows.Forms.CheckBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label23 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
             this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -138,15 +149,6 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
-            this.Goose_Tab = new System.Windows.Forms.TabPage();
-            this.label22 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label23 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
-            this.checkBox6 = new System.Windows.Forms.CheckBox();
-            this.checkBox7 = new System.Windows.Forms.CheckBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -154,11 +156,11 @@
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
             this.Callout_Tab.SuspendLayout();
+            this.Goose_Tab.SuspendLayout();
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
             this.Interop_GUI_menuStrip.SuspendLayout();
-            this.Goose_Tab.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -280,7 +282,7 @@
             // 
             // Telem_Start_Stop_Button
             // 
-            this.Telem_Start_Stop_Button.Location = new System.Drawing.Point(16, 303);
+            this.Telem_Start_Stop_Button.Location = new System.Drawing.Point(16, 308);
             this.Telem_Start_Stop_Button.Name = "Telem_Start_Stop_Button";
             this.Telem_Start_Stop_Button.Size = new System.Drawing.Size(75, 23);
             this.Telem_Start_Stop_Button.TabIndex = 12;
@@ -290,7 +292,7 @@
             // 
             // TelemServerResp
             // 
-            this.TelemServerResp.Location = new System.Drawing.Point(16, 268);
+            this.TelemServerResp.Location = new System.Drawing.Point(16, 273);
             this.TelemServerResp.Name = "TelemServerResp";
             this.TelemServerResp.ReadOnly = true;
             this.TelemServerResp.Size = new System.Drawing.Size(237, 20);
@@ -300,7 +302,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(13, 252);
+            this.label7.Location = new System.Drawing.Point(13, 257);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(108, 13);
             this.label7.TabIndex = 10;
@@ -327,7 +329,7 @@
             // 
             // Reset_Stats
             // 
-            this.Reset_Stats.Location = new System.Drawing.Point(178, 303);
+            this.Reset_Stats.Location = new System.Drawing.Point(178, 308);
             this.Reset_Stats.Name = "Reset_Stats";
             this.Reset_Stats.Size = new System.Drawing.Size(75, 23);
             this.Reset_Stats.TabIndex = 7;
@@ -498,6 +500,7 @@
             // 
             // Map_Tab
             // 
+            this.Map_Tab.Controls.Add(this.Update_FP_Button);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
             this.Map_Tab.Controls.Add(this.UAS_Trackbar);
@@ -520,6 +523,16 @@
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Update_FP_Button
+            // 
+            this.Update_FP_Button.Location = new System.Drawing.Point(51, 354);
+            this.Update_FP_Button.Name = "Update_FP_Button";
+            this.Update_FP_Button.Size = new System.Drawing.Size(163, 23);
+            this.Update_FP_Button.TabIndex = 16;
+            this.Update_FP_Button.Text = "Update FP Map";
+            this.Update_FP_Button.UseVisualStyleBackColor = true;
+            this.Update_FP_Button.Click += new System.EventHandler(this.Update_FP_Button_Click);
             // 
             // Fixed_UAS_Size_Checkbox
             // 
@@ -671,7 +684,7 @@
             // 
             // Mission_Enable
             // 
-            this.Mission_Enable.Location = new System.Drawing.Point(51, 502);
+            this.Mission_Enable.Location = new System.Drawing.Point(51, 306);
             this.Mission_Enable.Name = "Mission_Enable";
             this.Mission_Enable.Size = new System.Drawing.Size(163, 23);
             this.Mission_Enable.TabIndex = 1;
@@ -846,6 +859,110 @@
             this.label17.Size = new System.Drawing.Size(113, 31);
             this.label17.TabIndex = 3;
             this.label17.Text = "Callouts";
+            // 
+            // Goose_Tab
+            // 
+            this.Goose_Tab.Controls.Add(this.showCameraTriggerLocation);
+            this.Goose_Tab.Controls.Add(this.button5);
+            this.Goose_Tab.Controls.Add(this.button4);
+            this.Goose_Tab.Controls.Add(this.checkBox7);
+            this.Goose_Tab.Controls.Add(this.checkBox6);
+            this.Goose_Tab.Controls.Add(this.button3);
+            this.Goose_Tab.Controls.Add(this.label23);
+            this.Goose_Tab.Controls.Add(this.button2);
+            this.Goose_Tab.Controls.Add(this.label22);
+            this.Goose_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Goose_Tab.Name = "Goose_Tab";
+            this.Goose_Tab.Padding = new System.Windows.Forms.Padding(3);
+            this.Goose_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Goose_Tab.TabIndex = 6;
+            this.Goose_Tab.Text = "Goose Control";
+            this.Goose_Tab.UseVisualStyleBackColor = true;
+            // 
+            // showCameraTriggerLocation
+            // 
+            this.showCameraTriggerLocation.Location = new System.Drawing.Point(16, 434);
+            this.showCameraTriggerLocation.Name = "showCameraTriggerLocation";
+            this.showCameraTriggerLocation.Size = new System.Drawing.Size(197, 23);
+            this.showCameraTriggerLocation.TabIndex = 12;
+            this.showCameraTriggerLocation.Text = "Show Camera Trigger Locations";
+            this.showCameraTriggerLocation.UseVisualStyleBackColor = true;
+            this.showCameraTriggerLocation.Click += new System.EventHandler(this.showCameraTriggerLocation_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(16, 252);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(197, 23);
+            this.button5.TabIndex = 11;
+            this.button5.Text = "Calculate K Factor";
+            this.button5.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(16, 281);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(197, 23);
+            this.button4.TabIndex = 10;
+            this.button4.Text = "Export Geese Data to CSV";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // checkBox7
+            // 
+            this.checkBox7.AutoSize = true;
+            this.checkBox7.Location = new System.Drawing.Point(16, 347);
+            this.checkBox7.Name = "checkBox7";
+            this.checkBox7.Size = new System.Drawing.Size(127, 17);
+            this.checkBox7.TabIndex = 9;
+            this.checkBox7.Text = "Show Nest Locations";
+            this.checkBox7.UseVisualStyleBackColor = true;
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Location = new System.Drawing.Point(16, 324);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(136, 17);
+            this.checkBox6.TabIndex = 8;
+            this.checkBox6.Text = "Show Goose Locations";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(16, 223);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(197, 23);
+            this.button3.TabIndex = 7;
+            this.button3.Text = "Calculate Nest Locations";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(13, 44);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(232, 130);
+            this.label23.TabIndex = 6;
+            this.label23.Text = resources.GetString("label23.Text");
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(16, 194);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(197, 23);
+            this.button2.TabIndex = 5;
+            this.button2.Text = "Enable Goose Mode";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(10, 13);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(189, 31);
+            this.label22.TabIndex = 4;
+            this.label22.Text = "Goose Control";
             // 
             // InteropMap_ContextMenuStrip
             // 
@@ -1115,7 +1232,7 @@
             // openSettingsToolStripMenuItem
             // 
             this.openSettingsToolStripMenuItem.Name = "openSettingsToolStripMenuItem";
-            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.openSettingsToolStripMenuItem.Text = "Options";
             this.openSettingsToolStripMenuItem.Click += new System.EventHandler(this.openSettingsToolStripMenuItem_Click);
             // 
@@ -1132,7 +1249,7 @@
             // editMissionToolStripMenuItem
             // 
             this.editMissionToolStripMenuItem.Name = "editMissionToolStripMenuItem";
-            this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editMissionToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.editMissionToolStripMenuItem.Text = "Edit Mission";
             this.editMissionToolStripMenuItem.Click += new System.EventHandler(this.editMissionToolStripMenuItem_Click);
             // 
@@ -1142,13 +1259,13 @@
             this.entireMissionToolStripMenuItem,
             this.itemToolStripMenuItem});
             this.serverImportToolStripMenuItem.Name = "serverImportToolStripMenuItem";
-            this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.serverImportToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.serverImportToolStripMenuItem.Text = "Server Import";
             // 
             // entireMissionToolStripMenuItem
             // 
             this.entireMissionToolStripMenuItem.Name = "entireMissionToolStripMenuItem";
-            this.entireMissionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.entireMissionToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.entireMissionToolStripMenuItem.Text = "Mission";
             // 
             // itemToolStripMenuItem
@@ -1161,7 +1278,7 @@
             this.offAxisTargetToolStripMenuItem1,
             this.emergentTargetToolStripMenuItem1});
             this.itemToolStripMenuItem.Name = "itemToolStripMenuItem";
-            this.itemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.itemToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.itemToolStripMenuItem.Text = "Item";
             // 
             // geofenceToolStripMenuItem1
@@ -1257,99 +1374,6 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
-            // Goose_Tab
-            // 
-            this.Goose_Tab.Controls.Add(this.button5);
-            this.Goose_Tab.Controls.Add(this.button4);
-            this.Goose_Tab.Controls.Add(this.checkBox7);
-            this.Goose_Tab.Controls.Add(this.checkBox6);
-            this.Goose_Tab.Controls.Add(this.button3);
-            this.Goose_Tab.Controls.Add(this.label23);
-            this.Goose_Tab.Controls.Add(this.button2);
-            this.Goose_Tab.Controls.Add(this.label22);
-            this.Goose_Tab.Location = new System.Drawing.Point(4, 22);
-            this.Goose_Tab.Name = "Goose_Tab";
-            this.Goose_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Goose_Tab.Size = new System.Drawing.Size(271, 531);
-            this.Goose_Tab.TabIndex = 6;
-            this.Goose_Tab.Text = "Goose Control";
-            this.Goose_Tab.UseVisualStyleBackColor = true;
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(10, 13);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(189, 31);
-            this.label22.TabIndex = 4;
-            this.label22.Text = "Goose Control";
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(16, 194);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(197, 23);
-            this.button2.TabIndex = 5;
-            this.button2.Text = "Enable Goose Mode";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(13, 44);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(232, 130);
-            this.label23.TabIndex = 6;
-            this.label23.Text = resources.GetString("label23.Text");
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(16, 223);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(197, 23);
-            this.button3.TabIndex = 7;
-            this.button3.Text = "Calculate Nest Locations";
-            this.button3.UseVisualStyleBackColor = true;
-            // 
-            // checkBox6
-            // 
-            this.checkBox6.AutoSize = true;
-            this.checkBox6.Location = new System.Drawing.Point(16, 324);
-            this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(136, 17);
-            this.checkBox6.TabIndex = 8;
-            this.checkBox6.Text = "Show Goose Locations";
-            this.checkBox6.UseVisualStyleBackColor = true;
-            // 
-            // checkBox7
-            // 
-            this.checkBox7.AutoSize = true;
-            this.checkBox7.Location = new System.Drawing.Point(16, 347);
-            this.checkBox7.Name = "checkBox7";
-            this.checkBox7.Size = new System.Drawing.Size(127, 17);
-            this.checkBox7.TabIndex = 9;
-            this.checkBox7.Text = "Show Nest Locations";
-            this.checkBox7.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(16, 281);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(197, 23);
-            this.button4.TabIndex = 10;
-            this.button4.Text = "Export Geese Data to CSV";
-            this.button4.UseVisualStyleBackColor = true;
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(16, 252);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(197, 23);
-            this.button5.TabIndex = 11;
-            this.button5.Text = "Calculate K Factor";
-            this.button5.UseVisualStyleBackColor = true;
-            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1387,14 +1411,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
             this.Callout_Tab.ResumeLayout(false);
             this.Callout_Tab.PerformLayout();
+            this.Goose_Tab.ResumeLayout(false);
+            this.Goose_Tab.PerformLayout();
             this.InteropMap_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
             this.MissionPlannerMenuAddon.PerformLayout();
             this.Interop_GUI_menuStrip.ResumeLayout(false);
             this.Interop_GUI_menuStrip.PerformLayout();
-            this.Goose_Tab.ResumeLayout(false);
-            this.Goose_Tab.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1519,5 +1543,7 @@
         private System.Windows.Forms.CheckBox checkBox6;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Button showCameraTriggerLocation;
+        private System.Windows.Forms.Button Update_FP_Button;
     }
 }

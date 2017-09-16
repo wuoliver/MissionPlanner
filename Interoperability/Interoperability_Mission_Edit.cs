@@ -83,21 +83,21 @@ namespace interoperability
                 }
                 for (int i = 0; i < Interoperability.getinstance().Current_Mission.mission_waypoints.Count; i++)
                 {
-                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].altitude_msl.ToString("000.00"));
-                    Waypoint_Textbox.AppendText(" ");
                     Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].latitude.ToString("00.000000"));
                     Waypoint_Textbox.AppendText(" ");
-                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].longitude.ToString("00.000000") + "\r\n");
+                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].longitude.ToString("00.000000"));
+                    Waypoint_Textbox.AppendText(" ");
+                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].altitude_msl.ToString("000") + "\r\n");
                 }
                 if (Interoperability.getinstance().Current_Mission.air_drop_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.air_drop_pos.longitude != 0)
                 {
                     Airdrop_Textbox.Text = Interoperability.getinstance().Current_Mission.air_drop_pos.latitude.ToString("00.000000") + " "
                    + Interoperability.getinstance().Current_Mission.air_drop_pos.longitude.ToString("00.000000");
                 }
-                if (Interoperability.getinstance().Current_Mission.emergent_lkp.latitude != 0 || Interoperability.getinstance().Current_Mission.emergent_lkp.longitude != 0)
+                if (Interoperability.getinstance().Current_Mission.emergent_last_known_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.emergent_last_known_pos.longitude != 0)
                 {
-                    Emergent_Target_Textbox.Text = Interoperability.getinstance().Current_Mission.emergent_lkp.latitude.ToString("00.000000") + " "
-                    + Interoperability.getinstance().Current_Mission.emergent_lkp.longitude.ToString("00.000000");
+                    Emergent_Target_Textbox.Text = Interoperability.getinstance().Current_Mission.emergent_last_known_pos.latitude.ToString("00.000000") + " "
+                    + Interoperability.getinstance().Current_Mission.emergent_last_known_pos.longitude.ToString("00.000000");
                 }
                 if (Interoperability.getinstance().Current_Mission.off_axis_target_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.off_axis_target_pos.longitude != 0)
                 {
@@ -128,20 +128,21 @@ namespace interoperability
                 }
                 for (int i = 0; i < Interoperability.getinstance().Current_Mission.mission_waypoints.Count; i++)
                 {
-                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].altitude_msl.ToString("000.00"));
-                    Waypoint_Textbox.AppendText(" ");
                     Waypoint_Textbox.AppendText(Interoperability.DDtoDMS(Interoperability.getinstance().Current_Mission.mission_waypoints[i].latitude,
-                        Interoperability.getinstance().Current_Mission.mission_waypoints[i].longitude) + "\r\n");
+                        Interoperability.getinstance().Current_Mission.mission_waypoints[i].longitude));
+                    Waypoint_Textbox.AppendText(" ");
+                    Waypoint_Textbox.AppendText(Interoperability.getinstance().Current_Mission.mission_waypoints[i].altitude_msl.ToString("000") + "\r\n");
+
                 }
                 if (Interoperability.getinstance().Current_Mission.air_drop_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.air_drop_pos.longitude != 0)
                 {
                     Airdrop_Textbox.Text = Interoperability.DDtoDMS(Interoperability.getinstance().Current_Mission.air_drop_pos.latitude,
                         Interoperability.getinstance().Current_Mission.air_drop_pos.longitude);
                 }
-                if (Interoperability.getinstance().Current_Mission.emergent_lkp.latitude != 0 || Interoperability.getinstance().Current_Mission.emergent_lkp.longitude != 0)
+                if (Interoperability.getinstance().Current_Mission.emergent_last_known_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.emergent_last_known_pos.longitude != 0)
                 {
-                    Emergent_Target_Textbox.Text = Interoperability.DDtoDMS(Interoperability.getinstance().Current_Mission.emergent_lkp.latitude,
-                        Interoperability.getinstance().Current_Mission.emergent_lkp.longitude);
+                    Emergent_Target_Textbox.Text = Interoperability.DDtoDMS(Interoperability.getinstance().Current_Mission.emergent_last_known_pos.latitude,
+                        Interoperability.getinstance().Current_Mission.emergent_last_known_pos.longitude);
                 }
                 if (Interoperability.getinstance().Current_Mission.off_axis_target_pos.latitude != 0 || Interoperability.getinstance().Current_Mission.off_axis_target_pos.longitude != 0)
                 {
@@ -284,7 +285,7 @@ namespace interoperability
 
             if (Temporary_Mission.air_drop_pos.latitude != 0 || Temporary_Mission.air_drop_pos.longitude != 0)
             {
-                marker = new GMarkerGoogle(new PointLatLng(Temporary_Mission.emergent_lkp.latitude, Temporary_Mission.emergent_lkp.longitude), GMarkerGoogleType.yellow_pushpin);
+                marker = new GMarkerGoogle(new PointLatLng(Temporary_Mission.emergent_last_known_pos.latitude, Temporary_Mission.emergent_last_known_pos.longitude), GMarkerGoogleType.yellow_pushpin);
                 marker.ToolTipMode = MarkerTooltipMode.Always;
                 marker.ToolTipText = "Emergent Target";
                 Map_Overlay.Markers.Add(marker);
@@ -345,8 +346,8 @@ namespace interoperability
 
             MAP_addStaticPoly(Temporary_Mission.search_grid_points, "Search_Area", Color.Green, Color.Green, 3, 90);
 
-            MAP_updateWP(Temporary_Mission.all_waypoints);
-            MAP_updateWPRoute(Temporary_Mission.all_waypoints);
+            MAP_updateWP(Temporary_Mission.mission_waypoints);
+            MAP_updateWPRoute(Temporary_Mission.mission_waypoints);
 
             MAP_updateOFAT_EN_DROP(Temporary_Mission);
 
@@ -372,10 +373,10 @@ namespace interoperability
                 lat.Add(Temporary_Mission.air_drop_pos.latitude);
                 lng.Add(Temporary_Mission.air_drop_pos.longitude);
             }
-            if (Temporary_Mission.emergent_lkp.latitude != 0 || Temporary_Mission.emergent_lkp.longitude != 0)
+            if (Temporary_Mission.emergent_last_known_pos.latitude != 0 || Temporary_Mission.emergent_last_known_pos.longitude != 0)
             {
-                lat.Add(Temporary_Mission.emergent_lkp.latitude);
-                lng.Add(Temporary_Mission.emergent_lkp.longitude);
+                lat.Add(Temporary_Mission.emergent_last_known_pos.latitude);
+                lng.Add(Temporary_Mission.emergent_last_known_pos.longitude);
             }
             if (Temporary_Mission.off_axis_target_pos.latitude != 0 || Temporary_Mission.off_axis_target_pos.longitude != 0)
             {
@@ -422,14 +423,15 @@ namespace interoperability
                 Parsed_Misison.search_grid_points = DDtoWaypoints(Search_Area_Text);
 
                 //Add Waypoints
-                //Skip for now
+                Parsed_Misison.mission_waypoints = DDwithAltitudetoWaypoints(Waypoint_Text);
 
-                if(DDtoWaypoints(Emergent_Target_Text).Count != 0)
+
+                if (DDtoWaypoints(Emergent_Target_Text).Count != 0)
                 {
-                    Parsed_Misison.emergent_lkp.latitude = DDtoWaypoints(Emergent_Target_Text)[0].latitude;
-                    Parsed_Misison.emergent_lkp.longitude = DDtoWaypoints(Emergent_Target_Text)[0].longitude;
+                    Parsed_Misison.emergent_last_known_pos.latitude = DDtoWaypoints(Emergent_Target_Text)[0].latitude;
+                    Parsed_Misison.emergent_last_known_pos.longitude = DDtoWaypoints(Emergent_Target_Text)[0].longitude;
                 }
-                if (DDtoWaypoints(Airdrop_Text).Count != 0)
+                if (DDtoWaypoints(Airdrop_Text).Count != 0) 
                 {
                     Parsed_Misison.air_drop_pos.latitude = DDtoWaypoints(Airdrop_Text)[0].latitude;
                     Parsed_Misison.air_drop_pos.longitude = DDtoWaypoints(Airdrop_Text)[0].longitude;
@@ -455,12 +457,12 @@ namespace interoperability
                 Parsed_Misison.search_grid_points = DMStoWaypoints(Search_Area_Text);
 
                 //Add Waypoints
-                //Skip for now
+                Parsed_Misison.mission_waypoints = DMSwithAltitudetoWaypoints(Waypoint_Text);
 
                 if (DMStoWaypoints(Emergent_Target_Text).Count != 0)
                 {
-                    Parsed_Misison.emergent_lkp.latitude = DMStoWaypoints(Emergent_Target_Text)[0].latitude;
-                    Parsed_Misison.emergent_lkp.longitude = DMStoWaypoints(Emergent_Target_Text)[0].longitude;
+                    Parsed_Misison.emergent_last_known_pos.latitude = DMStoWaypoints(Emergent_Target_Text)[0].latitude;
+                    Parsed_Misison.emergent_last_known_pos.longitude = DMStoWaypoints(Emergent_Target_Text)[0].longitude;
                 }
                 if (DMStoWaypoints(Airdrop_Text).Count != 0)
                 {
@@ -477,9 +479,94 @@ namespace interoperability
             return Parsed_Misison;
         }
 
-        private List<Waypoint> DMStoWaypoints(string DMS)
+        public static List<Waypoint> DMSwithAltitudetoWaypoints(string DMS)
         {
             List<Waypoint> Waypoint_List = new List<Waypoint>();
+            //If string is empty, then don't do anything
+            if (DMS.Replace(" ", "") == "")
+            {
+                return Waypoint_List;
+            }
+
+            Waypoint Temp_Waypoint;
+            char[] delimiterChars = { ' ' };
+            DMS = DMS.Replace("\r\n", " ").Replace("\r", "").Replace("\n", " ");
+            string[] DMS_SPLIT = DMS.Split(delimiterChars);
+
+            List<string> DMS_FILTERED = new List<string>();
+
+            //Filter out all the "" items
+            for (int i = 0; i < DMS_SPLIT.Count(); i++)
+            {
+                if (DMS_SPLIT[i] != "")
+                {
+                    DMS_FILTERED.Add(DMS_SPLIT[i]);
+                }
+            }
+
+            int num_pairs = DMS_FILTERED.Count / 3;
+            try {
+                for (int i = 0; i < num_pairs; i++)
+                {
+                    Temp_Waypoint = Interoperability.DMStoDD(DMS_FILTERED[i * 3], DMS_FILTERED[i * 3 + 1]);
+                    if (Temp_Waypoint.empty == false)
+                    {
+                        Temp_Waypoint.altitude_msl = (float)Convert.ToDouble(DMS_FILTERED[i * 3 + 2]);
+                        Waypoint_List.Add(Temp_Waypoint);
+                    }
+                }
+            }
+            catch {
+                //Do nothing
+            }
+            
+            return Waypoint_List;
+        }
+
+        public static List<Waypoint> DDwithAltitudetoWaypoints(string DD)
+        {
+            List<Waypoint> Waypoint_List = new List<Waypoint>();
+            if (DD.Replace(" ", "") == "")
+            {
+                return Waypoint_List;
+            }
+            Waypoint Temp_Waypoint;
+            char[] delimiterChars = { ' ' };
+            DD = DD.Replace("\r\n", " ").Replace("\r", "").Replace("\n", " ");
+            string[] DD_SPLIT = DD.Split(delimiterChars);
+
+            List<string> DD_FILTERED = new List<string>();
+
+            //Filter out all the "" items
+            for (int i = 0; i < DD_SPLIT.Count(); i++)
+            {
+                if (DD_SPLIT[i] != "")
+                {
+                    DD_FILTERED.Add(DD_SPLIT[i]);
+                }
+            }
+
+            int num_pairs = DD_FILTERED.Count / 3;
+
+            for (int i = 0; i < num_pairs; i++)
+            {
+                //Veify correct input
+                if (Convert.ToDouble(DD_FILTERED[i * 3]) < 90 && Convert.ToDouble(DD_FILTERED[i * 3]) > -90 &&
+                    Convert.ToDouble(DD_FILTERED[i * 3 + 1]) < 180 && Convert.ToDouble(DD_FILTERED[i * 3 + 1]) > -180)
+                {
+                    Temp_Waypoint = new Waypoint(Convert.ToDouble(DD_FILTERED[i * 3]), Convert.ToDouble(DD_FILTERED[i * 3 + 1]));
+                    Temp_Waypoint.altitude_msl = (float)Convert.ToDecimal(DD_FILTERED[i * 3 + 2]);
+                    Waypoint_List.Add(Temp_Waypoint);
+                }
+            }
+            return Waypoint_List;
+        }
+
+
+        public static List<Waypoint> DMStoWaypoints(string DMS)
+        {
+            List<Waypoint> Waypoint_List = new List<Waypoint>();
+            //If string is empty, then don't do anything
             if (DMS.Replace(" ", "") == "")
             {
                 return Waypoint_List;
@@ -514,7 +601,7 @@ namespace interoperability
             return Waypoint_List;
         }
 
-        private List<Waypoint> DDtoWaypoints(String DD)
+        public static List<Waypoint> DDtoWaypoints(String DD)
         {
             List<Waypoint> Waypoint_List = new List<Waypoint>();
             if (DD.Replace(" ", "") == "")
