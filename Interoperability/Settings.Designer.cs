@@ -227,7 +227,8 @@
             this.GUI_FORMAT_BOX.FormattingEnabled = true;
             this.GUI_FORMAT_BOX.Items.AddRange(new object[] {
             "USC",
-            "AUVSI"});
+            "AUVSI",
+            "Drone PV Cleaning"});
             this.GUI_FORMAT_BOX.Location = new System.Drawing.Point(164, 212);
             this.GUI_FORMAT_BOX.Name = "GUI_FORMAT_BOX";
             this.GUI_FORMAT_BOX.Size = new System.Drawing.Size(166, 21);

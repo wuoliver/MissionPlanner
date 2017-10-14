@@ -7,11 +7,70 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using GMap.NET;
+using MissionPlanner.Mavlink;
+using MissionPlanner.Comms;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 
 namespace interoperability
 {
+    //Interop Callback Class
+
+    public class Mavlink_Command
+    {
+        //doCommand(MAV_CMD actionid, float p1, float p2, float p3, float p4, float p5, float p6, float p7, bool requireack = true)
+        public MAVLink.MAV_CMD actionid { get; set; } = MAVLink.MAV_CMD.ENUM_END;
+        public float p1 { get; set; } = 0; 
+        public float p2 { get; set; } = 0; 
+        public float p3 { get; set; } = 0; 
+        public float p4 { get; set; } = 0; 
+        public float p5 { get; set; } = 0; 
+        public float p6 { get; set; } = 0;
+        public float p7 { get; set; } = 0;
+        public bool requireack { get; set; } = true;
+
+        public Mavlink_Command(MAVLink.MAV_CMD _actionid, float _p1, float _p2, float _p3, float _p4, float _p5, float _p6, float _p7, bool _requireack = true)
+        {
+            actionid = _actionid;
+            p1 = _p1;
+            p2 = _p2;
+            p3 = _p3;
+            p4 = _p4;
+            p5 = _p5;
+            p6 = _p6;
+            p7 = _p7;
+            requireack = _requireack;
+        }
+    }
+
+    public class Interop_Callback_Struct
+    {
+        public Interoperability.Interop_Action action { get; set; }
+        public Mavlink_Command mav_command { get; set; }
+        public MAVLink.mavlink_set_position_target_local_ned_t mav_position { get; set; }
+ 
+        public Interop_Callback_Struct(Interoperability.Interop_Action _action)
+        {
+            action = _action;
+        }
+
+        public Interop_Callback_Struct(Interoperability.Interop_Action _action, Mavlink_Command _mav_command)
+        {
+            action = _action;
+            mav_command = _mav_command;
+        }
+
+        
+        public Interop_Callback_Struct(Interoperability.Interop_Action _action, MAVLink.mavlink_set_position_target_local_ned_t _mav_position)
+        {
+            action = _action;
+            mav_position = _mav_position;
+        }
+
+    }
+
+
+
     //SDA Classes 
     public class Moving_Obstacle
     {
@@ -335,7 +394,7 @@ namespace interoperability
         {
             // assumes pq is not empty; up to calling code
             int li = data.Count - 1; // last index (before removal)
-            if(li < 0)
+            if (li < 0)
             {
                 return default(T);
             }
@@ -419,7 +478,7 @@ namespace interoperability
         }
     }
 
-    
+
 
     //Target Classes
     public class Target
@@ -465,7 +524,8 @@ namespace interoperability
             heading = 0;
             size = 0;
         }
-        public imageOverlay(string _imagePath, float _heading, float _size){
+        public imageOverlay(string _imagePath, float _heading, float _size)
+        {
             imagePath = _imagePath;
             heading = _heading;
             size = _size;

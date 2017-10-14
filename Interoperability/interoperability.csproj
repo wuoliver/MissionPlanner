@@ -128,6 +128,10 @@
     <Compile Include="TriDiagonalMatrix.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExtLibs\Comms\MissionPlanner.Comms.csproj">
+      <Project>{825E7A10-390C-4A2B-B3A8-491D14966912}</Project>
+      <Name>MissionPlanner.Comms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ExtLibs\GMap.NET.Core\GMap.NET.Core.csproj">
       <Project>{d0c39d9d-bed0-418b-9a5e-713176caf40c}</Project>
       <Name>GMap.NET.Core</Name>

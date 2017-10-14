@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using interoperability;
+using MissionPlanner;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
@@ -23,7 +24,7 @@ namespace Interoperability_GUI_Forms
 {
     public partial class Interoperability_GUI_Main : Form
     {
-        Action<Interoperability.Interop_Action> InteroperabilityCallback;
+        Action<Interop_Callback_Struct> InteroperabilityCallback;
 
         protected int telemPollRate = 10;
         protected int mapRefreshRate = 20;
@@ -50,7 +51,7 @@ namespace Interoperability_GUI_Forms
         GMapOverlay g_Plane_Overlay;
         GMapOverlay g_WP_Overlay;
         GMapOverlay g_OFAT_EM_DROP_Overlay;
-        
+
 
         //Used for map control thread
         protected bool MAP_Bool_DrawWP = true;
@@ -73,7 +74,7 @@ namespace Interoperability_GUI_Forms
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
 
-        public Interoperability_GUI_Main(Action<Interoperability.Interop_Action> _InteroperabilityCallback, Interoperability_Settings _Settings)
+        public Interoperability_GUI_Main(Action<Interop_Callback_Struct> _InteroperabilityCallback, Interoperability_Settings _Settings)
         {
             Console.WriteLine("Created GUI");
             InitializeComponent();
@@ -101,7 +102,7 @@ namespace Interoperability_GUI_Forms
             Settings.Save();
 
             Settings_GUI_Instance = new Settings_GUI(InteroperabilityCallback, InteroperabilityGUIAction, Settings);
-      
+
             Interoperability_Mission_Edit_Instance = new Interoperability_Mission_Edit();
 
             //Set poll Rate text 
@@ -121,14 +122,14 @@ namespace Interoperability_GUI_Forms
 
         private void Interoperability_GUI_FormClosing(object sender, FormClosingEventArgs e)
         {
-            InteroperabilityCallback(Interoperability.Interop_Action.Stop_All_Threads_Quit);
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Stop_All_Threads_Quit));
             isOpened = false;
         }
 
         private void showInteroperabilityControlPanelToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Opening Interoperability Control Panel");
-            InteroperabilityCallback(Interoperability.Interop_Action.Show_Interop_GUI);
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Show_Interop_GUI));
         }
 
         private void Interoperability_GUI_Main_Shown(object sender, EventArgs e)
@@ -141,12 +142,12 @@ namespace Interoperability_GUI_Forms
         {
             if (e.Button == MouseButtons.Middle)
             {
-                InteroperabilityCallback(Interoperability.Interop_Action.Easter_Egg_Action);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Easter_Egg_Action));
             }
             else if (e.Button == MouseButtons.Left)
             {
                 Console.WriteLine("Opening Interoperability Control Panel");
-                InteroperabilityCallback(Interoperability.Interop_Action.Show_Interop_GUI);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Show_Interop_GUI));
             }
 
         }
@@ -171,7 +172,7 @@ namespace Interoperability_GUI_Forms
                     this.Text = "UTAT UAV Interoperability Control Panel (AUVSI) - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 //Disable AUVSI Elements, Enable USC 
-                case 1: 
+                case 1:
                     TabCount = Interoperability_GUI_Tab.TabPages.Count;
                     for (int i = 0; i < TabCount; i++)
                     {
@@ -181,6 +182,16 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[5]); //Geese Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (USC) - " + Interoperability.getinstance().Current_Mission.name;
+                    break;
+                //Disable all elements, add Drone PV Cleaning
+                case 2:
+                    TabCount = Interoperability_GUI_Tab.TabPages.Count;
+                    for (int i = 0; i < TabCount; i++)
+                    {
+                        Interoperability_GUI_Tab.TabPages.RemoveAt(0);
+                    }
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[6]); //Drone PV Cleaning Tab
+                    this.Text = "Drone PV Cleaning - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 default:
                     break;
@@ -259,9 +270,13 @@ namespace Interoperability_GUI_Forms
             {
                 InteroperabilityGUIAction(0);
             }
-            else
+            else if (gui_format == "USC")
             {
                 InteroperabilityGUIAction(1);
+            }
+            else
+            {
+                InteroperabilityGUIAction(2);
             }
 
         }
@@ -278,10 +293,10 @@ namespace Interoperability_GUI_Forms
             return MissionPlannerMenuAddon.Items[0];
         }
 
-        
 
 
-        
+
+
 
         public Settings_GUI getSettings_GUI()
         {
@@ -318,7 +333,7 @@ namespace Interoperability_GUI_Forms
         private void Reset_Stats_Click(object sender, EventArgs e)
         {
             //Restarts the Telemetry Upload Stats
-            InteroperabilityCallback(Interoperability.Interop_Action.Telemetry_Thread_Reset_Stats);
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Telemetry_Thread_Reset_Stats));
         }
 
         private void Telem_Start_Stop_Button_Click(object sender, EventArgs e)
@@ -326,13 +341,13 @@ namespace Interoperability_GUI_Forms
             if (Telem_Start_Stop_Button.Text == "Start")
             {
                 //Start
-                InteroperabilityCallback(Interoperability.Interop_Action.Telemtry_Thread_Start);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Telemtry_Thread_Start));
                 Telem_Start_Stop_Button.Text = "Stop";
             }
             else
             {
                 //Stop
-                InteroperabilityCallback(Interoperability.Interop_Action.Telemtry_Thread_Stop);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Telemtry_Thread_Stop));
                 Telem_Start_Stop_Button.Text = "Start";
             }
         }
@@ -422,13 +437,13 @@ namespace Interoperability_GUI_Forms
             if (SDA_Start_Stop_Button.Text == "Start SDA Polling")
             {
                 //Start
-                InteroperabilityCallback(Interoperability.Interop_Action.Obstacle_SDA_Thread_Start);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Obstacle_SDA_Thread_Start));
                 SDA_Start_Stop_Button.Text = "Stop SDA Polling";
             }
             else
             {
                 //Stop
-                InteroperabilityCallback(Interoperability.Interop_Action.Obstacle_SDA_Thread_Stop);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Obstacle_SDA_Thread_Stop));
                 SDA_Start_Stop_Button.Text = "Start SDA Polling";
             }
         }
@@ -494,12 +509,12 @@ namespace Interoperability_GUI_Forms
             if (SDA_Plane_Simulation_Start_Button.Text == "Start Simulation")
             {
                 SDA_Plane_Simulation_Start_Button.Text = "Stop Simulation";
-                InteroperabilityCallback(Interoperability.Interop_Action.SDA_Plane_Simulator_Thread_Start);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.SDA_Plane_Simulator_Thread_Start));
             }
             else
             {
                 SDA_Plane_Simulation_Start_Button.Text = "Start Simulation";
-                InteroperabilityCallback(Interoperability.Interop_Action.SDA_Plane_Simulator_Thread_Stop);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.SDA_Plane_Simulator_Thread_Stop));
             }
 
         }
@@ -509,12 +524,12 @@ namespace Interoperability_GUI_Forms
             if (SDA_Start_Algorithm_Button.Text == "Start Algorithm")
             {
                 SDA_Start_Algorithm_Button.Text = "Stop Algorithm";
-                InteroperabilityCallback(Interoperability.Interop_Action.SDA_Avoidance_Algorithm_Thread_Start);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.SDA_Avoidance_Algorithm_Thread_Start));
             }
             else
             {
                 SDA_Start_Algorithm_Button.Text = "Start Algorithm";
-                InteroperabilityCallback(Interoperability.Interop_Action.SDA_Avoidance_Algorithm_Thread_Stop);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.SDA_Avoidance_Algorithm_Thread_Stop));
             }
 
         }
@@ -523,7 +538,7 @@ namespace Interoperability_GUI_Forms
         {
             return sdaPollRate;
         }
-  
+
         public int getPlaneSimulationAirspeed()
         {
             return Convert.ToInt32(Plane_Simulated_Airspeed_Select.Value);
@@ -673,7 +688,7 @@ namespace Interoperability_GUI_Forms
 
         private void Mission_Download_Click(object sender, EventArgs e)
         {
-            InteroperabilityCallback(Interoperability.Interop_Action.Mission_Download_Run);
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Mission_Download_Run));
         }
 
         public bool getDrawWP()
@@ -735,12 +750,12 @@ namespace Interoperability_GUI_Forms
             if (Callout_StartStop_Button.Text == "Start")
             {
                 Callout_StartStop_Button.Text = "Stop";
-                InteroperabilityCallback(Interoperability.Interop_Action.Callout_Thread_Start);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Callout_Thread_Start));
             }
             else
             {
                 Callout_StartStop_Button.Text = "Start";
-                InteroperabilityCallback(Interoperability.Interop_Action.Callout_Thread_Stop);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Callout_Thread_Stop));
             }
 
         }
@@ -905,7 +920,7 @@ namespace Interoperability_GUI_Forms
             }
             return Points;
         }
- 
+
 
         /// <summary>
         /// Updates the plane location in the map
@@ -921,7 +936,7 @@ namespace Interoperability_GUI_Forms
             {
                 if (location.Lat != 0 || location.Lng != 0)
                 {
-                    GMapMarkerPlane marker = new GMapMarkerPlane(location, zoom, UAS_Scale, Map_Bool_UAS_FixedSize, heading, cog, nav_bearing, target, radius);
+                    interoperability.GMapMarkerPlane marker = new interoperability.GMapMarkerPlane(location, zoom, UAS_Scale, Map_Bool_UAS_FixedSize, heading, cog, nav_bearing, target, radius);
                     //Show the altitude always
                     marker.ToolTipMode = MarkerTooltipMode.Always;
                     string altitudetext = "";
@@ -993,10 +1008,10 @@ namespace Interoperability_GUI_Forms
         {
             this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
             {
-                GMapMarkerWP marker;
+                interoperability.GMapMarkerWP marker;
                 for (int i = 0; i < waypoints.Count(); i++)
                 {
-                    marker = new GMapMarkerWP(new PointLatLng(waypoints[i].latitude, waypoints[i].longitude), i.ToString("0"));
+                    marker = new interoperability.GMapMarkerWP(new PointLatLng(waypoints[i].latitude, waypoints[i].longitude), i.ToString("0"));
                     //marker.ToolTipMode = MarkerTooltipMode.Always;
                     //marker.ToolTipText = i.ToString();
                     g_WP_Overlay.Markers.Add(marker);
@@ -1011,7 +1026,7 @@ namespace Interoperability_GUI_Forms
                 GMapMarkerImage marker;
                 marker = new GMapMarkerImage(p, heading, altitude, path);
                 g_WP_Overlay.Markers.Add(marker);
-                
+
             });
         }
 
@@ -1106,7 +1121,7 @@ namespace Interoperability_GUI_Forms
                     instance.mapinvalidateWaypoints = false;
                 }
 
-                if(instance.mapinvalidateSearchArea || instance.mapinvalidateGeofence)
+                if (instance.mapinvalidateSearchArea || instance.mapinvalidateGeofence)
                 {
                     gMapControl1.Overlays.Remove(g_Static_Overlay);
                     gMapControl1.Overlays.Add(g_Static_Overlay);
@@ -1192,7 +1207,7 @@ namespace Interoperability_GUI_Forms
 
         private void Flight_Time_Label_DoubleClick(object sender, EventArgs e)
         {
-            InteroperabilityCallback(Interoperability.Interop_Action.Map_Thread_Restart_Flight_Timer);
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Map_Thread_Restart_Flight_Timer));
         }
 
         private void gMapControl1_OnMapZoomChanged()
@@ -1206,43 +1221,60 @@ namespace Interoperability_GUI_Forms
             {
                 InteroperabilityCallback(7);
             }*/
-
-            int freq = 0;
-            switch (e.KeyChar)
+            Console.WriteLine(e.KeyChar);
+            if (PV_Start_Drone_Control.Checked == true)
             {
-                case 'a':
-                    freq = 523;
-                    break;
-                case 's':
-                    freq = 587;
-                    break;
-                case 'd':
-                    freq = 659;
-                    break;
-                case 'f':
-                    freq = 698;
-                    break;
-                case 'g':
-                    freq = 784;
-                    break;
-                case 'h':
-                    freq = 880;
-                    break;
-                case 'j':
-                    freq = 988;
-                    break;
-                case 'k':
-                    freq = 1046;
-                    break;
-                case 'l':
-                    freq = 1174; 
-                    break;
-                default:
-                    freq = 433;
-                    break;
-            }
-            Console.Beep(freq, 100);
+                MAVLink.mavlink_set_position_target_local_ned_t mav_position = new MAVLink.mavlink_set_position_target_local_ned_t();
+                /*Positions are relative to the current vehicle position in a frame based on the vehicle’s current heading.
+                Use this to specify a position x metres forward from the current vehicle position, y metres to the right, and z metres down
+                (forward, right and down are “positive” values).*/
+                mav_position.coordinate_frame = 8;
+                //set max velocity to 0.1 meters per second 
+                mav_position.vx = 0.2F;
+                mav_position.vy = 0.2F;
+                mav_position.vz = 0.2F;
+                //4088 = 0b0000111111111000 - Use Position Only
+                //4039 = 0b0000111111000111 - Use Velocity Only
+                mav_position.type_mask = (ushort) 4088;
 
+                switch (e.KeyChar)
+                {
+                    case 'o':
+                        //arm quad
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Arm_Disarm,
+                            new Mavlink_Command(MAVLink.MAV_CMD.COMPONENT_ARM_DISARM, 1, 21196, 0, 0, 0, 0, 0)));
+                        break;
+                    case 'p':
+                        //disarm quad
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Arm_Disarm,
+                            new Mavlink_Command(MAVLink.MAV_CMD.COMPONENT_ARM_DISARM, 0, 21196, 0, 0, 0, 0, 0)));
+                        break;
+                    //Make the quad move in 1 meter increments -- Hopefully??
+                    case 'w':
+                        //forward
+                        mav_position.x = 0.2F;
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
+                        break;
+                    case 'a':
+                        //left
+                        mav_position.y = -0.2F;
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
+                        break;
+                    case 's':
+                        //backwards
+                        mav_position.x = -0.2F;
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
+                        break;
+                    case 'd':
+                        //right
+                        mav_position.y = 0.2F;
+                        InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
+                        break;
+                    default:
+                        //Don't do anything!!!!!!!!!!!!
+                        break;
+                }
+            }
         }
 
         //-------------------------------------------//
@@ -1517,7 +1549,10 @@ namespace Interoperability_GUI_Forms
                     Interoperability.getinstance().Current_Mission.all_waypoints.Clear();
                     Interoperability.getinstance().Current_Mission.all_waypoints.AddRange(Interoperability_Mission_Edit.DDtoWaypoints(lines));
                 }
-                catch { }
+                catch
+                {
+
+                }
             }
             Interoperability.getinstance().Invalidate_Map();
         }
@@ -1551,7 +1586,7 @@ namespace Interoperability_GUI_Forms
                 tempOverlay.Markers.Add(marker);
             }
             else
-            { 
+            {
                 //Console.WriteLine("Did not display air drop because coordinate at 0,0");
             }
 
@@ -1562,9 +1597,20 @@ namespace Interoperability_GUI_Forms
                 marker.ToolTipText = "Emergent Target";
                 tempOverlay.Markers.Add(marker);
             }
-// Interoperability.getinstance().Host.FPGMapControl.Overlays.Remove(tempOverlay);
+            // Interoperability.getinstance().Host.FPGMapControl.Overlays.Remove(tempOverlay);
             Interoperability.getinstance().Host.FPGMapControl.Overlays.Add(tempOverlay);
         }
+
+        private void getMavWaypoint_Button_Click(object sender, EventArgs e)
+        {
+            Interoperability.getinstance().Host.GetWPs();
+
+            MAVLinkInterface port = new MAVLinkInterface();
+            //port.
+        }
+
+        //Remove everything past here if it doesn't work 
+        //FOR CAPSTONE - TESTING
 
     }
 

@@ -62,6 +62,7 @@
             this.SDA_Start_Stop_Button = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.Map_Tab = new System.Windows.Forms.TabPage();
+            this.getMavWaypoint_Button = new System.Windows.Forms.Button();
             this.Update_FP_Button = new System.Windows.Forms.Button();
             this.Fixed_UAS_Size_Checkbox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
@@ -104,6 +105,8 @@
             this.label23 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
+            this.Solar_PV_Tab_Page = new System.Windows.Forms.TabPage();
+            this.label24 = new System.Windows.Forms.Label();
             this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -149,6 +152,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.PV_Start_Drone_Control = new System.Windows.Forms.CheckBox();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -157,6 +161,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
             this.Callout_Tab.SuspendLayout();
             this.Goose_Tab.SuspendLayout();
+            this.Solar_PV_Tab_Page.SuspendLayout();
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
@@ -250,6 +255,7 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.TargetUpload_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Callout_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Goose_Tab);
+            this.Interoperability_GUI_Tab.Controls.Add(this.Solar_PV_Tab_Page);
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 27);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
@@ -500,6 +506,7 @@
             // 
             // Map_Tab
             // 
+            this.Map_Tab.Controls.Add(this.getMavWaypoint_Button);
             this.Map_Tab.Controls.Add(this.Update_FP_Button);
             this.Map_Tab.Controls.Add(this.Fixed_UAS_Size_Checkbox);
             this.Map_Tab.Controls.Add(this.label12);
@@ -524,9 +531,19 @@
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
             // 
+            // getMavWaypoint_Button
+            // 
+            this.getMavWaypoint_Button.Location = new System.Drawing.Point(16, 365);
+            this.getMavWaypoint_Button.Name = "getMavWaypoint_Button";
+            this.getMavWaypoint_Button.Size = new System.Drawing.Size(163, 23);
+            this.getMavWaypoint_Button.TabIndex = 17;
+            this.getMavWaypoint_Button.Text = "Get MAV WP";
+            this.getMavWaypoint_Button.UseVisualStyleBackColor = true;
+            this.getMavWaypoint_Button.Click += new System.EventHandler(this.getMavWaypoint_Button_Click);
+            // 
             // Update_FP_Button
             // 
-            this.Update_FP_Button.Location = new System.Drawing.Point(51, 354);
+            this.Update_FP_Button.Location = new System.Drawing.Point(16, 335);
             this.Update_FP_Button.Name = "Update_FP_Button";
             this.Update_FP_Button.Size = new System.Drawing.Size(163, 23);
             this.Update_FP_Button.TabIndex = 16;
@@ -684,7 +701,7 @@
             // 
             // Mission_Enable
             // 
-            this.Mission_Enable.Location = new System.Drawing.Point(51, 306);
+            this.Mission_Enable.Location = new System.Drawing.Point(16, 306);
             this.Mission_Enable.Name = "Mission_Enable";
             this.Mission_Enable.Size = new System.Drawing.Size(163, 23);
             this.Mission_Enable.TabIndex = 1;
@@ -963,6 +980,27 @@
             this.label22.Size = new System.Drawing.Size(189, 31);
             this.label22.TabIndex = 4;
             this.label22.Text = "Goose Control";
+            // 
+            // Solar_PV_Tab_Page
+            // 
+            this.Solar_PV_Tab_Page.Controls.Add(this.PV_Start_Drone_Control);
+            this.Solar_PV_Tab_Page.Controls.Add(this.label24);
+            this.Solar_PV_Tab_Page.Location = new System.Drawing.Point(4, 22);
+            this.Solar_PV_Tab_Page.Name = "Solar_PV_Tab_Page";
+            this.Solar_PV_Tab_Page.Padding = new System.Windows.Forms.Padding(3);
+            this.Solar_PV_Tab_Page.Size = new System.Drawing.Size(271, 531);
+            this.Solar_PV_Tab_Page.TabIndex = 7;
+            this.Solar_PV_Tab_Page.Text = "Solar PV Control";
+            this.Solar_PV_Tab_Page.UseVisualStyleBackColor = true;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(12, 61);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(247, 13);
+            this.label24.TabIndex = 1;
+            this.label24.Text = "Click on map, and use WASD keys to control quad";
             // 
             // InteropMap_ContextMenuStrip
             // 
@@ -1374,6 +1412,16 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
+            // PV_Start_Drone_Control
+            // 
+            this.PV_Start_Drone_Control.AutoSize = true;
+            this.PV_Start_Drone_Control.Location = new System.Drawing.Point(72, 23);
+            this.PV_Start_Drone_Control.Name = "PV_Start_Drone_Control";
+            this.PV_Start_Drone_Control.Size = new System.Drawing.Size(116, 17);
+            this.PV_Start_Drone_Control.TabIndex = 2;
+            this.PV_Start_Drone_Control.Text = "Start Drone Control";
+            this.PV_Start_Drone_Control.UseVisualStyleBackColor = true;
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1413,6 +1461,8 @@
             this.Callout_Tab.PerformLayout();
             this.Goose_Tab.ResumeLayout(false);
             this.Goose_Tab.PerformLayout();
+            this.Solar_PV_Tab_Page.ResumeLayout(false);
+            this.Solar_PV_Tab_Page.PerformLayout();
             this.InteropMap_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
@@ -1545,5 +1595,9 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Button showCameraTriggerLocation;
         private System.Windows.Forms.Button Update_FP_Button;
+        private System.Windows.Forms.Button getMavWaypoint_Button;
+        private System.Windows.Forms.TabPage Solar_PV_Tab_Page;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.CheckBox PV_Start_Drone_Control;
     }
 }

@@ -18,6 +18,7 @@ using System.Speech.Synthesis;
 using System.Speech.Recognition;
 
 using MissionPlanner.Plugin;
+using MissionPlanner.Comms;
 
 using Interoperability_GUI_Forms;
 
@@ -113,7 +114,6 @@ namespace interoperability
 
         private static Interoperability Instance = null;
 
-
         public static Mutex Interoperability_Mutex = new Mutex();
 
         //Instantiate windows forms
@@ -143,7 +143,7 @@ namespace interoperability
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
-                + "*                            Interoperability 0.3.3                           *\n"
+                + "*                            Interoperability 0.7.3                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 
             //Set up settings object, and load from xml file
@@ -180,6 +180,10 @@ namespace interoperability
             //Add item to flight data context menu 
             Host.FDMenuMap.Items.Add(Interoperability_GUI.getContextMenu());
             Host.MainForm.MainMenu.Items.Insert(2, Interoperability_GUI.getMenuStrip());
+            if (Settings["gui_format"] == "Drone PV Cleaning")
+            {
+                Host.MainForm.MainMenu.Items[2].Name = "Drone PV";
+            }
 
             // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
@@ -218,17 +222,19 @@ namespace interoperability
             SDA_Plane_Simulator_Thread_Start,
             SDA_Plane_Simulator_Thread_Stop,
             SDA_Avoidance_Algorithm_Thread_Start,
-            SDA_Avoidance_Algorithm_Thread_Stop
+            SDA_Avoidance_Algorithm_Thread_Stop,
+            MAV_Command_Arm_Disarm,
+            MAV_Command_Set_Position
         }
 
         /// <summary>
         /// Allows other functions to control the interoperability threads.
         /// </summary>
         /// <param name="action"></param>
-        public void interoperabilityAction(Interop_Action action)
+        public void interoperabilityAction(Interop_Callback_Struct action)
         {
             Interoperability_Action_Mutex.WaitOne();
-            switch (action)
+            switch (action.action)
             {
                 //Start Telemetry_Upload Thread
                 case Interop_Action.Telemtry_Thread_Start:
@@ -457,7 +463,67 @@ namespace interoperability
                 case Interop_Action.SDA_Avoidance_Algorithm_Thread_Stop:
                     Stop_Thread(ref SDA_Avoidance_Algorithm_Thread, ref SDA_Avoidance_Algorithm_Thread_shouldStop);
                     break;
+                case Interop_Action.MAV_Command_Arm_Disarm:
+                    //Check to see if there is a connection to the quad
+                    if (!Host.comPort.BaseStream.IsOpen)
+                    {
+                        return;
+                    }
+                    //Check to see if we have an invalid mavlink command
+                    if (action.mav_command.actionid == MAVLink.MAV_CMD.ENUM_END)
+                    {
+                        MessageBox.Show("Error, invalid mavlink command", Strings.ERROR);
+                        return;
+                    }
 
+
+                    try
+                    {
+                        if (action.mav_command.actionid == MAVLink.MAV_CMD.COMPONENT_ARM_DISARM)
+                        {
+                            if (!Host.comPort.MAV.cs.armed)
+                                if (CustomMessageBox.Show("Are you sure you want to Arm?", "Arm?", MessageBoxButtons.YesNo) !=
+                                    DialogResult.Yes)
+                                    return;
+                        }
+
+                        bool ans = Host.comPort.doCommand(action.mav_command.actionid, action.mav_command.p1, action.mav_command.p2,
+                            action.mav_command.p3, action.mav_command.p4, action.mav_command.p5, action.mav_command.p6,
+                            action.mav_command.p7, action.mav_command.requireack);
+
+                        if (ans == false)
+                            MessageBox.Show(Strings.ErrorRejectedByMAV, Strings.ERROR);
+                    }
+                    catch
+                    {
+                        MessageBox.Show(Strings.ErrorNoResponce, Strings.ERROR);
+                    }
+
+                    break;
+                case Interop_Action.MAV_Command_Set_Position:
+                    //Check to see if there is a connection to the quad
+                    if (!Host.comPort.BaseStream.IsOpen)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        MAVLink.mavlink_set_position_target_local_ned_t packet;
+                        packet = action.mav_position;
+                        packet.target_system = Host.comPort.MAV.sysid;
+                        packet.target_component = Host.comPort.MAV.compid;
+                        packet.time_boot_ms = 0;
+
+                        //send the command
+                        Host.comPort.sendPacket(packet, Host.comPort.MAV.sysid, Host.comPort.MAV.compid);
+                    }
+                    catch
+                    {
+                        MessageBox.Show(Strings.ErrorNoResponce, Strings.ERROR);
+                    }
+
+                    break;
                 default:
                     break;
             }
@@ -876,7 +942,7 @@ namespace interoperability
                     }
                 }
 
-                mapinvalidateWaypoints = true;
+                Invalidate_Map();
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
@@ -1426,15 +1492,6 @@ namespace interoperability
 
             bool useSpline = false;
 
-            if (!useSpline)
-            {
-                Simulator_Path.Clear();
-                foreach (Waypoint i in Current_Mission.all_waypoints)
-                {
-                    Simulator_Path.Add(i);
-                }
-            }
-
             //Invalidate waypoints and obstacles, to update for new paths
             mapinvalidateWaypoints = true;
             mapinvalidateObstacle = true;
@@ -1445,6 +1502,12 @@ namespace interoperability
                 if (!useSpline)
                 {
                     total_waypoints = Current_Mission.all_waypoints.Count();
+
+                    Simulator_Path.Clear();
+                    foreach (Waypoint i in Current_Mission.all_waypoints)
+                    {
+                        Simulator_Path.Add(i);
+                    }
 
                     if (target_waypoint == total_waypoints)
                     {
@@ -1716,7 +1779,7 @@ namespace interoperability
                 Interoperability_GUI.MAP_Clear_Overlays();
                 //Draw Obstacles 
                 if (Obstacles_Downloaded)
-                { 
+                {
                     if (Interoperability_GUI.getDrawObstacles() && mapinvalidateObstacle)
                     {
                         for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
@@ -1773,7 +1836,6 @@ namespace interoperability
                         Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), (float)alt, Host.cs.yaw,
                                                 Host.cs.groundcourse, Host.cs.nav_bearing, Host.cs.target_bearing, Host.cs.radius);
                     }
-
                 }
 
                 //Draw Waypoints
@@ -2092,7 +2154,7 @@ namespace interoperability
         /// <returns></returns>
         override public bool Exit()
         {
-            interoperabilityAction(Interop_Action.Stop_All_Threads_Quit);
+            interoperabilityAction(new Interop_Callback_Struct(Interop_Action.Stop_All_Threads_Quit));
             return (true);
         }
     }

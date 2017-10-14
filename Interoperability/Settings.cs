@@ -32,13 +32,13 @@ namespace Interoperability_GUI_Forms
 
         private string gui_format = "AUVSI";
 
-        Action<Interoperability.Interop_Action> InteroperabilityCallback;
+        Action<Interop_Callback_Struct> InteroperabilityCallback;
         Action<int> InteroperabilityGUICallback;
         Interoperability_Settings Settings;
 
         public bool isOpened = false;
 
-        public Settings_GUI(Action<Interoperability.Interop_Action> _InteroperabilityCallback, Action<int> _InteroperabilityGUICallback, Interoperability_Settings _Settings)
+        public Settings_GUI(Action<Interop_Callback_Struct> _InteroperabilityCallback, Action<int> _InteroperabilityGUICallback, Interoperability_Settings _Settings)
         {
             InitializeComponent();
             InteroperabilityCallback = _InteroperabilityCallback;
@@ -110,7 +110,7 @@ namespace Interoperability_GUI_Forms
                 Settings.Save();
 
                 //Restarts all the threads relying on HTTP to update credentials
-                InteroperabilityCallback(Interoperability.Interop_Action.Restart_Threads_Settings);
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Restart_Threads_Settings));
 
                 //Change tab layout 
                 if (GUI_FORMAT_BOX.Text != old_gui_format)
@@ -119,9 +119,13 @@ namespace Interoperability_GUI_Forms
                     {
                         InteroperabilityGUICallback(0);
                     }
-                    else
+                    else if(GUI_FORMAT_BOX.Text == "USC")
                     {
                         InteroperabilityGUICallback(1);
+                    }
+                    else
+                    {
+                        InteroperabilityGUICallback(2);
                     }
                 }
                 isOpened = false;
@@ -190,6 +194,5 @@ namespace Interoperability_GUI_Forms
             bg.Start();
             bg.Join();
         }
-
     }
 }
