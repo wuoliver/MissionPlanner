@@ -188,7 +188,7 @@ namespace interoperability
             // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
             ImportantTimer.Start();
-
+       
             Console.WriteLine("End of init()");
 
             return (true);
@@ -224,7 +224,8 @@ namespace interoperability
             SDA_Avoidance_Algorithm_Thread_Start,
             SDA_Avoidance_Algorithm_Thread_Stop,
             MAV_Command_Arm_Disarm,
-            MAV_Command_Set_Position
+            MAV_Command_Set_Position,
+            TEST
         }
 
         /// <summary>
@@ -482,7 +483,7 @@ namespace interoperability
                         if (action.mav_command.actionid == MAVLink.MAV_CMD.COMPONENT_ARM_DISARM)
                         {
                             if (!Host.comPort.MAV.cs.armed)
-                                if (CustomMessageBox.Show("Are you sure you want to Arm?", "Arm?", MessageBoxButtons.YesNo) !=
+                                if (MessageBox.Show("Are you sure you want to Arm?", "Arm?", MessageBoxButtons.YesNo) !=
                                     DialogResult.Yes)
                                     return;
                         }
@@ -500,6 +501,7 @@ namespace interoperability
                     }
 
                     break;
+
                 case Interop_Action.MAV_Command_Set_Position:
                     //Check to see if there is a connection to the quad
                     if (!Host.comPort.BaseStream.IsOpen)
@@ -514,15 +516,66 @@ namespace interoperability
                         packet.target_system = Host.comPort.MAV.sysid;
                         packet.target_component = Host.comPort.MAV.compid;
                         packet.time_boot_ms = 0;
+                        packet.afx = 0;
+                        packet.afy = 0;
+                        packet.afz = 0;
+
+                        /*MAVLink.mavlink_rc_channels_override_t rc_override = new MAVLink.mavlink_rc_channels_override_t();
+                        rc_override.target_component = Host.comPort.MAV.sysid;
+                        rc_override.target_component = Host.comPort.MAV.compid;
+
+                        rc_override.chan1_raw = 0;
+                        rc_override.chan2_raw = 0;
+                        rc_override.chan3_raw = (ushort)(1600);
+                        rc_override.chan4_raw = 0; 
+                        rc_override.chan5_raw = 0;
+                        rc_override.chan6_raw = 0; 
+                        rc_override.chan7_raw = 0;
+                        rc_override.chan8_raw = 0;*/
 
                         //send the command
+                        //Host.comPort.sendPacket(rc_override, Host.comPort.MAV.sysid, Host.comPort.MAV.compid);
                         Host.comPort.sendPacket(packet, Host.comPort.MAV.sysid, Host.comPort.MAV.compid);
+
+                        //Reset rc_override back to the RC controller after 200ms 
+                        //Thread.Sleep(200);
+                        //rc_override.chan3_raw = 0;
+                        //Host.comPort.sendPacket(rc_override, Host.comPort.MAV.sysid, Host.comPort.MAV.compid);
                     }
                     catch
                     {
                         MessageBox.Show(Strings.ErrorNoResponce, Strings.ERROR);
                     }
+                    //MAVLink.mavlink_command_int_t command = new MAVLink.mavlink_command_int_t();
+                    //Host.comPort.
 
+                    break;
+                case Interop_Action.TEST:
+                    List<Waypoint> temp = new List<Waypoint>();
+                    temp.Add(new Waypoint(300, 38.149220, -76.429480));
+                    temp.Add(new Waypoint(300, 38.150140, -76.430850));
+                    temp.Add(new Waypoint(300, 38.148950, -76.432290));
+                    temp.Add(new Waypoint(400, 38.147010, -76.430640));
+                    temp.Add(new Waypoint(200, 38.143780, -76.431990));
+
+                    List<MAVLink.mavlink_mission_item_t> temp_waypoints = create_mission(MAVLink.MAV_TYPE.QUADROTOR, temp);
+                    export_mission_file(temp_waypoints);
+                    /*
+                    foreach (MAVLink.mavlink_mission_item_t i in temp_waypoints)
+                    {
+                        MAVLink.MAV_MISSION_RESULT result =  Host.comPort.setWP(i);
+                        if(result == MAVLink.MAV_MISSION_RESULT.MAV_MISSION_ACCEPTED)
+                        {
+                            Host.comPort.setWPACK();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Error sending waypoints");
+                        }
+                    }
+                    Host.comPort.setWPTotal((ushort)(temp_waypoints.Count() - 1)); //because first waypoint is the home.
+                    //Host.comPort.setWP()
+                    */
                     break;
                 default:
                     break;
@@ -545,6 +598,101 @@ namespace interoperability
             }
             return;
         }
+
+        public void export_mission_file(List<MAVLink.mavlink_mission_item_t> mission)
+        {
+            Stream myStream;
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                {
+                    string mission_string = "";
+
+                    //< INDEX > < CURRENT WP > < COORD FRAME > < COMMAND > < PARAM1 > < PARAM2 > < PARAM3 > < PARAM4 > < PARAM5 / X / LONGITUDE > < PARAM6 / Y / LATITUDE > < PARAM7 / Z / ALTITUDE > < AUTOCONTINUE >
+                    mission_string += "QGC WPL 110\n";
+                    for(int i = 0; i < mission.Count(); i++)
+                    {
+                        mission_string += i + "\t" + "0\t" + "0\t" + mission[i].command + "\t" + mission[i].param1 + "\t" + mission[i].param2 + "\t"
+                            + mission[i].param3 + "\t" + mission[i].param4 + "\t" + mission[i].x + "\t" + mission[i].y + "\t" + mission[i].z + "\n";
+                    }
+
+                    byte[] byteArray = Encoding.UTF8.GetBytes(mission_string);
+                    myStream.Write(byteArray, 0, byteArray.Count());
+                    myStream.Close();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Creates a mission given a set of waypoints. Inserts a takeoff and land command if quadcopter.
+        /// </summary>
+        public List<MAVLink.mavlink_mission_item_t> create_mission(MAVLink.MAV_TYPE frametype, List<Waypoint> waypoints)
+        {
+            List<MAVLink.mavlink_mission_item_t> mission = new List<MAVLink.mavlink_mission_item_t>();
+
+            MAVLink.mavlink_mission_item_t temp_command = new MAVLink.mavlink_mission_item_t();
+            temp_command.param1 = 0;    //Copter hold time (seconds)
+            temp_command.param2 = 20;   //Acceptance Radius (metres)
+            temp_command.param3 = 0;
+            temp_command.param4 = 0;
+            temp_command.target_component = Host.comPort.MAV.compid;
+            temp_command.target_system = Host.comPort.MAV.sysid;
+            temp_command.autocontinue = 1;
+            temp_command.command = (ushort)MAVLink.MAV_CMD.WAYPOINT;
+            temp_command.current = 0;
+            temp_command.frame = (byte)MAVLink.MAV_FRAME.GLOBAL_RELATIVE_ALT;
+            temp_command.seq = 0;
+
+            if (frametype == MAVLink.MAV_TYPE.FIXED_WING)
+            {
+                for(int i = 0; i < waypoints.Count(); i++)
+                {
+                    temp_command.x = waypoints[i].latitude;
+                    temp_command.y = waypoints[i].longitude;
+                    temp_command.z = waypoints[i].altitude_msl; //Be careful, I don't know how to set absolute vs relative altitude
+                    temp_command.seq = (ushort)(i);
+                    mission.Add(temp_command);
+                }
+                //p2 - acceptance radius (metres)
+                //p5 - lat
+                //p6 - lon
+                //p7 - alt
+            }
+            else if (frametype == MAVLink.MAV_TYPE.QUADROTOR)
+            {
+                for (int i = 0; i < waypoints.Count(); i++)
+                {
+                    temp_command.x = waypoints[i].latitude;
+                    temp_command.y = waypoints[i].longitude;
+                    temp_command.z = waypoints[i].altitude_msl; //Be careful, I don't know how to set absolute vs relative altitude
+                    temp_command.seq = (ushort)(i);
+                    mission.Add(temp_command);
+                }
+                //Be careful, I don't know how to set absolute vs relative altitude
+                //p1 - hold time (seconds)
+                //p5 - lat
+                //p6 - lon
+                //p7 - alt
+            }
+            return mission;
+        }
+
+
+        /// <summary>
+        /// Concatinates a series of waypoints 
+        /// </summary>
+        public void concat_mission()
+        {
+
+        }
+
 
 
         public void test_function()
@@ -607,6 +755,7 @@ namespace interoperability
             int count = 0;
             CookieContainer cookies = new CookieContainer();
 
+            string telemetry_uploaded_data = "";
             try
             {
                 using (var client = new HttpClient())
@@ -704,6 +853,14 @@ namespace interoperability
                             telemData.Add("longitude", lng.ToString("F10"));
                             telemData.Add("altitude_msl", alt.ToString("F10"));
                             telemData.Add("uas_heading", yaw.ToString("F10"));
+
+                            telemetry_uploaded_data += "Latitude: " + lat.ToString("F10");
+                            telemetry_uploaded_data += "\nLongitude: " + lng.ToString("F10");
+                            telemetry_uploaded_data += "\nAltitude_MSL: " + alt.ToString("F10");
+                            telemetry_uploaded_data += "\nUAS_Heading: " + yaw.ToString("F10");
+
+                            Interoperability_GUI.set_telemetry_data_textbox(telemetry_uploaded_data);
+
                             //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
 
                             var telem = new FormUrlEncodedContent(telemData);
@@ -943,6 +1100,7 @@ namespace interoperability
                 }
 
                 Invalidate_Map();
+                Invalidate_Map();
 
                 Thread.Sleep(500);  //Change depending on how often you want to compute the algorithm
                 SDA_Avoidance_Algorithm_Thread_shouldStop = true;
@@ -953,6 +1111,7 @@ namespace interoperability
         List<List<Vertex>> vertices = new List<List<Vertex>>();
         PriorityQueue<Vertex> open;
         PriorityQueue<Vertex> closed;
+
 
         /// <summary>
         /// Calculates the optimal path between two points given stationary obstacles and geofence
@@ -1208,7 +1367,7 @@ namespace interoperability
         {
             if (!LOS(S, vertices[S.parentCoords.x][S.parentCoords.y]))
             {
-                double minCost = 10000000000000000000;
+                double minCost = Double.MaxValue;
                 Vertex minVertex = null;
                 foreach (Vertex v in getNeighboursVis(S))
                 {
@@ -1232,6 +1391,7 @@ namespace interoperability
             return S;
         }
 
+        //Determine if we hit any obstacles. 
         public bool LOS(Vertex S, Vertex S_prime)
         {
             //Points of S and S_prime
@@ -1276,7 +1436,7 @@ namespace interoperability
                     currX += dx;
 
                     distance = Math.Sqrt(Math.Pow(currY - y0, 2) + Math.Pow(currX - x0, 2));
-                    if (distance <= (o.cylinder_radius * 0.3048 + 15)) //Add 50 feed safety radius 
+                    if (distance <= (o.cylinder_radius * 0.3048 + 15)) //Add 50 foot safety radius 
                     {
                         return false;
                     }
@@ -1347,51 +1507,12 @@ namespace interoperability
             obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835270, (float)-79.240780));
             obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, (float)43.835711, (float)-79.238709));
 
-            /*Current_Mission.all_waypoints.Add(new Waypoint(0, 38.144885, -76.428173));
-            Current_Mission.all_waypoints.Add(new Waypoint(30, 38.146336, -76.428495));
-            Current_Mission.all_waypoints.Add(new Waypoint(50, 38.147551, -76.429503));
-            Current_Mission.all_waypoints.Add(new Waypoint(100, 38.148463, -76.430297));
-            Current_Mission.all_waypoints.Add(new Waypoint(200, 38.149492, -76.431477));
-            Current_Mission.all_waypoints.Add(new Waypoint(200, 38.150774, -76.432850));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.150724, -76.433687));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.150319, -76.434095));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149880, -76.433923));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149543, -76.433280));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.149188, -76.432829));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146505, -76.430426));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145104, -76.429117));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142843, -76.427572));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142050, -76.427572));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141915, -76.428087));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144581, -76.430769));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144379, -76.431627));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141881, -76.429482));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141662, -76.430533));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144193, -76.432443));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143991, -76.433280));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141189, -76.431756));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.140715, -76.431112));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.141324, -76.426606));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142455, -76.424847));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145493, -76.426928));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.145965, -76.426306));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.142877, -76.423881));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143130, -76.422873));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146235, -76.425319));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146421, -76.424482));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143535, -76.422036));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.144075, -76.421506));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.146674, -76.423473));
-            Current_Mission.all_waypoints.Add(new Waypoint(150, 38.143451, -76.426735));
-            
-            //Add obstacles between each of the waypoints
-            for (int i=0;i<Current_Mission.all_waypoints.Count()-1;i++)
-            {
-                obstaclesList.stationary_obstacles.Add(new Stationary_Obstacle(100, 50, 
-                    (Current_Mission.all_waypoints[i].latitude + Current_Mission.all_waypoints[i+1].latitude)/2, 
-                    (Current_Mission.all_waypoints[i].longitude + Current_Mission.all_waypoints[i + 1].longitude) / 2));
-            }
-            */
+
+            //start working on an actual simulator. 
+            Dictionary<int, MAVLink.mavlink_mission_item_t> mission = Host.comPort.MAV.wps;
+
+
+
 
             if (Current_Mission.all_waypoints.Count() < 3)
             {

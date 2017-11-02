@@ -19,6 +19,7 @@ using GMap.NET.WindowsForms.Markers;
 
 //For javascript serializer
 using System.Web.Script.Serialization;
+using System.Net.Http;
 
 namespace Interoperability_GUI_Forms
 {
@@ -152,6 +153,13 @@ namespace Interoperability_GUI_Forms
 
         }
 
+        public enum Interop_Interface
+        {
+            AUVSI,
+            USC,
+            DRONE_PV
+        }
+
         public void InteroperabilityGUIAction(int action)
         {
             int TabCount;
@@ -191,6 +199,7 @@ namespace Interoperability_GUI_Forms
                         Interoperability_GUI_Tab.TabPages.RemoveAt(0);
                     }
                     Interoperability_GUI_Tab.TabPages.Add(TabList[6]); //Drone PV Cleaning Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     this.Text = "Drone PV Cleaning - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 default:
@@ -358,6 +367,11 @@ namespace Interoperability_GUI_Forms
             {
                 Telem_Start_Stop_Button.Text = "Start";
             });
+        }
+
+        public void set_telemetry_data_textbox(string text)
+        {
+            telemetry_data_textbox.Text = text;
         }
 
         public int getTelemPollRate()
@@ -1235,7 +1249,7 @@ namespace Interoperability_GUI_Forms
                 mav_position.vz = 0.2F;
                 //4088 = 0b0000111111111000 - Use Position Only
                 //4039 = 0b0000111111000111 - Use Velocity Only
-                mav_position.type_mask = (ushort) 4088;
+                mav_position.type_mask = (ushort)4088;
 
                 switch (e.KeyChar)
                 {
@@ -1252,22 +1266,22 @@ namespace Interoperability_GUI_Forms
                     //Make the quad move in 1 meter increments -- Hopefully??
                     case 'w':
                         //forward
-                        mav_position.x = 0.2F;
+                        mav_position.x = 1F;
                         InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
                         break;
                     case 'a':
                         //left
-                        mav_position.y = -0.2F;
+                        mav_position.y = -1F;
                         InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
                         break;
                     case 's':
                         //backwards
-                        mav_position.x = -0.2F;
+                        mav_position.x = -1F;
                         InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
                         break;
                     case 'd':
                         //right
-                        mav_position.y = 0.2F;
+                        mav_position.y = 1F;
                         InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.MAV_Command_Set_Position, mav_position));
                         break;
                     default:
@@ -1607,6 +1621,106 @@ namespace Interoperability_GUI_Forms
 
             MAVLinkInterface port = new MAVLinkInterface();
             //port.
+        }
+
+        private void SDA_Import_WP_Click(object sender, EventArgs e)
+        {
+            Stream myStream = null;
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            openFileDialog1.InitialDirectory = "c:\\";
+            openFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 2;
+            openFileDialog1.RestoreDirectory = true;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if ((myStream = openFileDialog1.OpenFile()) != null)
+                    {
+                        using (myStream)
+                        {
+                            StreamReader reader = new StreamReader(myStream);
+                            string text = reader.ReadToEnd();
+                            string[] lines = text.Split(new[] { "/r/n" }, StringSplitOptions.RemoveEmptyEntries);
+
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show("Error, Invalid Mission File.\n" + ex.Message, "Interoperability Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                }
+            }
+        }
+
+        private async void solarPV_API_Call_Click(object sender, EventArgs e)
+        {
+            string address = "";
+            string username = "";
+            string password = "";
+            try
+            {
+                using (var client = new HttpClient())
+                {
+
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 10);
+                    //client.Timeout = timeout;
+
+                    client.BaseAddress = new Uri(address); // This seems to change every time
+
+                    // Log in.
+                    Console.WriteLine("---INITIAL LOGIN---");
+                    var v = new Dictionary<string, string>();
+                    v.Add("username", username);
+                    v.Add("password", password);
+                    var auth = new FormUrlEncodedContent(v);
+                    //Get authentication cookie. Cookie is automatically sent after being sent
+                    HttpResponseMessage resp = await client.PostAsync("/api/login", auth);
+                    Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+                    Console.WriteLine("---LOGIN FINISHED---");
+
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Invalid Credentials");
+                        return;
+
+                    }
+                    else
+                    {
+                        Console.WriteLine("Credentials Valid");
+                    }
+
+                    while (true)
+                    {
+                        var telemData = new Dictionary<string, string>();
+
+                        float lat = 0f;
+                        telemData.Add("latitude", lat.ToString("F10"));
+                        //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
+
+                        var telem = new FormUrlEncodedContent(telemData);
+                        HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
+                        Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
+                    }
+                }
+            }
+
+            //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
+            catch//(Exception e)
+            {
+                Console.WriteLine("Error, exception thrown in API call thread");
+                //Console.WriteLine(e.Message);
+                //Console.WriteLine(e.InnerException);
+            }
+        }
+
+        private void dronepv_writewp_button_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.TEST));
         }
 
         //Remove everything past here if it doesn't work 

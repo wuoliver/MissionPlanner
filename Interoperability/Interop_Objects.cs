@@ -41,6 +41,14 @@ namespace interoperability
             p7 = _p7;
             requireack = _requireack;
         }
+        public MAVLink.mavlink_command_long_t get_command_long()
+        {
+            MAVLink.mavlink_command_long_t temp = new MAVLink.mavlink_command_long_t();
+            //temp.command = actionid;
+            temp.param1 = p1;
+            temp.param2 = p2;
+            return temp;
+        }
     }
 
     public class Interop_Callback_Struct
