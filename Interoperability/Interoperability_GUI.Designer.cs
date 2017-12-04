@@ -109,6 +109,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
             this.Solar_PV_Tab_Page = new System.Windows.Forms.TabPage();
+            this.dronepv_writewp_button = new System.Windows.Forms.Button();
             this.solarPV_API_Call = new System.Windows.Forms.Button();
             this.PV_Start_Drone_Control = new System.Windows.Forms.CheckBox();
             this.label24 = new System.Windows.Forms.Label();
@@ -157,7 +158,6 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
-            this.dronepv_writewp_button = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -1032,6 +1032,16 @@
             this.Solar_PV_Tab_Page.Text = "Solar PV Control";
             this.Solar_PV_Tab_Page.UseVisualStyleBackColor = true;
             // 
+            // dronepv_writewp_button
+            // 
+            this.dronepv_writewp_button.Location = new System.Drawing.Point(15, 197);
+            this.dronepv_writewp_button.Name = "dronepv_writewp_button";
+            this.dronepv_writewp_button.Size = new System.Drawing.Size(134, 23);
+            this.dronepv_writewp_button.TabIndex = 4;
+            this.dronepv_writewp_button.Text = "Write_Waypoint";
+            this.dronepv_writewp_button.UseVisualStyleBackColor = true;
+            this.dronepv_writewp_button.Click += new System.EventHandler(this.dronepv_writewp_button_Click);
+            // 
             // solarPV_API_Call
             // 
             this.solarPV_API_Call.Location = new System.Drawing.Point(15, 131);
@@ -1329,7 +1339,7 @@
             // openSettingsToolStripMenuItem
             // 
             this.openSettingsToolStripMenuItem.Name = "openSettingsToolStripMenuItem";
-            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.openSettingsToolStripMenuItem.Text = "Options";
             this.openSettingsToolStripMenuItem.Click += new System.EventHandler(this.openSettingsToolStripMenuItem_Click);
             // 
@@ -1470,16 +1480,6 @@
             this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
-            // 
-            // dronepv_writewp_button
-            // 
-            this.dronepv_writewp_button.Location = new System.Drawing.Point(15, 197);
-            this.dronepv_writewp_button.Name = "dronepv_writewp_button";
-            this.dronepv_writewp_button.Size = new System.Drawing.Size(134, 23);
-            this.dronepv_writewp_button.TabIndex = 4;
-            this.dronepv_writewp_button.Text = "Write_Waypoint";
-            this.dronepv_writewp_button.UseVisualStyleBackColor = true;
-            this.dronepv_writewp_button.Click += new System.EventHandler(this.dronepv_writewp_button_Click);
             // 
             // Interoperability_GUI_Main
             // 

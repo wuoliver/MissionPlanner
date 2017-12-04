@@ -559,7 +559,7 @@ namespace interoperability
                     temp.Add(new Waypoint(200, 38.143780, -76.431990));
 
                     List<MAVLink.mavlink_mission_item_t> temp_waypoints = create_mission(MAVLink.MAV_TYPE.QUADROTOR, temp);
-                    export_mission_file(temp_waypoints);
+                    export_mission_file(temp_waypoints, temp_waypoints[0]);
                     /*
                     foreach (MAVLink.mavlink_mission_item_t i in temp_waypoints)
                     {
@@ -599,7 +599,7 @@ namespace interoperability
             return;
         }
 
-        public void export_mission_file(List<MAVLink.mavlink_mission_item_t> mission)
+        public void export_mission_file(List<MAVLink.mavlink_mission_item_t> mission, MAVLink.mavlink_mission_item_t home)
         {
             Stream myStream;
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
@@ -692,8 +692,6 @@ namespace interoperability
         {
 
         }
-
-
 
         public void test_function()
         {
