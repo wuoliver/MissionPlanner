@@ -371,7 +371,12 @@ namespace Interoperability_GUI_Forms
 
         public void set_telemetry_data_textbox(string text)
         {
-            telemetry_data_textbox.Text = text;
+            this.telemetry_data_textbox.BeginInvoke((MethodInvoker)delegate ()
+            {
+                telemetry_data_textbox.Clear();
+                telemetry_data_textbox.Text = text;
+            });
+            return;
         }
 
         public int getTelemPollRate()
@@ -940,6 +945,8 @@ namespace Interoperability_GUI_Forms
         /// Updates the plane location in the map
         /// </summary>
         /// <param name="location">Location of the plane</param>
+        /// <param name="altitude">Altitude of the plane in metres</param>
+        /// <param name="heading">Heading of the plane in degrees</param>
         /// <param name="cog">Center of Gravity. Not necessary for plane simulations</param>
         /// <param name="nav_bearing">The compass bearing of where the plane wants to go</param>
         /// <param name="target">The compass bearing of the target waypoint</param>

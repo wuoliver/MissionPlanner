@@ -151,6 +151,14 @@ namespace interoperability
             Settings.Load();
             getSettings();
 
+            //Set up host settings to include distance units. For some reason the distunits is not loaded
+            //at startup on some programs unless you modify the setting
+            if (Host.config["distunits"] == null)
+            {
+                Console.Write("Error, can't find distance unit in settings. Setting to Meters");
+                Host.config["distunits"] = "Meters";
+            }
+
             //Instantiate all threads, but do not start
             Telemetry_Thread = new Thread(new ThreadStart(this.Telemetry_Upload));
             Obstacle_SDA_Thread = new Thread(new ThreadStart(this.Obstacle_SDA));
@@ -586,6 +594,7 @@ namespace interoperability
 
         private void Stop_Thread(ref Thread _thread, ref bool shouldStop_Variable)
         {
+            shouldStop_Variable = true;
             if (_thread.IsAlive)
             {
                 shouldStop_Variable = true;
@@ -806,13 +815,12 @@ namespace interoperability
                         //If person sets speed to 0, then GUI crashes 
                         if (Interoperability_GUI.getTelemPollRate() != 0)
                         {
-                            csl = this.Host.cs;
                             lat = csl.lat;
                             lng = csl.lng;
                             alt = csl.altasl;
                             yaw = csl.yaw;
-
-                            if (Host.config["distunits"] == "Meters")
+                            Host.config.Load();
+                            if (Host.config["distunits"].ToString() == "Meters")
                             {
                                 alt *= 3.28084;
                             }
@@ -821,10 +829,10 @@ namespace interoperability
                             {
                                 uniquedata_count++;
                                 averagedata_count++;
-                                oldlat = csl.lat;
-                                oldlng = csl.lng;
-                                oldalt = csl.altasl;
-                                oldyaw = csl.yaw;
+                                oldlat = lat;
+                                oldlng = lng;
+                                oldalt = alt;
+                                oldyaw = yaw;
                             }
                             if (count % Interoperability_GUI.getTelemPollRate() == 0)
                             {
@@ -845,18 +853,18 @@ namespace interoperability
 
                             var telemData = new Dictionary<string, string>();
 
-                            CurrentState cs = this.Host.cs;
 
                             telemData.Add("latitude", lat.ToString("F10"));
                             telemData.Add("longitude", lng.ToString("F10"));
                             telemData.Add("altitude_msl", alt.ToString("F10"));
                             telemData.Add("uas_heading", yaw.ToString("F10"));
 
-                            telemetry_uploaded_data += "Latitude: " + lat.ToString("F10");
-                            telemetry_uploaded_data += "\nLongitude: " + lng.ToString("F10");
-                            telemetry_uploaded_data += "\nAltitude_MSL: " + alt.ToString("F10");
-                            telemetry_uploaded_data += "\nUAS_Heading: " + yaw.ToString("F10");
+                            telemetry_uploaded_data = "Latitude: " + lat.ToString("F10");
+                            telemetry_uploaded_data += "\r\nLongitude: " + lng.ToString("F10");
+                            telemetry_uploaded_data += "\r\nAltitude_MSL: " + alt.ToString("F10");
+                            telemetry_uploaded_data += "\r\nUAS_Heading: " + yaw.ToString("F10");
 
+                            //Interoperability_GUI.set_telemetry_data_textbox("");
                             Interoperability_GUI.set_telemetry_data_textbox(telemetry_uploaded_data);
 
                             //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
@@ -870,13 +878,13 @@ namespace interoperability
 
                             Thread.Sleep(1000 / Interoperability_GUI.getTelemPollRate());
                         }
-                        Thread.Sleep(1000);
+                        //Thread.Sleep(1000);
                     }
                 }
             }
 
             //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
-            catch//(Exception e)
+            catch(Exception e)
             {
                 //<h1>403 Forbidden</h1> 
                 Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
@@ -884,8 +892,8 @@ namespace interoperability
                 Interoperability_GUI.setTelemResp("Error, Unable to Connect to Server");
                 Interoperability_GUI.Telem_Start_Stop_Button_Off();
                 Console.WriteLine("Error, exception thrown in telemtry upload thread");
-                //Console.WriteLine(e.Message);
-                //Console.WriteLine(e.InnerException);
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException);
             }
             Console.WriteLine("Telemetry_Upload Thread Stopped");
             Interoperability_GUI.Telem_Start_Stop_Button_Off();
@@ -1947,9 +1955,11 @@ namespace interoperability
                     {
                         //Account for feet vs meters
                         double alt = Host.cs.altasl;
-                        if (Host.config["distunits"] == "Meters")
+                        if (Host.config["distunits"].ToString() == "Feet")
                         {
-                            alt *= 3.28084;
+                            
+                                alt /= 3.28084;
+                              
                         }
 
                         Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), (float)alt, Host.cs.yaw,
@@ -2017,19 +2027,40 @@ namespace interoperability
                 GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
 
                 //Update altitude and delta altitude label at bottom of interface
-                switch (dist_units)
+                if(Host.config["distunits"].ToString() == "Meters")
                 {
-                    case "Metres":
-                        Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
-                            (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
-                        break;
-                    case "Feet":
-                        Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
-                            (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
-                        break;
-                    default:
-                        break;
+                    switch (dist_units)
+                    {
+                        case "Metres":
+                            Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
+                                (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
+                            break;
+                        case "Feet":
+                            Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
+                                (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                //Units are in feet
+                else 
+                {
+                    switch (dist_units)
+                    {
+                        case "Metres":
+                            Interoperability_GUI.MAP_updateAltLabel((Host.cs.altasl / 3.28084).ToString("00.000") + "m",
+                                (Host.cs.altasl / 3.28084 - GroundElevation / 3.28084).ToString("00.000") + "m");
+                            break;
+                        case "Feet":
+                            Interoperability_GUI.MAP_updateAltLabel((Host.cs.altasl).ToString("00.000") + "ft",
+                                (Host.cs.altasl - GroundElevation).ToString("00.000") + "ft");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
                 Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
                 //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                 t.Restart();
