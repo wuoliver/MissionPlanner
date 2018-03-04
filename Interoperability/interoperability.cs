@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Drawing;
@@ -80,6 +81,7 @@ namespace interoperability
         private Thread Callout_Thread;
         private Thread SDA_Plane_Simulator_Thread;
         private Thread SDA_Avoidance_Algorithm_Thread;
+        private Thread Drone_Server_Thread;
 
         private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
         private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
@@ -196,7 +198,7 @@ namespace interoperability
             // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
             ImportantTimer.Start();
-       
+
             Console.WriteLine("End of init()");
 
             return (true);
@@ -233,6 +235,7 @@ namespace interoperability
             SDA_Avoidance_Algorithm_Thread_Stop,
             MAV_Command_Arm_Disarm,
             MAV_Command_Set_Position,
+            Drone_Cleaning_Server_Start,
             TEST
         }
 
@@ -585,6 +588,10 @@ namespace interoperability
                     //Host.comPort.setWP()
                     */
                     break;
+                case Interop_Action.Drone_Cleaning_Server_Start:
+                    Drone_Server_Thread = new Thread(new ThreadStart(this.drone_cleaning_server));
+                    Drone_Server_Thread.Start();
+                    break;
                 default:
                     break;
             }
@@ -625,7 +632,7 @@ namespace interoperability
 
                     //< INDEX > < CURRENT WP > < COORD FRAME > < COMMAND > < PARAM1 > < PARAM2 > < PARAM3 > < PARAM4 > < PARAM5 / X / LONGITUDE > < PARAM6 / Y / LATITUDE > < PARAM7 / Z / ALTITUDE > < AUTOCONTINUE >
                     mission_string += "QGC WPL 110\n";
-                    for(int i = 0; i < mission.Count(); i++)
+                    for (int i = 0; i < mission.Count(); i++)
                     {
                         mission_string += i + "\t" + "0\t" + "0\t" + mission[i].command + "\t" + mission[i].param1 + "\t" + mission[i].param2 + "\t"
                             + mission[i].param3 + "\t" + mission[i].param4 + "\t" + mission[i].x + "\t" + mission[i].y + "\t" + mission[i].z + "\n";
@@ -661,7 +668,7 @@ namespace interoperability
 
             if (frametype == MAVLink.MAV_TYPE.FIXED_WING)
             {
-                for(int i = 0; i < waypoints.Count(); i++)
+                for (int i = 0; i < waypoints.Count(); i++)
                 {
                     temp_command.x = waypoints[i].latitude;
                     temp_command.y = waypoints[i].longitude;
@@ -674,6 +681,7 @@ namespace interoperability
                 //p6 - lon
                 //p7 - alt
             }
+
             else if (frametype == MAVLink.MAV_TYPE.QUADROTOR)
             {
                 for (int i = 0; i < waypoints.Count(); i++)
@@ -700,6 +708,187 @@ namespace interoperability
         public void concat_mission()
         {
 
+        }
+
+        /// <summary>
+        /// Contorls the quadcopter for solar panel cleaning
+        /// </summary>
+        public void pv_drone_control()
+        {
+            /*
+            Features:
+                -Continuously poll the module that checks the power levels. If it needs cleaning, then the module will return true, or some coordinates. 
+                -Get home position, and compute optimal path to solar panel using waypoints. 
+                -Write waypoints
+                -Set mode to auto
+                -Arm quadcopter and start flying 
+                -Check to see if it is at the panel (within 5m or something). 
+                -Switch to guided mode and clean panel (need a module or something for this)
+                -Once clean, move to next panel, or go home. 
+                -Switch to auto and conitnue mission
+                -Once done, go home and land. 
+                -Disarm quadcopter
+                -Go back to top
+            */
+
+            //Temp waypoints until we get the waypoint generator working. 
+            List<Waypoint> temp = new List<Waypoint>();
+            temp.Add(new Waypoint(300, 38.149220, -76.429480));
+            temp.Add(new Waypoint(300, 38.150140, -76.430850));
+            temp.Add(new Waypoint(300, 38.148950, -76.432290));
+            temp.Add(new Waypoint(400, 38.147010, -76.430640));
+            temp.Add(new Waypoint(200, 38.143780, -76.431990));
+            
+            //Get list of missions 
+            List<MAVLink.mavlink_mission_item_t> mission = create_mission(MAVLink.MAV_TYPE.QUADROTOR, temp);
+
+            //Write waypoints'
+            //Somehow..................
+
+            //Set mode
+            Host.comPort.setMode("LOITER");
+
+            if (!Host.comPort.MAV.cs.armed)
+            {
+                arm_disarm_uav(MAV_ARM_DISARM.ARM);
+            }
+            else
+            {
+                //If it's armed, don't do anything. Something probably went wrong
+                Console.WriteLine("Error, UAV is already armed.");
+                return;
+            }
+            
+
+            //Set mode 
+            Host.comPort.setMode("Auto");
+
+            //Start mission 
+            //Might need to "hack" ardupilot, as it needs a pilot to initiate flight. 
+            //But it's also a safety feature 
+
+            //This waypoint will be the one we use when we get to the 
+            while(Host.cs.wpno != 5)
+            {
+                //Poll until we have reached the waypoint. 
+            }
+            Host.comPort.setMode("Loiter");
+
+            //Loop here to start cleaning pattern
+        }
+
+
+        public void drone_cleaning_server()
+        {
+            Console.WriteLine("HELLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO------------------------");
+            // IPAddress ip = IPAddress.Parse("192.168.0.1");
+            // IPAddress ipaddr = IPAddress.Parse("127.0.0.1");
+            IPAddress ipaddr = IPAddress.Any;
+            int port = 9903;
+            IPEndPoint ip = new IPEndPoint(ipaddr, port);
+
+
+            // TcpListener server = null;
+            Socket socket = null;
+            Socket conn = null;
+            try
+            {
+                socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                socket.Bind(ip);
+                socket.Listen(1);
+
+                Console.WriteLine("*\n*\n*\n*\n*\nWaiting for connection...\n");
+
+                conn = socket.Accept();
+
+                Console.WriteLine("*\n*\n*\n*\n*\nReceived Connection from Client\n");
+
+                while (true)
+                {
+                    var telemDict = new Dictionary<String, double>();
+                    telemDict["lat"] = Host.cs.lat;
+                    telemDict["lon"] = Host.cs.lng;
+                    telemDict["alt"] = Host.cs.altasl;
+                    telemDict["yaw"] = Host.cs.yaw;
+                    telemDict["spd"] = Host.cs.groundspeed;
+                    // String t = "Test string 12345\r\n\0";
+                    String t = "{" + String.Join(", ", telemDict.Select(x => x.Key + ":" + x.Value.ToString()).ToArray()) + "} ";
+                    byte[] tb = Encoding.ASCII.GetBytes(t);
+                    // stream.Write(tb, 0, tb.Length);
+                    conn.Send(tb);
+                }
+            } // try
+            catch (Exception e)
+            {
+                Console.WriteLine("*\n*\n*\n*\n*\nDrone cleaning server: SocketException: {0}", e);
+            }
+            finally
+            {
+                // Stop listening for new clients.
+                // Shutdown and end connection
+                conn.Close();
+                socket.Close();
+            }
+
+
+            Console.WriteLine("Drone cleaning server: exit");
+        }
+
+        /// <summary>
+        /// Arms or disarms the connected UAV. If the UAV is armed, it will disarm. If it is disarmed, it will arm. 
+        /// Warning. If aircraft is airborne, this may cause it to fall out of the sky if the checks fail.
+        /// </summary>
+        public void arm_disarm_uav(MAV_ARM_DISARM choice)
+        {
+            //Check to see if there is a connection to the quad
+            if (!Host.comPort.BaseStream.IsOpen)
+            {
+                return;
+            }
+
+            try
+            {
+                Mavlink_Command command;
+                if (choice == MAV_ARM_DISARM.ARM)
+                {
+                    //arm
+                    command = new Mavlink_Command(MAVLink.MAV_CMD.COMPONENT_ARM_DISARM, 1, 21196, 0, 0, 0, 0, 0);
+                }
+                else
+                {
+                    //Ensure aircraft is not airborne. 
+                    if (!Host.cs.landed)
+                    {
+                        Console.WriteLine("Error, cannot disarm. UAV is airborne");
+                        return;
+                    }
+                    //disarm
+                    command = new Mavlink_Command(MAVLink.MAV_CMD.COMPONENT_ARM_DISARM, 0, 21196, 0, 0, 0, 0, 0);
+                }
+
+
+
+                bool ans = Host.comPort.doCommand(command.actionid, command.p1, command.p2, command.p3,
+                    command.p4, command.p5, command.p6, command.p7, command.requireack);
+
+                if (ans == false) 
+                    MessageBox.Show(Strings.ErrorRejectedByMAV, Strings.ERROR);
+            }
+            catch
+            {
+                MessageBox.Show(Strings.ErrorNoResponce, Strings.ERROR);
+            }
+        }
+
+        public enum MAV_ARM_DISARM
+        {
+            ARM,
+            DISARM
+        }
+
+        public int get_power()
+        {
+            return 1;
         }
 
         public void test_function()
@@ -884,7 +1073,7 @@ namespace interoperability
             }
 
             //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
-            catch(Exception e)
+            catch (Exception e)
             {
                 //<h1>403 Forbidden</h1> 
                 Interoperability_GUI.setAvgTelUploadText("Error, Unable to Connect to Server");
@@ -1957,9 +2146,9 @@ namespace interoperability
                         double alt = Host.cs.altasl;
                         if (Host.config["distunits"].ToString() == "Feet")
                         {
-                            
-                                alt /= 3.28084;
-                              
+
+                            alt /= 3.28084;
+
                         }
 
                         Interoperability_GUI.MAP_updatePlaneLoc(new PointLatLng(Host.cs.lat, Host.cs.lng), (float)alt, Host.cs.yaw,
@@ -2027,7 +2216,7 @@ namespace interoperability
                 GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
 
                 //Update altitude and delta altitude label at bottom of interface
-                if(Host.config["distunits"].ToString() == "Meters")
+                if (Host.config["distunits"].ToString() == "Meters")
                 {
                     switch (dist_units)
                     {
@@ -2044,7 +2233,7 @@ namespace interoperability
                     }
                 }
                 //Units are in feet
-                else 
+                else
                 {
                     switch (dist_units)
                     {
@@ -2060,7 +2249,7 @@ namespace interoperability
                             break;
                     }
                 }
-                
+
                 Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
                 //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                 t.Restart();

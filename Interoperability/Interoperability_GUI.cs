@@ -1730,6 +1730,18 @@ namespace Interoperability_GUI_Forms
             InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.TEST));
         }
 
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Console.Write("Hello World");
+            clickme.Text = "Hello World";
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Drone_Cleaning_Server_Start));
+        }
+
         //Remove everything past here if it doesn't work 
         //FOR CAPSTONE - TESTING
 

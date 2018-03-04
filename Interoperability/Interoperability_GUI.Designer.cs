@@ -109,6 +109,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
             this.Solar_PV_Tab_Page = new System.Windows.Forms.TabPage();
+            this.clickme = new System.Windows.Forms.Label();
+            this.button6 = new System.Windows.Forms.Button();
             this.dronepv_writewp_button = new System.Windows.Forms.Button();
             this.solarPV_API_Call = new System.Windows.Forms.Button();
             this.PV_Start_Drone_Control = new System.Windows.Forms.CheckBox();
@@ -158,6 +160,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.button7 = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -1020,6 +1023,9 @@
             // 
             // Solar_PV_Tab_Page
             // 
+            this.Solar_PV_Tab_Page.Controls.Add(this.button7);
+            this.Solar_PV_Tab_Page.Controls.Add(this.clickme);
+            this.Solar_PV_Tab_Page.Controls.Add(this.button6);
             this.Solar_PV_Tab_Page.Controls.Add(this.dronepv_writewp_button);
             this.Solar_PV_Tab_Page.Controls.Add(this.solarPV_API_Call);
             this.Solar_PV_Tab_Page.Controls.Add(this.PV_Start_Drone_Control);
@@ -1031,6 +1037,25 @@
             this.Solar_PV_Tab_Page.TabIndex = 7;
             this.Solar_PV_Tab_Page.Text = "Solar PV Control";
             this.Solar_PV_Tab_Page.UseVisualStyleBackColor = true;
+            // 
+            // clickme
+            // 
+            this.clickme.AutoSize = true;
+            this.clickme.Location = new System.Drawing.Point(41, 275);
+            this.clickme.Name = "clickme";
+            this.clickme.Size = new System.Drawing.Size(83, 13);
+            this.clickme.TabIndex = 6;
+            this.clickme.Text = "Insert Text Here";
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(44, 304);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(144, 23);
+            this.button6.TabIndex = 5;
+            this.button6.Text = "Hello World";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // dronepv_writewp_button
             // 
@@ -1481,6 +1506,16 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(44, 376);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(144, 23);
+            this.button7.TabIndex = 7;
+            this.button7.Text = "Start Server";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1663,5 +1698,8 @@
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.TextBox telemetry_data_textbox;
         private System.Windows.Forms.Button dronepv_writewp_button;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Label clickme;
+        private System.Windows.Forms.Button button7;
     }
 }
