@@ -203,5 +203,9 @@ namespace MissionPlanner
 
             return true;
         }
+
+        public class Serialization
+        {
+        }
     }
 }

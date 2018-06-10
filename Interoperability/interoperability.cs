@@ -15,6 +15,8 @@ using MissionPlanner;
 using MissionPlanner.Utilities;
 using MissionPlanner.GCSViews;
 
+using System.IO.Ports;
+
 using System.Speech.Synthesis;
 using System.Speech.Recognition;
 
@@ -82,6 +84,9 @@ namespace interoperability
         private Thread SDA_Plane_Simulator_Thread;
         private Thread SDA_Avoidance_Algorithm_Thread;
         private Thread Drone_Server_Thread;
+        private Thread PV_Drone_Control_Thread;
+        private Thread PV_Power_Read_Thread;
+        private Thread Bottle_Drop_Thread;
 
         private bool Telemetry_Thread_shouldStop = true;        //Used to start/stop the telemtry thread
         private bool Obstacle_SDA_Thread_shouldStop = true;     //Used to start/stop the SDA thread
@@ -90,10 +95,16 @@ namespace interoperability
         private bool Callout_Thread_shouldStop = true;          //Used to start/stop the callout thread
         private bool SDA_Plane_Simulator_Thread_shouldStop = true;
         private bool SDA_Avoidance_Algorithm_Thread_shouldStop = true;
+        private bool PV_Drone_Control_Thread_shouldStop = true;
+        private bool PV_Power_Read_Thread_shouldStop = true;
+        private bool Bottle_Drop_Thread_shouldStop = true;
 
         private int ImportantCounter = 0;
         private long ImporantTimeCount = 0;
         private Stopwatch ImportantTimer = new Stopwatch();
+
+        private double Panel_Voltage = -1;
+        private double Panel_Temp = -1;
 
         bool Obstacles_Downloaded = false;                  //Used to tell the map control thread we can access obstaclesList 
         bool resetUploadStats = false;                      //Used to reset telemetry upload stats
@@ -127,7 +138,7 @@ namespace interoperability
         }
         override public string Version
         {
-            get { return ("0.7.3"); }
+            get { return ("0.7.6"); }
         }
         override public string Author
         {
@@ -145,8 +156,9 @@ namespace interoperability
             // System.Windows.Forms.MessageBox.Show("Pong");
             Console.Write("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n"
                 + "*                                   UTAT UAV                                  *\n"
-                + "*                            Interoperability 0.7.3                           *\n"
+                + "*                            Interoperability 0.7.6                           *\n"
                 + "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
+
 
             //Set up settings object, and load from xml file
             Settings = new Interoperability_Settings();
@@ -169,6 +181,10 @@ namespace interoperability
             SDA_Plane_Simulator_Thread = new Thread(new ThreadStart(this.SDA_Plane_Simulator));
             SDA_Avoidance_Algorithm_Thread = new Thread(new ThreadStart(this.SDA_Avoidance_Algorithm));
             Map_Control_Thread = new Thread(new ThreadStart(this.Map_Control));
+            Drone_Server_Thread = new Thread(new ThreadStart(this.drone_cleaning_server));
+            PV_Drone_Control_Thread = new Thread(new ThreadStart(this.pv_drone_control));
+            PV_Power_Read_Thread = new Thread(new ThreadStart(this.pv_power_read));
+            Bottle_Drop_Thread = new Thread(new ThreadStart(this.Bottle_Drop));
 
             //Instantiate Mission_List
             Mission_List = new List<Mission>();
@@ -198,6 +214,7 @@ namespace interoperability
             // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
             ImportantTimer.Start();
+
 
             Console.WriteLine("End of init()");
 
@@ -236,6 +253,10 @@ namespace interoperability
             MAV_Command_Arm_Disarm,
             MAV_Command_Set_Position,
             Drone_Cleaning_Server_Start,
+            PV_Drone_Control_Start,
+            PV_Power_Read,
+            Bottle_Drop_Start,
+            Bottle_Drop_Stop,
             TEST
         }
 
@@ -350,11 +371,15 @@ namespace interoperability
                     Callout_Thread_shouldStop = true;
                     SDA_Plane_Simulator_Thread_shouldStop = true;
                     SDA_Avoidance_Algorithm_Thread_shouldStop = true;
+                    PV_Drone_Control_Thread_shouldStop = true;
+                    PV_Power_Read_Thread_shouldStop = true;
+                    Bottle_Drop_Thread_shouldStop = true;
 
                     Stopwatch t = new Stopwatch();
                     t.Start();
                     while (Mission_Thread.IsAlive || Obstacle_SDA_Thread.IsAlive || Telemetry_Thread.IsAlive || Map_Control_Thread.IsAlive ||
-                        Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive || SDA_Avoidance_Algorithm_Thread.IsAlive)
+                        Callout_Thread.IsAlive || SDA_Plane_Simulator_Thread.IsAlive || SDA_Avoidance_Algorithm_Thread.IsAlive || PV_Drone_Control_Thread.IsAlive
+                        || PV_Power_Read_Thread.IsAlive || Bottle_Drop_Thread.IsAlive)
                     {
                         //If all threads haven't quit in 1 seconds, force quit
                         if (t.ElapsedMilliseconds > 1000)
@@ -366,6 +391,9 @@ namespace interoperability
                             Callout_Thread.Abort();
                             SDA_Avoidance_Algorithm_Thread.Abort();
                             SDA_Plane_Simulator_Thread.Abort();
+                            PV_Drone_Control_Thread.Abort();
+                            PV_Power_Read_Thread.Abort();
+                            Bottle_Drop_Thread.Abort();
                             break;
                         }
                         //Wait until all threads have stopped
@@ -488,7 +516,6 @@ namespace interoperability
                         return;
                     }
 
-
                     try
                     {
                         if (action.mav_command.actionid == MAVLink.MAV_CMD.COMPONENT_ARM_DISARM)
@@ -561,6 +588,14 @@ namespace interoperability
                     //Host.comPort.
 
                     break;
+                case Interop_Action.Bottle_Drop_Start:
+                    Bottle_Drop_Thread = new Thread(new ThreadStart(this.Bottle_Drop));
+                    Bottle_Drop_Thread.Start();
+                    break;
+                case Interop_Action.Bottle_Drop_Stop:
+                    Bottle_Drop_Thread_shouldStop = true;
+                    break;
+
                 case Interop_Action.TEST:
                     List<Waypoint> temp = new List<Waypoint>();
                     temp.Add(new Waypoint(300, 38.149220, -76.429480));
@@ -589,8 +624,18 @@ namespace interoperability
                     */
                     break;
                 case Interop_Action.Drone_Cleaning_Server_Start:
-                    Drone_Server_Thread = new Thread(new ThreadStart(this.drone_cleaning_server));
+                    Drone_Server_Thread = new Thread(new ThreadStart(this.drone_cleaning_server));                   
                     Drone_Server_Thread.Start();
+                    break;
+                case Interop_Action.PV_Drone_Control_Start:
+                    PV_Drone_Control_Thread = new Thread(new ThreadStart(pv_drone_control));
+                    PV_Drone_Control_Thread_shouldStop = false;
+                    PV_Drone_Control_Thread.Start();
+                    break;
+                case Interop_Action.PV_Power_Read:
+                    PV_Power_Read_Thread = new Thread(new ThreadStart(pv_power_read));
+                    PV_Power_Read_Thread_shouldStop = false;
+                    PV_Power_Read_Thread.Start();
                     break;
                 default:
                     break;
@@ -715,6 +760,10 @@ namespace interoperability
         /// </summary>
         public void pv_drone_control()
         {
+            Console.WriteLine("\n\n\n------------------Starting Automatic Drone Control------------------\n\n\n");
+            Console.WriteLine("***********************************************************************");
+            Interoperability_GUI.PV_Add_Status("Starting Drone Control\n");
+            Interoperability_GUI.PV_Add_Status("**********************\n");
             /*
             Features:
                 -Continuously poll the module that checks the power levels. If it needs cleaning, then the module will return true, or some coordinates. 
@@ -730,23 +779,48 @@ namespace interoperability
                 -Disarm quadcopter
                 -Go back to top
             */
+            Interoperability_GUI.PV_Add_Status("Checking Panel Voltage:\n");
+            while(Panel_Voltage > 1.0)
+            {
+                Interoperability_GUI.PV_Add_Status("Panel Voltage: " + Panel_Voltage.ToString() + "V\n");
+                Thread.Sleep(1000);
+            }
+            Interoperability_GUI.PV_Add_Status("Voltage Threshold Reached\n");
 
             //Temp waypoints until we get the waypoint generator working. 
+            Interoperability_GUI.PV_Add_Status("Generating Waypoints...");
             List<Waypoint> temp = new List<Waypoint>();
             temp.Add(new Waypoint(300, 38.149220, -76.429480));
             temp.Add(new Waypoint(300, 38.150140, -76.430850));
             temp.Add(new Waypoint(300, 38.148950, -76.432290));
             temp.Add(new Waypoint(400, 38.147010, -76.430640));
             temp.Add(new Waypoint(200, 38.143780, -76.431990));
-            
+            Interoperability_GUI.PV_Add_Status("Done\n");
+
             //Get list of missions 
             List<MAVLink.mavlink_mission_item_t> mission = create_mission(MAVLink.MAV_TYPE.QUADROTOR, temp);
 
             //Write waypoints'
-            //Somehow..................
+            Interoperability_GUI.PV_Add_Status("Writing Waypoints...");
+            Thread.Sleep(1500);
+            Interoperability_GUI.PV_Add_Status("Done\n");
 
             //Set mode
+            Interoperability_GUI.PV_Add_Status("Setting mode to Loiter...");
             Host.comPort.setMode("LOITER");
+            Thread.Sleep(1500);
+            if(Host.cs.mode != "Loiter")
+            {
+                Interoperability_GUI.PV_Add_Status("\nError, could not set mode. Quitting\n");
+                return;
+            }
+            Interoperability_GUI.PV_Add_Status("Done\n");
+
+            Thread.Sleep(5000);
+
+            Interoperability_GUI.PV_Add_Status("Arming UAV...");
+            
+            Interoperability_GUI.PV_Add_Status("Done\n");
 
             if (!Host.comPort.MAV.cs.armed)
             {
@@ -755,34 +829,255 @@ namespace interoperability
             else
             {
                 //If it's armed, don't do anything. Something probably went wrong
-                Console.WriteLine("Error, UAV is already armed.");
+                Interoperability_GUI.PV_Add_Status("Error, UAV is already armed. Quitting\n");
                 return;
             }
-            
+            Thread.Sleep(1500);
+            if (Host.cs.armed != true)
+            {
+                Interoperability_GUI.PV_Add_Status("\nError, could not arm quad. Quitting\n");
+                return;
+            }
 
+            Interoperability_GUI.PV_Add_Status("Done\n");
+
+
+            Interoperability_GUI.PV_Add_Status("Setting mode to Auto in 5 Seconds...");
+            Thread.Sleep(5000);
             //Set mode 
             Host.comPort.setMode("Auto");
-
+            if (Host.cs.mode != "Auto")
+            {
+                Interoperability_GUI.PV_Add_Status("\nError, could not set mode. Quitting\n");
+                return;
+            }
+            Interoperability_GUI.PV_Add_Status("Done\n");
             //Start mission 
-            //Might need to "hack" ardupilot, as it needs a pilot to initiate flight. 
+            //Might need to "hack" ardupilot, as it needs a pilot to initiate flight by raising throttle. 
             //But it's also a safety feature 
+            Interoperability_GUI.PV_Add_Status("Pilot, please raise throttle to begin.\n");
+            while (Host.cs.landed)
+            {
+            }
+            Interoperability_GUI.PV_Add_Status("Mission Starting...\n");
 
             //This waypoint will be the one we use when we get to the 
-            while(Host.cs.wpno != 5)
+            while (Host.cs.wpno != 6)
             {
                 //Poll until we have reached the waypoint. 
             }
+            Interoperability_GUI.PV_Add_Status("Setting mode to Loiter...");
             Host.comPort.setMode("Loiter");
+            Thread.Sleep(1500);
+            if (Host.cs.mode != "Loiter")
+            {
+                Interoperability_GUI.PV_Add_Status("\nError, could not set mode. Quitting\n");
+                return;
+            }
 
             //Loop here to start cleaning pattern
+            Thread.Sleep(10000);
+
+            Interoperability_GUI.PV_Add_Status("Setting waypoint to 7\n");
+            Host.comPort.setWPCurrent(7);
+
+             
+            Interoperability_GUI.PV_Add_Status("Setting mode to Auto\n");
+            Host.comPort.setMode("Auto");
+            Thread.Sleep(1500);
+            if (Host.cs.mode != "Auto")
+            {
+                Interoperability_GUI.PV_Add_Status("\nError, could not set mode. Quitting\n");
+                return;
+            }
+
+            //Quadcopter should land once the cleaning pattern is done. 
+        }
+
+        void pv_power_read()
+        {
+            string message;
+            string[] words;
+            StringComparer stringComparer = StringComparer.OrdinalIgnoreCase;
+
+            //Create new thread to handle webserver handling
+            Thread Enlighten_Thread = new Thread(new ThreadStart(this.pv_enlighten_connect));
+            Enlighten_Thread.Start();
+
+            Thread Characterization_Server_Thread = new Thread(new ThreadStart(this.characterization_server));
+            Characterization_Server_Thread.Start();
+
+            // Create a new SerialPort object with default settings.
+            System.IO.Ports.SerialPort _serialPort = new System.IO.Ports.SerialPort();
+
+            // Allow the user to set the appropriate properties.
+            _serialPort.PortName = "COM5";
+            _serialPort.BaudRate = 9600;
+            _serialPort.Parity = Parity.None;
+            _serialPort.DataBits = 8;
+            _serialPort.StopBits = StopBits.One;
+            _serialPort.Handshake = Handshake.None;
+
+            _serialPort.ReadTimeout = 500;
+            _serialPort.WriteTimeout = 500;
+
+            try
+            {
+                _serialPort.Open();
+                while (!PV_Power_Read_Thread_shouldStop)
+                {
+                    _serialPort.DiscardInBuffer();
+                    Thread.Sleep(100);
+                    message = _serialPort.ReadLine();
+                    Console.WriteLine(message);
+                    words = message.Split(' ');
+                    if (words[0] == "Temp")
+                    {
+                        Interoperability_GUI.Update_PV_Voltage(Convert.ToDouble(words[4]));
+                        Interoperability_GUI.Update_PV_Temperature(Convert.ToDouble(words[2]));
+                        Panel_Voltage = Convert.ToDouble(words[4]);
+                        char_voltage = Convert.ToDouble(words[4]);
+                        Panel_Temp = Convert.ToDouble(words[2]);
+                        char_temperature = Convert.ToDouble(words[2]);
+                    }
+
+                    Thread.Sleep(100);
+                }
+                
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine("Error in Panel Read Function: \n");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException);
+            }
+
+            Enlighten_Thread.Abort();
+            Characterization_Server_Thread.Abort();
+            return;
+        }
+
+        private double char_voltage = 0;
+        private double char_temperature = 0;
+
+
+        async void pv_enlighten_connect()
+        {
+            //user id: 4f4455354e6a67310a
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    TimeSpan timeout = new TimeSpan(0, 0, 0, 10);
+                    client.Timeout = timeout;
+                    //client.BaseAddress = new Uri("https://api.enphaseenergy.com/api/v2"); // This seems to change every time
+
+
+                    //"https://api.enphaseenergy.com/api/v2/systems/67/summary?key=96a7de32fabc1dd8ff68ec43eca21c06&user_id=4d7a45774e6a41320a"
+                    //HttpResponseMessage resp = await client.GetAsync("https://api.enphaseenergy.com/api/v2/systems?key=c8e5316cff14b89ba39a495f46dd8a9b&user_id=4f4455354e6a67310a");
+                    //Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+
+                    //HttpResponseMessage resp = await client.GetAsync("https://api.enphaseenergy.com/api/v2/systems/1138299/summary?key=c8e5316cff14b89ba39a495f46dd8a9b&user_id=4f4455354e6a67310a");
+                    //Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+
+                    while (true)
+                    {
+                        HttpResponseMessage resp = await client.GetAsync("https://api.enphaseenergy.com/api/v2/systems/1138299/summary?key=c8e5316cff14b89ba39a495f46dd8a9b&user_id=4f4455354e6a67310a");
+                        Console.WriteLine("Login POST result: " + resp.Content.ReadAsStringAsync().Result);
+
+                        Enlighten_Object data = new JavaScriptSerializer().Deserialize<Enlighten_Object>(resp.Content.ReadAsStringAsync().Result);
+                        Interoperability_GUI.Update_PV_Power_Output(data.current_power);
+                        Interoperability_GUI.Update_Last_Panel_Update(data.last_report_at);
+
+
+                        Thread.Sleep(60000);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error, exception thrown in Connecting to Enlighten");
+                Console.WriteLine("Error" + e.Message);
+                Console.WriteLine("Error" + e.InnerException);
+
+            }
+
+        }
+
+        public void characterization_server()
+        {
+            IPAddress ipaddr = IPAddress.Any;
+            int port = 9905;
+            IPEndPoint ip = new IPEndPoint(ipaddr, port);
+
+
+            // TcpListener server = null;
+            Socket socket = null;
+            Socket conn = null;
+            try
+            {
+                socket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                socket.Bind(ip);
+                socket.Listen(1);
+
+                Console.WriteLine("*\n*\n*\n*\n*\nWaiting for connection...\n");
+
+                conn = socket.Accept();
+
+                Console.WriteLine("*\n*\n*\n*\n*\nReceived Connection from Client\n");
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
+                double average_expected_power = 0;
+                int num_polled = 0;
+                while (true)
+                {
+                    var characterizationDict = new Dictionary<String, double>();
+                    characterizationDict["\"Voltage\""] = char_voltage;
+                    characterizationDict["\"Temperature\""] = char_temperature;
+                    // String t = "Test string 12345\r\n\0";
+                    String t = "{" + String.Join(", ", characterizationDict.Select(x => x.Key + ":" + x.Value.ToString()).ToArray()) + "}< ";
+                    byte[] tb = Encoding.ASCII.GetBytes(t);
+                    // stream.Write(tb, 0, tb.Length);
+                    conn.Send(tb);
+                    Thread.Sleep(2000);
+                    byte[] recv = new byte[100];
+                    conn.Receive(recv);
+                    Console.WriteLine("\n\n\n\n******************\n\n\n\n");
+                    
+                    string text = Encoding.ASCII.GetString(recv);
+                    string[] split_text = Encoding.ASCII.GetString(recv).Split( ':', '}');
+                    average_expected_power += Convert.ToDouble(split_text[2]);
+                    num_polled++;
+
+                    if (timer.ElapsedMilliseconds > 300000)
+                    {
+                        Interoperability_GUI.Update_PV_Expected_Power_Output(average_expected_power/num_polled);
+                        average_expected_power = 0;
+                        num_polled = 0;
+                        timer.Restart();
+                    } 
+                }
+            } // try
+            catch (Exception e)
+            {
+                Console.WriteLine("*\n*\n*\n*\n*\nDrone cleaning server: SocketException: {0}", e);
+            }
+            finally
+            {
+                // Stop listening for new clients.
+                // Shutdown and end connection
+                conn.Close();
+                socket.Close();
+            }
+
+
+            Console.WriteLine("Drone cleaning server: exit");
         }
 
 
         public void drone_cleaning_server()
         {
-            Console.WriteLine("HELLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO------------------------");
-            // IPAddress ip = IPAddress.Parse("192.168.0.1");
-            // IPAddress ipaddr = IPAddress.Parse("127.0.0.1");
             IPAddress ipaddr = IPAddress.Any;
             int port = 9903;
             IPEndPoint ip = new IPEndPoint(ipaddr, port);
@@ -806,16 +1101,18 @@ namespace interoperability
                 while (true)
                 {
                     var telemDict = new Dictionary<String, double>();
-                    telemDict["lat"] = Host.cs.lat;
-                    telemDict["lon"] = Host.cs.lng;
-                    telemDict["alt"] = Host.cs.altasl;
-                    telemDict["yaw"] = Host.cs.yaw;
-                    telemDict["spd"] = Host.cs.groundspeed;
+                    telemDict["\"lat\""] = Host.cs.lat; 
+                    telemDict["\"lon\""] = Host.cs.lng;
+                    telemDict["\"alt\""] = Host.cs.altasl;
+                    telemDict["\"hdg\""] = Host.cs.yaw;
+                    telemDict["\"spd\""] = Host.cs.groundspeed;
                     // String t = "Test string 12345\r\n\0";
-                    String t = "{" + String.Join(", ", telemDict.Select(x => x.Key + ":" + x.Value.ToString()).ToArray()) + "} ";
+                    String t = "{" + String.Join(", ", telemDict.Select(x => x.Key + ":" + x.Value.ToString()).ToArray()) + "}\n";
                     byte[] tb = Encoding.ASCII.GetBytes(t);
                     // stream.Write(tb, 0, tb.Length);
                     conn.Send(tb);
+
+                    Thread.Sleep(1000);
                 }
             } // try
             catch (Exception e)
@@ -871,7 +1168,7 @@ namespace interoperability
                 bool ans = Host.comPort.doCommand(command.actionid, command.p1, command.p2, command.p3,
                     command.p4, command.p5, command.p6, command.p7, command.requireack);
 
-                if (ans == false) 
+                if (ans == false)
                     MessageBox.Show(Strings.ErrorRejectedByMAV, Strings.ERROR);
             }
             catch
@@ -885,6 +1182,8 @@ namespace interoperability
             ARM,
             DISARM
         }
+
+        
 
         public int get_power()
         {
@@ -1161,6 +1460,60 @@ namespace interoperability
             Console.WriteLine("Obstacle_SDA Thread Stopped");
         }
 
+        public void Bottle_Drop()
+        {
+            //float target_altitude_agl = (float)srtm.getAltitude(., Host.cs.lng).alt;
+            float plane_altitude_agl, groundspeed, time, drop_distance, plane_distance, time_drop;
+            string drop_lat, drop_lng;
+            double drop_x, drop_y;
+            double plane_x, plane_y;
+            int waypoint_drop;
+
+            string status;
+
+            while (Bottle_Drop_Thread_shouldStop)
+            {
+                plane_altitude_agl = Host.cs.altasl;
+                groundspeed = Host.cs.groundspeed;
+                waypoint_drop = Interoperability_GUI.bottle_drop_get_WP_NO();
+
+                //This does not account for drag of the bottle
+                time = (float)Math.Sqrt((double)(2 * plane_altitude_agl) / 9.81); //Time it takes for bottle to hit ground
+                drop_distance = groundspeed * time;    //Distance the bottle will travel
+
+                drop_lat = Interoperability_GUI.bottle_drop_get_Lat();
+                drop_lng = Interoperability_GUI.bottle_drop_get_Long();
+
+                drop_y = MercatorProjection.latToY(Convert.ToDouble(drop_lat));
+                drop_x = MercatorProjection.lonToX(Convert.ToDouble(drop_lng));
+
+                plane_y = MercatorProjection.latToY(Host.cs.lat);
+                plane_x = MercatorProjection.lonToX(Host.cs.lng);
+
+                plane_distance = (float)Math.Sqrt(Math.Pow((drop_x - plane_x), 2) + Math.Pow((drop_y - plane_y), 2));
+                time_drop = (plane_distance - drop_distance) / groundspeed;
+
+                status = "Current Waypoint: " + Host.cs.wpno.ToString() + "\r\n" + "Distance to Target: " + plane_distance.ToString()
+                    + "\r\n" + "Drop Distance: " + drop_distance.ToString() + "\r\n" + "Estimated time to drop: " + time_drop.ToString() 
+                    + "\r\n" + "Bottle Status: Not Dropped";
+
+                Interoperability_GUI.update_bottle_drop_status(status);
+
+                //Send command to drop thing
+                if (drop_distance >=  plane_distance)
+                {
+                    for(int i=0; i < 20; i++)
+                    {
+                        //Host.comPort.doCommand(MAVLink.MAV_CMD.DO_SET_SERVO, 9, 1750, 0, 0, 0, 0, 0);
+                    }
+                    status = "Bottle Status: Dropped :)";
+                    Interoperability_GUI.update_bottle_drop_status(status);
+                    break;
+                }
+
+                
+            }
+        }
 
         private List<Waypoint> Simulator_Path;
 
@@ -2215,7 +2568,7 @@ namespace interoperability
 
                 GroundElevation = srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt;
 
-                //Update altitude and delta altitude label at bottom of interface
+                //Update altitude and delta altitude label at bottom of interface and AUVSI Label
                 if (Host.config["distunits"].ToString() == "Meters")
                 {
                     switch (dist_units)
@@ -2223,10 +2576,12 @@ namespace interoperability
                         case "Metres":
                             Interoperability_GUI.MAP_updateAltLabel(Host.cs.altasl.ToString("00.000") + "m",
                                 (Host.cs.altasl - GroundElevation).ToString("00.000") + "m");
+                            Interoperability_GUI.MAP_updateAUVSIAltLabel((3.28084 * Host.cs.altasl).ToString("00.000"));
                             break;
                         case "Feet":
                             Interoperability_GUI.MAP_updateAltLabel((3.28084 * Host.cs.altasl).ToString("00.000") + "ft",
                                 (3.28084 * Host.cs.altasl - 3.28084 * GroundElevation).ToString("00.000") + "ft");
+                            Interoperability_GUI.MAP_updateAUVSIAltLabel((3.28084 * Host.cs.altasl).ToString("00.000"));
                             break;
                         default:
                             break;
@@ -2240,16 +2595,42 @@ namespace interoperability
                         case "Metres":
                             Interoperability_GUI.MAP_updateAltLabel((Host.cs.altasl / 3.28084).ToString("00.000") + "m",
                                 (Host.cs.altasl / 3.28084 - GroundElevation / 3.28084).ToString("00.000") + "m");
+                            Interoperability_GUI.MAP_updateAUVSIAltLabel((Host.cs.altasl).ToString("00.000"));
                             break;
                         case "Feet":
                             Interoperability_GUI.MAP_updateAltLabel((Host.cs.altasl).ToString("00.000") + "ft",
                                 (Host.cs.altasl - GroundElevation).ToString("00.000") + "ft");
+                            Interoperability_GUI.MAP_updateAUVSIAltLabel((Host.cs.altasl).ToString("00.000"));
                             break;
                         default:
                             break;
                     }
                 }
 
+                
+                switch (Host.config["speedunits"].ToString())
+                {
+                    case "meters_per_second":
+                        Interoperability_GUI.MAP_updateAUVSIArspdLabel((1.94384 * Host.cs.airspeed).ToString());
+                        break;
+                    case "knots":
+                        Interoperability_GUI.MAP_updateAUVSIArspdLabel((Host.cs.airspeed).ToString());
+                        break;
+                    case "mph":
+                        Interoperability_GUI.MAP_updateAUVSIArspdLabel((0.868976 * Host.cs.airspeed).ToString());
+                        break;
+                    case "fps":
+                        Interoperability_GUI.MAP_updateAUVSIArspdLabel((0.5924836363625846 * Host.cs.airspeed).ToString());
+                        break;
+                    case "kph":
+                        Interoperability_GUI.MAP_updateAUVSIArspdLabel((0.53995665314471419372 * Host.cs.airspeed).ToString());
+                        break;
+                    default:
+                        break;
+      
+                }
+
+                
                 Interoperability_GUI.setFlightTimerLabel(FlightTime.ElapsedMilliseconds);
                 //Console.WriteLine(srtm.getAltitude(Host.cs.lat, Host.cs.lng).alt.ToString());
                 t.Restart();

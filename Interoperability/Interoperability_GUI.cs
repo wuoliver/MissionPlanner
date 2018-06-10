@@ -20,6 +20,7 @@ using GMap.NET.WindowsForms.Markers;
 //For javascript serializer
 using System.Web.Script.Serialization;
 using System.Net.Http;
+using System.Net;
 
 namespace Interoperability_GUI_Forms
 {
@@ -71,6 +72,9 @@ namespace Interoperability_GUI_Forms
         //GMAP Zoom
         private int zoom = 0;
 
+        //Target Upload
+        private List<Image_Uploads> Target_List = new List<Image_Uploads>();
+
         //Container for all possible targets
         List<PointLatLng> PossibleTargets;  //Targets that are found through the FPV camera
         List<PointLatLng> FoundTargets;     //Targets found through Davis's algorithm
@@ -119,6 +123,9 @@ namespace Interoperability_GUI_Forms
             g_WP_Overlay = new GMapOverlay("Waypoints");
             g_OFAT_EM_DROP_Overlay = new GMapOverlay("OFAT_EN_DROP_Overlay");
 
+
+            Target_List.Add(new Image_Uploads());
+            Image_Upload_Target_Select.SelectedIndex = 0;
         }
 
         private void Interoperability_GUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -177,6 +184,7 @@ namespace Interoperability_GUI_Forms
                     Interoperability_GUI_Tab.TabPages.Add(TabList[2]); //Map control tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[3]); //Image Tab
                     Interoperability_GUI_Tab.TabPages.Add(TabList[4]); //Callout Tab
+                    Interoperability_GUI_Tab.TabPages.Add(TabList[7]); //Callout Tab
                     this.Text = "UTAT UAV Interoperability Control Panel (AUVSI) - " + Interoperability.getinstance().Current_Mission.name;
                     break;
                 //Disable AUVSI Elements, Enable USC 
@@ -1007,6 +1015,30 @@ namespace Interoperability_GUI_Forms
             });
         }
 
+        /// <summary>
+        /// Sets the plane AUVSI required altitude label
+        /// </summary>
+        /// <param name="altitude_asl">The altitude of the plane below sea level</param>
+        public void MAP_updateAUVSIAltLabel(string altitude_asl)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                AUVSI_Alt_Label.Text = "UAS Altitude: " + altitude_asl + " ft ASL";
+            });
+        }
+
+        /// <summary>
+        /// Sets the plane AUVSI required altitude label
+        /// </summary>
+        /// <param name="airspeed">The altitude of the plane below sea level</param>
+        public void MAP_updateAUVSIArspdLabel(string airspeed)
+        {
+            this.gMapControl1.BeginInvoke((MethodInvoker)delegate ()
+            {
+                AUVSI_ARSPD_Label.Text = "UAS Airspeed: " + airspeed + " Knots";
+            });
+        }
+
 
         /// <summary>
         /// Sets the flight timer below the map
@@ -1664,11 +1696,141 @@ namespace Interoperability_GUI_Forms
             }
         }
 
-        private async void solarPV_API_Call_Click(object sender, EventArgs e)
+        private void dronepv_writewp_button_Click(object sender, EventArgs e)
         {
-            string address = "";
-            string username = "";
-            string password = "";
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.TEST));
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Drone_Cleaning_Server_Start));
+        }
+
+        private void Auto_Drone_Control_Button_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.PV_Drone_Control_Start));
+        }
+
+        public void PV_Add_Status(string status)
+        {
+            this.PV_Status_TextBox.BeginInvoke((MethodInvoker)delegate ()
+            {
+                PV_Status_TextBox.AppendText(status);
+            });
+        }
+
+        public void PV_Clear_Status()
+        {
+            PV_Status_TextBox.Text = "";
+        }
+
+        private void Start_PV_Power_Read_Button_Click(object sender, EventArgs e)
+        {
+            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.PV_Power_Read));
+        }
+
+        public void Update_PV_Voltage(double voltage)
+        {
+            this.Char_Cell_Voltage_Text.BeginInvoke((MethodInvoker)delegate ()
+            {
+                Char_Cell_Voltage_Text.Text = "Chracterization Cell Voltage: " + voltage.ToString();
+            });
+        }
+
+        public void Update_PV_Temperature(double temperature)
+        {
+            this.Solar_Cell_Temperature_Text.BeginInvoke((MethodInvoker)delegate ()
+            {
+                Solar_Cell_Temperature_Text.Text = "Solar Cell Temperature: " + temperature.ToString() + "C";
+            });
+
+        }
+
+        public void Update_PV_Power_Output(double power)
+        {
+            this.panel_power_output_label.BeginInvoke((MethodInvoker)delegate ()
+            {
+                panel_power_output_label.Text = "Panel Power Output: " + power.ToString() + "W";
+            });
+
+        }
+
+        public void Update_PV_Expected_Power_Output(double power)
+        {
+            this.expected_panel_power_output_label.BeginInvoke((MethodInvoker)delegate ()
+            {
+                expected_panel_power_output_label.Text = "Expected Panel Power Output: " + power.ToString("F2") + "W";
+            });
+
+        }
+
+        public void Update_Last_Panel_Update(Int64 unixtime)
+        {
+            this.last_panel_update_label.BeginInvoke((MethodInvoker)delegate ()
+            {
+                System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                dtDateTime = dtDateTime.AddSeconds(unixtime).ToLocalTime();
+                last_panel_update_label.Text = "Last Panel Update: " + dtDateTime.ToString();
+            });
+        }
+
+        //-------------------------------------------//
+        //             Bottle Drop Tab               //
+        //-------------------------------------------//
+        private void bottle_drop_button_Click(object sender, EventArgs e)
+        {
+            if (bottle_drop_start_button.Text == "Start Bottle Drop")
+            {
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Bottle_Drop_Start));
+                bottle_drop_start_button.Text = "Stop Bottle Drop";
+                Bottle_Drop_WP_No.ReadOnly = true;
+                Bottle_Drop_Lat.ReadOnly = true;
+                Bottle_Drop_Long.ReadOnly = true;
+            }
+            else
+            {
+                InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Bottle_Drop_Stop));
+                bottle_drop_start_button.Text = "Start Bottle Drop";
+                Bottle_Drop_WP_No.ReadOnly = false;
+                Bottle_Drop_Lat.ReadOnly = false;
+                Bottle_Drop_Long.ReadOnly = false;
+            }
+
+        }
+
+        public string bottle_drop_get_Lat()
+        {
+            return Bottle_Drop_Lat.Text;
+        }
+
+        public string bottle_drop_get_Long()
+        {
+            return Bottle_Drop_Long.Text;
+        }
+
+        public int bottle_drop_get_WP_NO()
+        {
+            return (int)Bottle_Drop_WP_No.Value;
+        }
+
+        public void update_bottle_drop_status(string status)
+        {
+            Bottle_Drop_Status.Text = status;
+            this.Bottle_Drop_Status.BeginInvoke((MethodInvoker)delegate ()
+            {
+                Bottle_Drop_Status.Text = status;
+            });
+        }
+
+        //Image Upload Code
+        async private void Image_Upload_Upload_Button_Click(object sender, EventArgs e)
+        {
+            string address = Settings["address"];
+            string username = Settings["username"];
+            string password = Settings["password"];
+
+            CookieContainer cookies = new CookieContainer();
+
             try
             {
                 using (var client = new HttpClient())
@@ -1701,49 +1863,398 @@ namespace Interoperability_GUI_Forms
                         Console.WriteLine("Credentials Valid");
                     }
 
-                    while (true)
+
+                    Image_Uploads_Target_ID temp_deseralizer = new Image_Uploads_Target_ID();
+
+                    foreach (Image_Uploads i in Target_List)
                     {
-                        var telemData = new Dictionary<string, string>();
 
-                        float lat = 0f;
-                        telemData.Add("latitude", lat.ToString("F10"));
-                        //Console.WriteLine("Latitude: " + lat + "\nLongitude: " + lng + "\nAltitude_MSL: " + alt + "\nHeading: " + yaw);
+                        //Upload Target 
+                        string thing = new JavaScriptSerializer().Serialize(i);
 
-                        var telem = new FormUrlEncodedContent(telemData);
-                        HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
-                        Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
+                        var content = new StringContent(thing, Encoding.UTF8, "application/json");
+                        var result = await client.PostAsync("/api/odlcs", content);
+
+                        Console.WriteLine("Server_info GET result: " + result.Content.ReadAsStringAsync().Result);
+                        temp_deseralizer = new JavaScriptSerializer().Deserialize<Image_Uploads_Target_ID>(result.Content.ReadAsStringAsync().Result);
+
+                        Console.WriteLine("TARGET ID:" + temp_deseralizer.id.ToString());
+
+
+
+                        //Upload Image
+
+                        //convert filestream to byte array
+                        MemoryStream stream = new MemoryStream();
+                        i.image.Save(stream, ImageFormat.Jpeg);
+
+                        byte[] fileBytes;
+                        fileBytes = stream.ToArray();
+
+
+                        //load the image byte[] into a System.Net.Http.ByteArrayContent
+                        var imageBinaryContent = new ByteArrayContent(fileBytes);
+
+                        //create a System.Net.Http.MultiPartFormDataContent
+                        ByteArrayContent content2 = new ByteArrayContent(fileBytes);
+                        content2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+
+                        //make the POST request using the URI enpoint and the MultiPartFormDataContent
+                        result = await client.PostAsync("/api/odlcs/" + temp_deseralizer.id.ToString() + "/image", content2);
+                        Console.WriteLine(result.StatusCode.ToString());
+                        Console.WriteLine(result.Content.ReadAsStringAsync().Result);
+
+
+
                     }
+
                 }
             }
 
             //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
-            catch//(Exception e)
+            catch (Exception c)
             {
-                Console.WriteLine("Error, exception thrown in API call thread");
-                //Console.WriteLine(e.Message);
-                //Console.WriteLine(e.InnerException);
+                Console.WriteLine("Error, exception thrown in Image upload thread");
+                Console.WriteLine(c.Message);
+                Console.WriteLine(c.InnerException);
             }
         }
 
-        private void dronepv_writewp_button_Click(object sender, EventArgs e)
+        private void Image_Upload_Download_Button_Click(object sender, EventArgs e)
         {
-            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.TEST));
+            //Don't do anything here yet
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        bool Image_Upload_Ignore = false;
+
+        private void Image_Upload_Add_Target_Click(object sender, EventArgs e)
         {
-            Console.Write("Hello World");
-            clickme.Text = "Hello World";
+            Image_Upload_Target_Select.Items.Insert(Image_Upload_Target_Select.Items.Count, "Target" + (Image_Upload_Target_Select.Items.Count + 1).ToString());
+            Target_List.Add(new Image_Uploads());
+
+            //prevent infinite loops 
+            Image_Upload_Ignore = true;
+
+            Image_Upload_Target_Select.SelectedIndex = Image_Upload_Target_Select.Items.Count - 1;
+
+            Image_Upload_Ignore = false;
+
+            Image_Upload_Latitude.Text = "";
+            Image_Upload_Longitude.Text = "";
+            Image_Upload_Orientation.SelectedIndex = 0;
+            Image_Upload_Shape.SelectedIndex = 0;
+            Image_Upload_Type.SelectedIndex = 0;
+            Image_Upload_Alphanumeric.Text = "";
+            Image_Upload_Alphanumeric_Colour.SelectedIndex = 0;
+            Image_Upload_Background_Colour.SelectedIndex = 0;
+
+
+
 
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void Image_Upload_Target_Select_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InteroperabilityCallback(new Interop_Callback_Struct(Interoperability.Interop_Action.Drone_Cleaning_Server_Start));
+            if (Image_Upload_Ignore)
+            {
+                return;
+            }
+            int index = Image_Upload_Target_Select.SelectedIndex;
+
+            //We need to create a new target 
+            /*if (index == Image_Upload_Target_Select.Items.Count - 1)
+            {
+                Target_List.Add(new Image_Uploads());
+                Image_Upload_Latitude.Text = "0";
+                Image_Upload_Longitude.Text = "0";
+                Image_Upload_Orientation.SelectedIndex = 0;
+                Image_Upload_Shape.SelectedIndex = 0; ;
+                Image_Upload_Type.SelectedIndex = 0; ;
+                Image_Upload_Alphanumeric.Text = "";
+                Image_Upload_Alphanumeric_Colour.SelectedIndex = 0;
+                Image_Upload_Background_Colour.SelectedIndex = 0;
+            }
+            //show a previously created target
+            else
+            {
+                Target_List[index].latitude = 0;
+                Target_List[index].longitude = 0;
+                Target_List[index].orientation = "";
+                Target_List[index].background_colour = "";
+                Target_List[index].alphanumeric = "";
+                Target_List[index].alphanumeric_colour = "";
+                Target_List[index].shape = "";
+                Target_List[index].description = "";
+            }*/
+
+            Image_Upload_Latitude.Text = Target_List[index].latitude;
+            Image_Upload_Longitude.Text = Target_List[index].longitude;
+            Image_Upload_Orientation.SelectedIndex = Image_Upload_Orientation_to_Index(Target_List[index].orientation);
+            Image_Upload_Shape.SelectedIndex = Image_Upload_Shape_to_Index(Target_List[index].shape);
+            Image_Upload_Type.SelectedIndex = Image_Upload_Type_to_Index(Target_List[index].type);
+            Image_Upload_Alphanumeric.Text = Target_List[index].alphanumeric;
+            Image_Upload_Alphanumeric_Colour.SelectedIndex = Image_Upload_Colour_to_Index(Target_List[index].alphanumeric_colour); ;
+            Image_Upload_Background_Colour.SelectedIndex = Image_Upload_Colour_to_Index(Target_List[index].background_colour);
+            Image_Upload_Description.Text = Target_List[index].description;
+            Image_Upload_Picture.Image = Target_List[index].image;
+
+
+            if (Image_Upload_Type.SelectedIndex != 2)
+            {
+                Image_Upload_Description.ReadOnly = true;
+            }
+            else
+            {
+                Image_Upload_Description.ReadOnly = false;
+            }
+
+
+            // Stretches the image to fit the pictureBox.
+            /*pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            MyImage = new Bitmap(fileToDisplay);
+            pictureBox1.ClientSize = new Size(xSize, ySize);
+            pictureBox1.Image = (Image)MyImage;*/
+
         }
 
-        //Remove everything past here if it doesn't work 
-        //FOR CAPSTONE - TESTING
+        private int Image_Upload_Type_to_Index(string colour)
+        {
+            switch (colour)
+            {
+                case "standard":
+                    return 0;
+                case "off_axis":
+                    return 1;
+                case "emergent":
+                    return 2;
+                default:
+                    return -1;
+            }
+        }
+
+        private int Image_Upload_Shape_to_Index(string colour)
+        {
+            switch (colour)
+            {
+                case "circle":
+                    return 0;
+                case "semicircle":
+                    return 1;
+                case "quarter_circle":
+                    return 2;
+                case "triangle":
+                    return 3;
+                case "square":
+                    return 4;
+                case "rectangle":
+                    return 5;
+                case "trapezoid":
+                    return 6;
+                case "pentagon":
+                    return 7;
+                case "hexagon":
+                    return 8;
+                case "heptagon":
+                    return 9;
+                case "octagon":
+                    return 10;
+                case "star":
+                    return 11;
+                case "cross":
+                    return 12;
+                default:
+                    return -1;
+            }
+        }
+
+        private int Image_Upload_Orientation_to_Index(string colour)
+        {
+            switch (colour)
+            {
+                case "N":
+                    return 0;
+                case "NE":
+                    return 1;
+                case "E":
+                    return 2;
+                case "SE":
+                    return 3;
+                case "S":
+                    return 4;
+                case "SW":
+                    return 5;
+                case "W":
+                    return 6;
+                case "NW":
+                    return 7;
+                default:
+                    return -1;
+            }
+        }
+
+        private int Image_Upload_Colour_to_Index(string colour)
+        {
+            switch (colour)
+            {
+                case "white":
+                    return 0;
+                case "black":
+                    return 1;
+                case "gray":
+                    return 2;
+                case "red":
+                    return 3;
+                case "blue":
+                    return 4;
+                case "green":
+                    return 5;
+                case "yellow":
+                    return 6;
+                case "purple":
+                    return 7;
+                case "brown":
+                    return 8;
+                case "orange":
+                    return 9;
+                default:
+                    return -1;
+            }
+        }
+
+        private void Image_Upload_Latitude_TextChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].latitude = Image_Upload_Latitude.Text;
+        }
+
+        private void Image_Upload_Longitude_TextChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].longitude = Image_Upload_Longitude.Text;
+        }
+
+        private void Image_Upload_Orientation_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].orientation = Image_Upload_Orientation.Text;
+        }
+
+        private void Image_Upload_Background_Colour_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].background_colour = Image_Upload_Background_Colour.Text;
+
+        }
+
+        private void Image_Upload_Alphanumeric_TextChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].alphanumeric = Image_Upload_Alphanumeric.Text;
+        }
+
+        private void Image_Upload_Alphanumeric_Colour_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].alphanumeric_colour = Image_Upload_Alphanumeric_Colour.Text;
+        }
+
+        private void Image_Upload_Shape_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].shape = Image_Upload_Shape.Text;
+        }
+
+        private void Image_Upload_Description_TextChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].description = Image_Upload_Description.Text;
+        }
+
+        private void Image_Upload_Type_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Target_List[index].type = Image_Upload_Type.Text;
+
+            if (Image_Upload_Type.SelectedIndex != 2)
+            {
+                Image_Upload_Description.ReadOnly = true;
+            }
+            else
+            {
+                Image_Upload_Description.ReadOnly = false;
+            }
+        }
+
+        private void Image_Upload_Select_Image_Button_Click(object sender, EventArgs e)
+        {
+            Stream myStream = null;
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            openFileDialog1.InitialDirectory = "c:\\";
+            openFileDialog1.Filter = "jpg files (*.jpg)|*.txt|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 2;
+            openFileDialog1.RestoreDirectory = true;
+
+            int index = Image_Upload_Target_Select.SelectedIndex;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    Bitmap MyImage;
+                    Image_Upload_Picture.SizeMode = PictureBoxSizeMode.StretchImage;
+                    MyImage = new Bitmap(openFileDialog1.FileName);
+                    Image_Upload_Picture.Image = MyImage;
+                    Target_List[index].image = MyImage;
+                }
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show("Error, Invalid Image File.\n" + ex.Message, "Interoperability Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                }
+            }
+        }
+
+        private void Image_Upload_Latitude_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.') && (e.KeyChar != '-'))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '-') && ((sender as TextBox).Text.IndexOf('-') > -1))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void Image_Upload_Longitude_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.') && (e.KeyChar != '-'))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '-') && ((sender as TextBox).Text.IndexOf('-') > -1))
+            {
+                e.Handled = true;
+            }
+        }
 
     }
 

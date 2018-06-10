@@ -14,6 +14,45 @@ using GMap.NET.WindowsForms.Markers;
 
 namespace interoperability
 {
+
+
+    public class Image_Uploads_Target_ID
+    {
+        public string id { get; set; }
+    }
+
+    //Image Upload Class
+    public class Image_Uploads
+    {
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+        public string orientation { get; set; }
+        public string background_colour { get; set; }
+        public string alphanumeric { get; set; }
+        public string alphanumeric_colour { get; set; }
+        public string shape { get; set; }
+        public string description { get; set; }
+        public string type { get; set; }
+        public Bitmap image { get; set; }
+
+        public Image_Uploads()
+        {
+            latitude = "";
+            longitude = "";
+            orientation = "N";
+            background_colour = "white";
+            alphanumeric = "";
+            alphanumeric_colour = "white";
+            shape = "circle";
+            description = "";
+            type = "standard";
+            image = null;
+        }
+    }
+
+
+
+
     //Interop Callback Class
 
     public class Mavlink_Command
@@ -463,6 +502,11 @@ namespace interoperability
         } // IsConsistent
     } // PriorityQueue
 
+    public class Enlighten_Object
+    {
+        public int current_power;
+        public uint last_report_at;
+    }
 
     public class VertexCoords
     {

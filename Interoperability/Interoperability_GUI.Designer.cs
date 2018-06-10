@@ -83,6 +83,31 @@
             this.label8 = new System.Windows.Forms.Label();
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
+            this.Image_Upload_Description = new System.Windows.Forms.TextBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.Image_Upload_Type = new System.Windows.Forms.ComboBox();
+            this.Image_Upload_Shape = new System.Windows.Forms.ComboBox();
+            this.Image_Upload_Alphanumeric_Colour = new System.Windows.Forms.ComboBox();
+            this.Image_Upload_Alphanumeric = new System.Windows.Forms.TextBox();
+            this.Image_Upload_Orientation = new System.Windows.Forms.ComboBox();
+            this.Image_Upload_Longitude = new System.Windows.Forms.TextBox();
+            this.Image_Upload_Latitude = new System.Windows.Forms.TextBox();
+            this.Image_Upload_Background_Colour = new System.Windows.Forms.ComboBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label42 = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.label39 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.Image_Upload_Picture = new System.Windows.Forms.PictureBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.Image_Upload_Target_Select = new System.Windows.Forms.ComboBox();
+            this.Image_Upload_Download_Button = new System.Windows.Forms.Button();
+            this.Image_Upload_Upload_Button = new System.Windows.Forms.Button();
+            this.label33 = new System.Windows.Forms.Label();
             this.Callout_Tab = new System.Windows.Forms.TabPage();
             this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
@@ -109,12 +134,31 @@
             this.button2 = new System.Windows.Forms.Button();
             this.label22 = new System.Windows.Forms.Label();
             this.Solar_PV_Tab_Page = new System.Windows.Forms.TabPage();
-            this.clickme = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
+            this.last_panel_update_label = new System.Windows.Forms.Label();
+            this.expected_panel_power_output_label = new System.Windows.Forms.Label();
+            this.panel_power_output_label = new System.Windows.Forms.Label();
+            this.Solar_Cell_Temperature_Text = new System.Windows.Forms.Label();
+            this.Start_PV_Power_Read_Button = new System.Windows.Forms.Button();
+            this.label27 = new System.Windows.Forms.Label();
+            this.PV_Status_TextBox = new System.Windows.Forms.TextBox();
+            this.label26 = new System.Windows.Forms.Label();
+            this.Auto_Drone_Control_Button = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.Char_Cell_Voltage_Text = new System.Windows.Forms.Label();
             this.dronepv_writewp_button = new System.Windows.Forms.Button();
-            this.solarPV_API_Call = new System.Windows.Forms.Button();
             this.PV_Start_Drone_Control = new System.Windows.Forms.CheckBox();
             this.label24 = new System.Windows.Forms.Label();
+            this.Bottle_Drop_Tab = new System.Windows.Forms.TabPage();
+            this.Bottle_Drop_Status = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.bottle_drop_start_button = new System.Windows.Forms.Button();
+            this.label31 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.Bottle_Drop_Long = new System.Windows.Forms.TextBox();
+            this.Bottle_Drop_Lat = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
+            this.Bottle_Drop_WP_No = new System.Windows.Forms.NumericUpDown();
+            this.label28 = new System.Windows.Forms.Label();
             this.InteropMap_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showGeofenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -160,16 +204,23 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readmeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
-            this.button7 = new System.Windows.Forms.Button();
+            this.AUVSI_Alt_Label = new System.Windows.Forms.Label();
+            this.AUVSI_ARSPD_Label = new System.Windows.Forms.Label();
+            this.Image_Upload_Add_Target = new System.Windows.Forms.Button();
+            this.Image_Upload_Select_Image_Button = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Plane_Simulated_Airspeed_Select)).BeginInit();
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
+            this.TargetUpload_Tab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).BeginInit();
             this.Callout_Tab.SuspendLayout();
             this.Goose_Tab.SuspendLayout();
             this.Solar_PV_Tab_Page.SuspendLayout();
+            this.Bottle_Drop_Tab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Bottle_Drop_WP_No)).BeginInit();
             this.InteropMap_ContextMenuStrip.SuspendLayout();
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
@@ -264,6 +315,7 @@
             this.Interoperability_GUI_Tab.Controls.Add(this.Callout_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Goose_Tab);
             this.Interoperability_GUI_Tab.Controls.Add(this.Solar_PV_Tab_Page);
+            this.Interoperability_GUI_Tab.Controls.Add(this.Bottle_Drop_Tab);
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 27);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
@@ -751,6 +803,33 @@
             // 
             // TargetUpload_Tab
             // 
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Select_Image_Button);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Add_Target);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Description);
+            this.TargetUpload_Tab.Controls.Add(this.label44);
+            this.TargetUpload_Tab.Controls.Add(this.label37);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Type);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Shape);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Alphanumeric_Colour);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Alphanumeric);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Orientation);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Longitude);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Latitude);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Background_Colour);
+            this.TargetUpload_Tab.Controls.Add(this.label43);
+            this.TargetUpload_Tab.Controls.Add(this.label42);
+            this.TargetUpload_Tab.Controls.Add(this.label41);
+            this.TargetUpload_Tab.Controls.Add(this.label40);
+            this.TargetUpload_Tab.Controls.Add(this.label39);
+            this.TargetUpload_Tab.Controls.Add(this.label38);
+            this.TargetUpload_Tab.Controls.Add(this.label36);
+            this.TargetUpload_Tab.Controls.Add(this.label35);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Picture);
+            this.TargetUpload_Tab.Controls.Add(this.label34);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Target_Select);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Download_Button);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Upload_Button);
+            this.TargetUpload_Tab.Controls.Add(this.label33);
             this.TargetUpload_Tab.Location = new System.Drawing.Point(4, 22);
             this.TargetUpload_Tab.Name = "TargetUpload_Tab";
             this.TargetUpload_Tab.Padding = new System.Windows.Forms.Padding(3);
@@ -758,6 +837,291 @@
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Image_Upload_Description
+            // 
+            this.Image_Upload_Description.Location = new System.Drawing.Point(158, 306);
+            this.Image_Upload_Description.Name = "Image_Upload_Description";
+            this.Image_Upload_Description.Size = new System.Drawing.Size(100, 20);
+            this.Image_Upload_Description.TabIndex = 28;
+            this.Image_Upload_Description.TextChanged += new System.EventHandler(this.Image_Upload_Description_TextChanged);
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(14, 306);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(60, 13);
+            this.label44.TabIndex = 27;
+            this.label44.Text = "Description";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(155, 74);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(31, 13);
+            this.label37.TabIndex = 26;
+            this.label37.Text = "Type";
+            // 
+            // Image_Upload_Type
+            // 
+            this.Image_Upload_Type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Type.FormattingEnabled = true;
+            this.Image_Upload_Type.Items.AddRange(new object[] {
+            "standard",
+            "off_axis",
+            "emergent"});
+            this.Image_Upload_Type.Location = new System.Drawing.Point(158, 90);
+            this.Image_Upload_Type.Name = "Image_Upload_Type";
+            this.Image_Upload_Type.Size = new System.Drawing.Size(100, 21);
+            this.Image_Upload_Type.TabIndex = 25;
+            this.Image_Upload_Type.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Type_SelectedIndexChanged);
+            // 
+            // Image_Upload_Shape
+            // 
+            this.Image_Upload_Shape.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Shape.FormattingEnabled = true;
+            this.Image_Upload_Shape.Items.AddRange(new object[] {
+            "circle",
+            "semicircle",
+            "quarter_circle",
+            "triangle",
+            "square",
+            "rectangle",
+            "trapezoid",
+            "pentagon",
+            "hexagon",
+            "heptagon",
+            "octagon",
+            "star",
+            "cross"});
+            this.Image_Upload_Shape.Location = new System.Drawing.Point(158, 276);
+            this.Image_Upload_Shape.Name = "Image_Upload_Shape";
+            this.Image_Upload_Shape.Size = new System.Drawing.Size(100, 21);
+            this.Image_Upload_Shape.TabIndex = 24;
+            this.Image_Upload_Shape.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Shape_SelectedIndexChanged);
+            // 
+            // Image_Upload_Alphanumeric_Colour
+            // 
+            this.Image_Upload_Alphanumeric_Colour.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Alphanumeric_Colour.FormattingEnabled = true;
+            this.Image_Upload_Alphanumeric_Colour.Items.AddRange(new object[] {
+            "white",
+            "black",
+            "gray",
+            "red",
+            "blue",
+            "green",
+            "yellow",
+            "purple",
+            "brown",
+            "orange"});
+            this.Image_Upload_Alphanumeric_Colour.Location = new System.Drawing.Point(158, 249);
+            this.Image_Upload_Alphanumeric_Colour.Name = "Image_Upload_Alphanumeric_Colour";
+            this.Image_Upload_Alphanumeric_Colour.Size = new System.Drawing.Size(100, 21);
+            this.Image_Upload_Alphanumeric_Colour.TabIndex = 23;
+            this.Image_Upload_Alphanumeric_Colour.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Alphanumeric_Colour_SelectedIndexChanged);
+            // 
+            // Image_Upload_Alphanumeric
+            // 
+            this.Image_Upload_Alphanumeric.Location = new System.Drawing.Point(158, 223);
+            this.Image_Upload_Alphanumeric.MaxLength = 1;
+            this.Image_Upload_Alphanumeric.Name = "Image_Upload_Alphanumeric";
+            this.Image_Upload_Alphanumeric.Size = new System.Drawing.Size(100, 20);
+            this.Image_Upload_Alphanumeric.TabIndex = 22;
+            this.Image_Upload_Alphanumeric.TextChanged += new System.EventHandler(this.Image_Upload_Alphanumeric_TextChanged);
+            // 
+            // Image_Upload_Orientation
+            // 
+            this.Image_Upload_Orientation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Orientation.FormattingEnabled = true;
+            this.Image_Upload_Orientation.Items.AddRange(new object[] {
+            "N",
+            "NE",
+            "E",
+            "SE",
+            "S",
+            "SW",
+            "W",
+            "NW"});
+            this.Image_Upload_Orientation.Location = new System.Drawing.Point(158, 169);
+            this.Image_Upload_Orientation.Name = "Image_Upload_Orientation";
+            this.Image_Upload_Orientation.Size = new System.Drawing.Size(100, 21);
+            this.Image_Upload_Orientation.TabIndex = 21;
+            this.Image_Upload_Orientation.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Orientation_SelectedIndexChanged);
+            // 
+            // Image_Upload_Longitude
+            // 
+            this.Image_Upload_Longitude.Location = new System.Drawing.Point(158, 143);
+            this.Image_Upload_Longitude.Name = "Image_Upload_Longitude";
+            this.Image_Upload_Longitude.Size = new System.Drawing.Size(100, 20);
+            this.Image_Upload_Longitude.TabIndex = 20;
+            this.Image_Upload_Longitude.TextChanged += new System.EventHandler(this.Image_Upload_Longitude_TextChanged);
+            this.Image_Upload_Longitude.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Image_Upload_Longitude_KeyPress);
+            // 
+            // Image_Upload_Latitude
+            // 
+            this.Image_Upload_Latitude.Location = new System.Drawing.Point(158, 117);
+            this.Image_Upload_Latitude.Name = "Image_Upload_Latitude";
+            this.Image_Upload_Latitude.Size = new System.Drawing.Size(100, 20);
+            this.Image_Upload_Latitude.TabIndex = 19;
+            this.Image_Upload_Latitude.TextChanged += new System.EventHandler(this.Image_Upload_Latitude_TextChanged);
+            this.Image_Upload_Latitude.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Image_Upload_Latitude_KeyPress);
+            // 
+            // Image_Upload_Background_Colour
+            // 
+            this.Image_Upload_Background_Colour.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Background_Colour.FormattingEnabled = true;
+            this.Image_Upload_Background_Colour.Items.AddRange(new object[] {
+            "white",
+            "black",
+            "gray",
+            "red",
+            "blue",
+            "green",
+            "yellow",
+            "purple",
+            "brown",
+            "orange"});
+            this.Image_Upload_Background_Colour.Location = new System.Drawing.Point(158, 196);
+            this.Image_Upload_Background_Colour.Name = "Image_Upload_Background_Colour";
+            this.Image_Upload_Background_Colour.Size = new System.Drawing.Size(100, 21);
+            this.Image_Upload_Background_Colour.TabIndex = 18;
+            this.Image_Upload_Background_Colour.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Background_Colour_SelectedIndexChanged);
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(13, 252);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(106, 13);
+            this.label43.TabIndex = 17;
+            this.label43.Text = "AlphaNumeric Colour";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(13, 226);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(73, 13);
+            this.label42.TabIndex = 16;
+            this.label42.Text = "AlphaNumeric";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(13, 200);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(98, 13);
+            this.label41.TabIndex = 15;
+            this.label41.Text = "Background Colour";
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(13, 146);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(54, 13);
+            this.label40.TabIndex = 14;
+            this.label40.Text = "Longitude";
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(13, 120);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(45, 13);
+            this.label39.TabIndex = 13;
+            this.label39.Text = "Latitude";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(14, 279);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(38, 13);
+            this.label38.TabIndex = 12;
+            this.label38.Text = "Shape";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(13, 172);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(58, 13);
+            this.label36.TabIndex = 10;
+            this.label36.Text = "Orientation";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(14, 365);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(77, 13);
+            this.label35.TabIndex = 9;
+            this.label35.Text = "Image Preview";
+            // 
+            // Image_Upload_Picture
+            // 
+            this.Image_Upload_Picture.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.Image_Upload_Picture.Location = new System.Drawing.Point(16, 381);
+            this.Image_Upload_Picture.Name = "Image_Upload_Picture";
+            this.Image_Upload_Picture.Size = new System.Drawing.Size(242, 144);
+            this.Image_Upload_Picture.TabIndex = 8;
+            this.Image_Upload_Picture.TabStop = false;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label34.Location = new System.Drawing.Point(13, 74);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(54, 13);
+            this.label34.TabIndex = 7;
+            this.label34.Text = "Targets:";
+            // 
+            // Image_Upload_Target_Select
+            // 
+            this.Image_Upload_Target_Select.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Image_Upload_Target_Select.FormattingEnabled = true;
+            this.Image_Upload_Target_Select.Items.AddRange(new object[] {
+            "Target 1"});
+            this.Image_Upload_Target_Select.Location = new System.Drawing.Point(17, 90);
+            this.Image_Upload_Target_Select.Name = "Image_Upload_Target_Select";
+            this.Image_Upload_Target_Select.Size = new System.Drawing.Size(121, 21);
+            this.Image_Upload_Target_Select.TabIndex = 6;
+            this.Image_Upload_Target_Select.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Target_Select_SelectedIndexChanged);
+            // 
+            // Image_Upload_Download_Button
+            // 
+            this.Image_Upload_Download_Button.Location = new System.Drawing.Point(97, 47);
+            this.Image_Upload_Download_Button.Name = "Image_Upload_Download_Button";
+            this.Image_Upload_Download_Button.Size = new System.Drawing.Size(75, 23);
+            this.Image_Upload_Download_Button.TabIndex = 5;
+            this.Image_Upload_Download_Button.Text = "Download";
+            this.Image_Upload_Download_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Download_Button.Click += new System.EventHandler(this.Image_Upload_Download_Button_Click);
+            // 
+            // Image_Upload_Upload_Button
+            // 
+            this.Image_Upload_Upload_Button.Location = new System.Drawing.Point(16, 48);
+            this.Image_Upload_Upload_Button.Name = "Image_Upload_Upload_Button";
+            this.Image_Upload_Upload_Button.Size = new System.Drawing.Size(75, 23);
+            this.Image_Upload_Upload_Button.TabIndex = 4;
+            this.Image_Upload_Upload_Button.Text = "Upload";
+            this.Image_Upload_Upload_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Upload_Button.Click += new System.EventHandler(this.Image_Upload_Upload_Button_Click);
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label33.Location = new System.Drawing.Point(10, 13);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(182, 31);
+            this.label33.TabIndex = 3;
+            this.label33.Text = "Image Upload";
             // 
             // Callout_Tab
             // 
@@ -1023,11 +1387,18 @@
             // 
             // Solar_PV_Tab_Page
             // 
+            this.Solar_PV_Tab_Page.Controls.Add(this.last_panel_update_label);
+            this.Solar_PV_Tab_Page.Controls.Add(this.expected_panel_power_output_label);
+            this.Solar_PV_Tab_Page.Controls.Add(this.panel_power_output_label);
+            this.Solar_PV_Tab_Page.Controls.Add(this.Solar_Cell_Temperature_Text);
+            this.Solar_PV_Tab_Page.Controls.Add(this.Start_PV_Power_Read_Button);
+            this.Solar_PV_Tab_Page.Controls.Add(this.label27);
+            this.Solar_PV_Tab_Page.Controls.Add(this.PV_Status_TextBox);
+            this.Solar_PV_Tab_Page.Controls.Add(this.label26);
+            this.Solar_PV_Tab_Page.Controls.Add(this.Auto_Drone_Control_Button);
             this.Solar_PV_Tab_Page.Controls.Add(this.button7);
-            this.Solar_PV_Tab_Page.Controls.Add(this.clickme);
-            this.Solar_PV_Tab_Page.Controls.Add(this.button6);
+            this.Solar_PV_Tab_Page.Controls.Add(this.Char_Cell_Voltage_Text);
             this.Solar_PV_Tab_Page.Controls.Add(this.dronepv_writewp_button);
-            this.Solar_PV_Tab_Page.Controls.Add(this.solarPV_API_Call);
             this.Solar_PV_Tab_Page.Controls.Add(this.PV_Start_Drone_Control);
             this.Solar_PV_Tab_Page.Controls.Add(this.label24);
             this.Solar_PV_Tab_Page.Location = new System.Drawing.Point(4, 22);
@@ -1038,28 +1409,114 @@
             this.Solar_PV_Tab_Page.Text = "Solar PV Control";
             this.Solar_PV_Tab_Page.UseVisualStyleBackColor = true;
             // 
-            // clickme
+            // last_panel_update_label
             // 
-            this.clickme.AutoSize = true;
-            this.clickme.Location = new System.Drawing.Point(41, 275);
-            this.clickme.Name = "clickme";
-            this.clickme.Size = new System.Drawing.Size(83, 13);
-            this.clickme.TabIndex = 6;
-            this.clickme.Text = "Insert Text Here";
+            this.last_panel_update_label.AutoSize = true;
+            this.last_panel_update_label.Location = new System.Drawing.Point(12, 234);
+            this.last_panel_update_label.Name = "last_panel_update_label";
+            this.last_panel_update_label.Size = new System.Drawing.Size(101, 13);
+            this.last_panel_update_label.TabIndex = 16;
+            this.last_panel_update_label.Text = "Last Panel Update: ";
             // 
-            // button6
+            // expected_panel_power_output_label
             // 
-            this.button6.Location = new System.Drawing.Point(44, 304);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(144, 23);
-            this.button6.TabIndex = 5;
-            this.button6.Text = "Hello World";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            this.expected_panel_power_output_label.AutoSize = true;
+            this.expected_panel_power_output_label.Location = new System.Drawing.Point(12, 221);
+            this.expected_panel_power_output_label.Name = "expected_panel_power_output_label";
+            this.expected_panel_power_output_label.Size = new System.Drawing.Size(156, 13);
+            this.expected_panel_power_output_label.TabIndex = 15;
+            this.expected_panel_power_output_label.Text = "Expected Panel Power Output: ";
+            // 
+            // panel_power_output_label
+            // 
+            this.panel_power_output_label.AutoSize = true;
+            this.panel_power_output_label.Location = new System.Drawing.Point(13, 208);
+            this.panel_power_output_label.Name = "panel_power_output_label";
+            this.panel_power_output_label.Size = new System.Drawing.Size(108, 13);
+            this.panel_power_output_label.TabIndex = 14;
+            this.panel_power_output_label.Text = "Panel Power Output: ";
+            // 
+            // Solar_Cell_Temperature_Text
+            // 
+            this.Solar_Cell_Temperature_Text.AutoSize = true;
+            this.Solar_Cell_Temperature_Text.Location = new System.Drawing.Point(12, 272);
+            this.Solar_Cell_Temperature_Text.Name = "Solar_Cell_Temperature_Text";
+            this.Solar_Cell_Temperature_Text.Size = new System.Drawing.Size(120, 13);
+            this.Solar_Cell_Temperature_Text.TabIndex = 13;
+            this.Solar_Cell_Temperature_Text.Text = "Solar Cell Temperature: ";
+            // 
+            // Start_PV_Power_Read_Button
+            // 
+            this.Start_PV_Power_Read_Button.Location = new System.Drawing.Point(16, 328);
+            this.Start_PV_Power_Read_Button.Name = "Start_PV_Power_Read_Button";
+            this.Start_PV_Power_Read_Button.Size = new System.Drawing.Size(172, 23);
+            this.Start_PV_Power_Read_Button.TabIndex = 12;
+            this.Start_PV_Power_Read_Button.Text = "Start PV Power Read Module";
+            this.Start_PV_Power_Read_Button.UseVisualStyleBackColor = true;
+            this.Start_PV_Power_Read_Button.Click += new System.EventHandler(this.Start_PV_Power_Read_Button_Click);
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(17, 54);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(130, 13);
+            this.label27.TabIndex = 11;
+            this.label27.Text = "Drone PV Cleaning Status";
+            // 
+            // PV_Status_TextBox
+            // 
+            this.PV_Status_TextBox.Location = new System.Drawing.Point(15, 70);
+            this.PV_Status_TextBox.MaxLength = 50000;
+            this.PV_Status_TextBox.Multiline = true;
+            this.PV_Status_TextBox.Name = "PV_Status_TextBox";
+            this.PV_Status_TextBox.ReadOnly = true;
+            this.PV_Status_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PV_Status_TextBox.Size = new System.Drawing.Size(210, 126);
+            this.PV_Status_TextBox.TabIndex = 10;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Location = new System.Drawing.Point(10, 13);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(215, 31);
+            this.label26.TabIndex = 9;
+            this.label26.Text = "Solar PV Control";
+            // 
+            // Auto_Drone_Control_Button
+            // 
+            this.Auto_Drone_Control_Button.Location = new System.Drawing.Point(16, 299);
+            this.Auto_Drone_Control_Button.Name = "Auto_Drone_Control_Button";
+            this.Auto_Drone_Control_Button.Size = new System.Drawing.Size(172, 23);
+            this.Auto_Drone_Control_Button.TabIndex = 8;
+            this.Auto_Drone_Control_Button.Text = "Start Automatic Drone Control";
+            this.Auto_Drone_Control_Button.UseVisualStyleBackColor = true;
+            this.Auto_Drone_Control_Button.Click += new System.EventHandler(this.Auto_Drone_Control_Button_Click);
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(16, 357);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(172, 23);
+            this.button7.TabIndex = 7;
+            this.button7.Text = "Start Computer Vision Server";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // Char_Cell_Voltage_Text
+            // 
+            this.Char_Cell_Voltage_Text.AutoSize = true;
+            this.Char_Cell_Voltage_Text.Location = new System.Drawing.Point(12, 259);
+            this.Char_Cell_Voltage_Text.Name = "Char_Cell_Voltage_Text";
+            this.Char_Cell_Voltage_Text.Size = new System.Drawing.Size(139, 13);
+            this.Char_Cell_Voltage_Text.TabIndex = 6;
+            this.Char_Cell_Voltage_Text.Text = "Chracterization Cell Voltage:";
             // 
             // dronepv_writewp_button
             // 
-            this.dronepv_writewp_button.Location = new System.Drawing.Point(15, 197);
+            this.dronepv_writewp_button.Location = new System.Drawing.Point(20, 445);
             this.dronepv_writewp_button.Name = "dronepv_writewp_button";
             this.dronepv_writewp_button.Size = new System.Drawing.Size(134, 23);
             this.dronepv_writewp_button.TabIndex = 4;
@@ -1067,20 +1524,10 @@
             this.dronepv_writewp_button.UseVisualStyleBackColor = true;
             this.dronepv_writewp_button.Click += new System.EventHandler(this.dronepv_writewp_button_Click);
             // 
-            // solarPV_API_Call
-            // 
-            this.solarPV_API_Call.Location = new System.Drawing.Point(15, 131);
-            this.solarPV_API_Call.Name = "solarPV_API_Call";
-            this.solarPV_API_Call.Size = new System.Drawing.Size(134, 23);
-            this.solarPV_API_Call.TabIndex = 3;
-            this.solarPV_API_Call.Text = "API Call";
-            this.solarPV_API_Call.UseVisualStyleBackColor = true;
-            this.solarPV_API_Call.Click += new System.EventHandler(this.solarPV_API_Call_Click);
-            // 
             // PV_Start_Drone_Control
             // 
             this.PV_Start_Drone_Control.AutoSize = true;
-            this.PV_Start_Drone_Control.Location = new System.Drawing.Point(72, 23);
+            this.PV_Start_Drone_Control.Location = new System.Drawing.Point(20, 485);
             this.PV_Start_Drone_Control.Name = "PV_Start_Drone_Control";
             this.PV_Start_Drone_Control.Size = new System.Drawing.Size(116, 17);
             this.PV_Start_Drone_Control.TabIndex = 2;
@@ -1090,11 +1537,116 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(12, 61);
+            this.label24.Location = new System.Drawing.Point(17, 505);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(247, 13);
             this.label24.TabIndex = 1;
             this.label24.Text = "Click on map, and use WASD keys to control quad";
+            // 
+            // Bottle_Drop_Tab
+            // 
+            this.Bottle_Drop_Tab.Controls.Add(this.Bottle_Drop_Status);
+            this.Bottle_Drop_Tab.Controls.Add(this.label32);
+            this.Bottle_Drop_Tab.Controls.Add(this.bottle_drop_start_button);
+            this.Bottle_Drop_Tab.Controls.Add(this.label31);
+            this.Bottle_Drop_Tab.Controls.Add(this.label30);
+            this.Bottle_Drop_Tab.Controls.Add(this.Bottle_Drop_Long);
+            this.Bottle_Drop_Tab.Controls.Add(this.Bottle_Drop_Lat);
+            this.Bottle_Drop_Tab.Controls.Add(this.label29);
+            this.Bottle_Drop_Tab.Controls.Add(this.Bottle_Drop_WP_No);
+            this.Bottle_Drop_Tab.Controls.Add(this.label28);
+            this.Bottle_Drop_Tab.Location = new System.Drawing.Point(4, 22);
+            this.Bottle_Drop_Tab.Name = "Bottle_Drop_Tab";
+            this.Bottle_Drop_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Bottle_Drop_Tab.TabIndex = 8;
+            this.Bottle_Drop_Tab.Text = "Bottle Drop";
+            this.Bottle_Drop_Tab.UseVisualStyleBackColor = true;
+            // 
+            // Bottle_Drop_Status
+            // 
+            this.Bottle_Drop_Status.Location = new System.Drawing.Point(16, 185);
+            this.Bottle_Drop_Status.Multiline = true;
+            this.Bottle_Drop_Status.Name = "Bottle_Drop_Status";
+            this.Bottle_Drop_Status.ReadOnly = true;
+            this.Bottle_Drop_Status.Size = new System.Drawing.Size(206, 170);
+            this.Bottle_Drop_Status.TabIndex = 14;
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(13, 168);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(37, 13);
+            this.label32.TabIndex = 13;
+            this.label32.Text = "Status";
+            // 
+            // bottle_drop_start_button
+            // 
+            this.bottle_drop_start_button.Location = new System.Drawing.Point(16, 485);
+            this.bottle_drop_start_button.Name = "bottle_drop_start_button";
+            this.bottle_drop_start_button.Size = new System.Drawing.Size(100, 23);
+            this.bottle_drop_start_button.TabIndex = 12;
+            this.bottle_drop_start_button.Text = "Start Bottle Drop";
+            this.bottle_drop_start_button.UseVisualStyleBackColor = true;
+            this.bottle_drop_start_button.Click += new System.EventHandler(this.bottle_drop_button_Click);
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(122, 52);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(82, 13);
+            this.label31.TabIndex = 11;
+            this.label31.Text = "Longitude (DD):";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(13, 52);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(73, 13);
+            this.label30.TabIndex = 10;
+            this.label30.Text = "Latitude (DD):";
+            // 
+            // Bottle_Drop_Long
+            // 
+            this.Bottle_Drop_Long.Location = new System.Drawing.Point(122, 71);
+            this.Bottle_Drop_Long.Name = "Bottle_Drop_Long";
+            this.Bottle_Drop_Long.Size = new System.Drawing.Size(100, 20);
+            this.Bottle_Drop_Long.TabIndex = 9;
+            // 
+            // Bottle_Drop_Lat
+            // 
+            this.Bottle_Drop_Lat.Location = new System.Drawing.Point(16, 71);
+            this.Bottle_Drop_Lat.Name = "Bottle_Drop_Lat";
+            this.Bottle_Drop_Lat.Size = new System.Drawing.Size(100, 20);
+            this.Bottle_Drop_Lat.TabIndex = 8;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(13, 103);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(151, 13);
+            this.label29.TabIndex = 7;
+            this.label29.Text = "Bottle Drop Waypoint Number:";
+            // 
+            // Bottle_Drop_WP_No
+            // 
+            this.Bottle_Drop_WP_No.Location = new System.Drawing.Point(16, 119);
+            this.Bottle_Drop_WP_No.Name = "Bottle_Drop_WP_No";
+            this.Bottle_Drop_WP_No.Size = new System.Drawing.Size(120, 20);
+            this.Bottle_Drop_WP_No.TabIndex = 6;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.Location = new System.Drawing.Point(10, 13);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(150, 31);
+            this.label28.TabIndex = 5;
+            this.label28.Text = "Bottle Drop";
             // 
             // InteropMap_ContextMenuStrip
             // 
@@ -1506,24 +2058,53 @@
             this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gMapControl1_KeyPress);
             // 
-            // button7
+            // AUVSI_Alt_Label
             // 
-            this.button7.Location = new System.Drawing.Point(44, 376);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(144, 23);
-            this.button7.TabIndex = 7;
-            this.button7.Text = "Start Server";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
+            this.AUVSI_Alt_Label.AutoSize = true;
+            this.AUVSI_Alt_Label.Location = new System.Drawing.Point(297, 27);
+            this.AUVSI_Alt_Label.Name = "AUVSI_Alt_Label";
+            this.AUVSI_Alt_Label.Size = new System.Drawing.Size(70, 13);
+            this.AUVSI_Alt_Label.TabIndex = 20;
+            this.AUVSI_Alt_Label.Text = "UAS Altitude:";
+            // 
+            // AUVSI_ARSPD_Label
+            // 
+            this.AUVSI_ARSPD_Label.AutoSize = true;
+            this.AUVSI_ARSPD_Label.Location = new System.Drawing.Point(297, 40);
+            this.AUVSI_ARSPD_Label.Name = "AUVSI_ARSPD_Label";
+            this.AUVSI_ARSPD_Label.Size = new System.Drawing.Size(79, 13);
+            this.AUVSI_ARSPD_Label.TabIndex = 21;
+            this.AUVSI_ARSPD_Label.Text = "UAS Airspeed: ";
+            // 
+            // Image_Upload_Add_Target
+            // 
+            this.Image_Upload_Add_Target.Location = new System.Drawing.Point(179, 48);
+            this.Image_Upload_Add_Target.Name = "Image_Upload_Add_Target";
+            this.Image_Upload_Add_Target.Size = new System.Drawing.Size(75, 23);
+            this.Image_Upload_Add_Target.TabIndex = 29;
+            this.Image_Upload_Add_Target.Text = "Add Target";
+            this.Image_Upload_Add_Target.UseVisualStyleBackColor = true;
+            this.Image_Upload_Add_Target.Click += new System.EventHandler(this.Image_Upload_Add_Target_Click);
+            // 
+            // Image_Upload_Select_Image_Button
+            // 
+            this.Image_Upload_Select_Image_Button.Location = new System.Drawing.Point(158, 352);
+            this.Image_Upload_Select_Image_Button.Name = "Image_Upload_Select_Image_Button";
+            this.Image_Upload_Select_Image_Button.Size = new System.Drawing.Size(96, 23);
+            this.Image_Upload_Select_Image_Button.TabIndex = 30;
+            this.Image_Upload_Select_Image_Button.Text = "Select Image";
+            this.Image_Upload_Select_Image_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Select_Image_Button.Click += new System.EventHandler(this.Image_Upload_Select_Image_Button_Click);
             // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.Controls.Add(this.AUVSI_ARSPD_Label);
+            this.Controls.Add(this.AUVSI_Alt_Label);
             this.Controls.Add(this.FlightTimeLabel);
             this.Controls.Add(this.Flight_Time_Label);
-            this.Controls.Add(this.MissionPlannerMenuAddon);
             this.Controls.Add(this.Interop_GUI_menuStrip);
             this.Controls.Add(this.UAS_D_Altitude_Label);
             this.Controls.Add(this.label15);
@@ -1534,6 +2115,7 @@
             this.Controls.Add(this.UAS_GPS_Label);
             this.Controls.Add(this.Interoperability_GUI_Tab);
             this.Controls.Add(this.gMapControl1);
+            this.Controls.Add(this.MissionPlannerMenuAddon);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MissionPlannerMenuAddon;
@@ -1551,12 +2133,18 @@
             this.Map_Tab.ResumeLayout(false);
             this.Map_Tab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
+            this.TargetUpload_Tab.ResumeLayout(false);
+            this.TargetUpload_Tab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).EndInit();
             this.Callout_Tab.ResumeLayout(false);
             this.Callout_Tab.PerformLayout();
             this.Goose_Tab.ResumeLayout(false);
             this.Goose_Tab.PerformLayout();
             this.Solar_PV_Tab_Page.ResumeLayout(false);
             this.Solar_PV_Tab_Page.PerformLayout();
+            this.Bottle_Drop_Tab.ResumeLayout(false);
+            this.Bottle_Drop_Tab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Bottle_Drop_WP_No)).EndInit();
             this.InteropMap_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlanner_ContextMenuStrip.ResumeLayout(false);
             this.MissionPlannerMenuAddon.ResumeLayout(false);
@@ -1694,12 +2282,59 @@
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.CheckBox PV_Start_Drone_Control;
         private System.Windows.Forms.Button SDA_Import_WP;
-        private System.Windows.Forms.Button solarPV_API_Call;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.TextBox telemetry_data_textbox;
         private System.Windows.Forms.Button dronepv_writewp_button;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Label clickme;
+        private System.Windows.Forms.Label Char_Cell_Voltage_Text;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button Auto_Drone_Control_Button;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TextBox PV_Status_TextBox;
+        private System.Windows.Forms.Button Start_PV_Power_Read_Button;
+        private System.Windows.Forms.Label Solar_Cell_Temperature_Text;
+        private System.Windows.Forms.Label expected_panel_power_output_label;
+        private System.Windows.Forms.Label panel_power_output_label;
+        private System.Windows.Forms.Label last_panel_update_label;
+        private System.Windows.Forms.Label AUVSI_Alt_Label;
+        private System.Windows.Forms.Label AUVSI_ARSPD_Label;
+        private System.Windows.Forms.TabPage Bottle_Drop_Tab;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.NumericUpDown Bottle_Drop_WP_No;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.TextBox Bottle_Drop_Long;
+        private System.Windows.Forms.TextBox Bottle_Drop_Lat;
+        private System.Windows.Forms.Button bottle_drop_start_button;
+        private System.Windows.Forms.TextBox Bottle_Drop_Status;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.PictureBox Image_Upload_Picture;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.ComboBox Image_Upload_Target_Select;
+        private System.Windows.Forms.Button Image_Upload_Download_Button;
+        private System.Windows.Forms.Button Image_Upload_Upload_Button;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.Label label38;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.ComboBox Image_Upload_Background_Colour;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.ComboBox Image_Upload_Shape;
+        private System.Windows.Forms.ComboBox Image_Upload_Alphanumeric_Colour;
+        private System.Windows.Forms.TextBox Image_Upload_Alphanumeric;
+        private System.Windows.Forms.ComboBox Image_Upload_Orientation;
+        private System.Windows.Forms.TextBox Image_Upload_Longitude;
+        private System.Windows.Forms.TextBox Image_Upload_Latitude;
+        private System.Windows.Forms.TextBox Image_Upload_Description;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.ComboBox Image_Upload_Type;
+        private System.Windows.Forms.Button Image_Upload_Add_Target;
+        private System.Windows.Forms.Button Image_Upload_Select_Image_Button;
     }
 }
