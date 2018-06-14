@@ -111,7 +111,6 @@
             this.label38 = new System.Windows.Forms.Label();
             this.label36 = new System.Windows.Forms.Label();
             this.label35 = new System.Windows.Forms.Label();
-            this.Image_Upload_Picture = new System.Windows.Forms.PictureBox();
             this.label34 = new System.Windows.Forms.Label();
             this.Image_Upload_Target_Select = new System.Windows.Forms.ComboBox();
             this.Image_Upload_Delete_Button = new System.Windows.Forms.Button();
@@ -188,7 +187,6 @@
             this.MissionPlanner_ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showInteroperabilityControlPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MissionPlannerMenuAddon = new System.Windows.Forms.MenuStrip();
-            this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
             this.FlightTimeLabel = new System.Windows.Forms.Label();
             this.Interop_GUI_menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -215,6 +213,8 @@
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.AUVSI_Alt_Label = new System.Windows.Forms.Label();
             this.AUVSI_ARSPD_Label = new System.Windows.Forms.Label();
+            this.Image_Upload_Picture = new System.Windows.Forms.PictureBox();
+            this.InteropGUIButton = new System.Windows.Forms.ToolStripMenuItem();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -222,7 +222,6 @@
             this.Map_Tab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).BeginInit();
             this.TargetUpload_Tab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).BeginInit();
             this.Callout_Tab.SuspendLayout();
             this.Goose_Tab.SuspendLayout();
             this.Solar_PV_Tab_Page.SuspendLayout();
@@ -232,6 +231,7 @@
             this.MissionPlanner_ContextMenuStrip.SuspendLayout();
             this.MissionPlannerMenuAddon.SuspendLayout();
             this.Interop_GUI_menuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -1028,7 +1028,7 @@
             // Image_Upload_Alphanumeric
             // 
             this.Image_Upload_Alphanumeric.Location = new System.Drawing.Point(158, 277);
-            this.Image_Upload_Alphanumeric.MaxLength = 1;
+            this.Image_Upload_Alphanumeric.MaxLength = 20;
             this.Image_Upload_Alphanumeric.Name = "Image_Upload_Alphanumeric";
             this.Image_Upload_Alphanumeric.Size = new System.Drawing.Size(100, 20);
             this.Image_Upload_Alphanumeric.TabIndex = 22;
@@ -1163,16 +1163,6 @@
             this.label35.Size = new System.Drawing.Size(77, 13);
             this.label35.TabIndex = 9;
             this.label35.Text = "Image Preview";
-            // 
-            // Image_Upload_Picture
-            // 
-            this.Image_Upload_Picture.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Image_Upload_Picture.Location = new System.Drawing.Point(16, 470);
-            this.Image_Upload_Picture.Name = "Image_Upload_Picture";
-            this.Image_Upload_Picture.Size = new System.Drawing.Size(242, 109);
-            this.Image_Upload_Picture.TabIndex = 8;
-            this.Image_Upload_Picture.TabStop = false;
-            this.Image_Upload_Picture.DoubleClick += new System.EventHandler(this.Image_Upload_Picture_DoubleClick);
             // 
             // label34
             // 
@@ -1931,21 +1921,6 @@
             this.MissionPlannerMenuAddon.Text = "menuStrip1";
             this.MissionPlannerMenuAddon.Visible = false;
             // 
-            // InteropGUIButton
-            // 
-            this.InteropGUIButton.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.InteropGUIButton.ForeColor = System.Drawing.Color.White;
-            this.InteropGUIButton.Image = global::interoperability.Properties.Resources.Interop_Icon;
-            this.InteropGUIButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.InteropGUIButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.InteropGUIButton.Name = "InteropGUIButton";
-            this.InteropGUIButton.Size = new System.Drawing.Size(89, 63);
-            this.InteropGUIButton.Text = "UTAT INTEROP";
-            this.InteropGUIButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.InteropGUIButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
-            this.InteropGUIButton.ToolTipText = "UTAT Interoperability Control Panel";
-            this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
-            // 
             // FlightTimeLabel
             // 
             this.FlightTimeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -2020,7 +1995,7 @@
             // openSettingsToolStripMenuItem
             // 
             this.openSettingsToolStripMenuItem.Name = "openSettingsToolStripMenuItem";
-            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.openSettingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openSettingsToolStripMenuItem.Text = "Options";
             this.openSettingsToolStripMenuItem.Click += new System.EventHandler(this.openSettingsToolStripMenuItem_Click);
             // 
@@ -2180,6 +2155,31 @@
             this.AUVSI_ARSPD_Label.TabIndex = 21;
             this.AUVSI_ARSPD_Label.Text = "UAS Airspeed: ";
             // 
+            // Image_Upload_Picture
+            // 
+            this.Image_Upload_Picture.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.Image_Upload_Picture.Location = new System.Drawing.Point(16, 470);
+            this.Image_Upload_Picture.Name = "Image_Upload_Picture";
+            this.Image_Upload_Picture.Size = new System.Drawing.Size(242, 109);
+            this.Image_Upload_Picture.TabIndex = 8;
+            this.Image_Upload_Picture.TabStop = false;
+            this.Image_Upload_Picture.DoubleClick += new System.EventHandler(this.Image_Upload_Picture_DoubleClick);
+            // 
+            // InteropGUIButton
+            // 
+            this.InteropGUIButton.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.InteropGUIButton.ForeColor = System.Drawing.Color.White;
+            this.InteropGUIButton.Image = global::interoperability.Properties.Resources.Interop_Icon;
+            this.InteropGUIButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.InteropGUIButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.InteropGUIButton.Name = "InteropGUIButton";
+            this.InteropGUIButton.Size = new System.Drawing.Size(89, 63);
+            this.InteropGUIButton.Text = "UTAT INTEROP";
+            this.InteropGUIButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.InteropGUIButton.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
+            this.InteropGUIButton.ToolTipText = "UTAT Interoperability Control Panel";
+            this.InteropGUIButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.InteropGUIButton_MouseUp);
+            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2219,7 +2219,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.UAS_Trackbar)).EndInit();
             this.TargetUpload_Tab.ResumeLayout(false);
             this.TargetUpload_Tab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).EndInit();
             this.Callout_Tab.ResumeLayout(false);
             this.Callout_Tab.PerformLayout();
             this.Goose_Tab.ResumeLayout(false);
@@ -2235,6 +2234,7 @@
             this.MissionPlannerMenuAddon.PerformLayout();
             this.Interop_GUI_menuStrip.ResumeLayout(false);
             this.Interop_GUI_menuStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Image_Upload_Picture)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -1921,21 +1921,23 @@ namespace Interoperability_GUI_Forms
                         //Upload Image
                         if (i.image != null)
                         {
+                            Console.WriteLine("1");
                             //convert filestream to byte array
                             MemoryStream stream = new MemoryStream();
                             i.image.Save(stream, ImageFormat.Jpeg);
 
                             byte[] fileBytes;
                             fileBytes = stream.ToArray();
+                            stream.Close();
 
-
+                            
                             //load the image byte[] into a System.Net.Http.ByteArrayContent
                             var imageBinaryContent = new ByteArrayContent(fileBytes);
-
+                            
                             //create a System.Net.Http.MultiPartFormDataContent
                             ByteArrayContent content2 = new ByteArrayContent(fileBytes);
                             content2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
-
+                     
                             //make the POST request using the URI enpoint and the MultiPartFormDataContent
                             results = await client.PostAsync("/api/odlcs/" + temp_deseralizer.id.ToString() + "/image", content2);
                             Console.WriteLine(results.StatusCode.ToString());
@@ -2271,7 +2273,7 @@ namespace Interoperability_GUI_Forms
                 try
                 {
                     Bitmap MyImage;
-                    Image_Upload_Picture.SizeMode = PictureBoxSizeMode.StretchImage;
+                    Image_Upload_Picture.SizeMode = PictureBoxSizeMode.Zoom;
                     MyImage = new Bitmap(openFileDialog1.FileName);
                     Image_Upload_Picture.Image = MyImage;
                     Target_List[index].image = MyImage;
@@ -2434,10 +2436,19 @@ namespace Interoperability_GUI_Forms
                         }
 
 
-                        using (FileStream stream = File.Open(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".jpg", FileMode.Open))
-                        {
-                            Target_List[Target_List.Count - 1].image = new Bitmap(stream);
-                        }
+                        //using (FileStream stream = File.Open(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".jpg", FileMode.Open))
+                        //{
+                        Bitmap MyImage;
+                        MyImage = new Bitmap(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".jpg");
+                        Target_List[Target_List.Count - 1].image = MyImage;
+                            //stream.Close();
+                        //}
+
+                        //Bitmap MyImage;
+                        //Image_Upload_Picture.SizeMode = PictureBoxSizeMode.Zoom;
+                        //MyImage = new Bitmap(openFileDialog1.FileName);
+                        //Image_Upload_Picture.Image = MyImage;
+                        //Target_List[index].image = MyImage;
 
 
 
@@ -2525,7 +2536,8 @@ namespace Interoperability_GUI_Forms
 
         private void Image_Upload_Picture_DoubleClick(object sender, EventArgs e)
         {
-            Target_Crop window = new Target_Crop();
+            int index = Image_Upload_Target_Select.SelectedIndex;
+            Image_View window = new Image_View(Target_List[index].image);
             window.ShowDialog();
         }
     }

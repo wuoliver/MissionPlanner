@@ -125,11 +125,11 @@
     <Compile Include="Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
-    <Compile Include="Target_Crop.cs">
+    <Compile Include="Image_View.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Target_Crop.Designer.cs">
-      <DependentUpon>Target_Crop.cs</DependentUpon>
+    <Compile Include="Image_View.Designer.cs">
+      <DependentUpon>Image_View.cs</DependentUpon>
     </Compile>
     <Compile Include="TriDiagonalMatrix.cs" />
   </ItemGroup>
@@ -173,8 +173,8 @@
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Target_Crop.resx">
-      <DependentUpon>Target_Crop.cs</DependentUpon>
+    <EmbeddedResource Include="Image_View.resx">
+      <DependentUpon>Image_View.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
