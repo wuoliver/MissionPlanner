@@ -11,6 +11,7 @@ using System.Xml;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
+using GMap.NET.WindowsForms.Markers;
 using MissionPlanner;
 using MissionPlanner.Utilities;
 using MissionPlanner.GCSViews;
@@ -210,6 +211,8 @@ namespace interoperability
             {
                 Host.MainForm.MainMenu.Items[2].Name = "Drone PV";
             }
+
+            FP_Obstacle_Overlays = new GMapOverlay();
 
             // MyView.AddScreen(new MainSwitcher.Screen("FlightData", FlightData, true));
             //Start Important Timer
@@ -1359,7 +1362,7 @@ namespace interoperability
 
                             var telem = new FormUrlEncodedContent(telemData);
                             HttpResponseMessage telemresp = await client.PostAsync("/api/telemetry", telem);
-                            Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
+                            //Console.WriteLine("Server_info GET result: " + telemresp.Content.ReadAsStringAsync().Result);
                             Interoperability_GUI.setTelemResp(telemresp.Content.ReadAsStringAsync().Result);
                             count++;
                             Interoperability_GUI.setTotalTelemUpload(count);
@@ -2371,6 +2374,37 @@ namespace interoperability
             mapinvalidateImage = true;
         }
 
+        GMapOverlay FP_Obstacle_Overlays;
+
+        private void FP_Map_Control(double radius, double altitude, double Lat, double Lon)
+        {
+
+            GMapPolygon polygon = new GMapPolygon(Interoperability_GUI.getCirclePoly(radius, Lat, Lon), "name");
+            polygon.Stroke = new Pen(Color.Red, 2);
+            polygon.Fill = new SolidBrush(Color.FromArgb(100, Color.RoyalBlue));
+            FP_Obstacle_Overlays.Polygons.Add(polygon);
+
+            //Show the altitude of the obstacle
+            GMarkerGoogle marker = new GMarkerGoogle(new PointLatLng(Lat, Lon), new Bitmap(1, 1));
+            marker.ToolTipMode = MarkerTooltipMode.Always;
+            string altitudetext = "";
+            switch (Settings["dist_units"])
+            {
+                case "Meters":
+                    altitudetext = altitude.ToString("0");
+                    break;
+                case "Feet":
+                    altitudetext = (altitude * 3.28084).ToString("0");
+                    break;
+                default:
+                    altitudetext = altitude.ToString("0");
+                    break;
+            }
+            
+            marker.ToolTipText = altitudetext;
+            FP_Obstacle_Overlays.Markers.Add(marker);
+        }
+
         public void Map_Control()
         {
             Console.WriteLine("Map_Control Thread Started");
@@ -2449,6 +2483,12 @@ namespace interoperability
                 //Draw Obstacles 
                 if (Obstacles_Downloaded)
                 {
+                    this.Host.MainForm.BeginInvoke((MethodInvoker)delegate ()
+                    {
+                        Host.FPGMapControl.Overlays.Remove(FP_Obstacle_Overlays);
+                        Host.FPGMapControl.Overlays.Add(FP_Obstacle_Overlays);
+                    });
+                    FP_Obstacle_Overlays.Clear();
                     if (Interoperability_GUI.getDrawObstacles() && mapinvalidateObstacle)
                     {
                         for (int i = 0; i < obstaclesList.stationary_obstacles.Count(); i++)
@@ -2456,6 +2496,11 @@ namespace interoperability
                             Interoperability_GUI.MAP_addSObstaclePoly(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
                                 obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
                                 obstaclesList.stationary_obstacles[i].longitude, "Static_Obstacle" + i.ToString());
+
+
+                            FP_Map_Control(obstaclesList.stationary_obstacles[i].cylinder_radius * 0.3048,
+                                obstaclesList.stationary_obstacles[i].cylinder_height * 0.3048, obstaclesList.stationary_obstacles[i].latitude,
+                                obstaclesList.stationary_obstacles[i].longitude);
                         }
 
                         for (int i = 0; i < obstaclesList.moving_obstacles.Count(); i++)
@@ -2463,8 +2508,14 @@ namespace interoperability
                             Interoperability_GUI.MAP_addMObstaclePoly(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
                                obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
                                obstaclesList.moving_obstacles[i].longitude, "Moving_Obstacle" + i.ToString());
+
+
+                            FP_Map_Control(obstaclesList.moving_obstacles[i].sphere_radius * 0.3048,
+                                obstaclesList.moving_obstacles[i].altitude_msl * 0.3048, obstaclesList.moving_obstacles[i].latitude,
+                                obstaclesList.moving_obstacles[i].longitude);
                         }
                     }
+                   
                 }
 
                 //Draw geofence
@@ -2607,7 +2658,7 @@ namespace interoperability
                     }
                 }
 
-                
+            
                 switch (Host.config["speedunits"].ToString())
                 {
                     case "meters_per_second":

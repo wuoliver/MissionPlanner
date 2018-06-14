@@ -15,10 +15,50 @@ using GMap.NET.WindowsForms.Markers;
 namespace interoperability
 {
 
-
-    public class Image_Uploads_Target_ID
+    public class Image_Uploads_List
     {
-        public string id { get; set; }
+        public List<Image_Uploads> Targets;
+    }
+
+    public class Image_Uploads_Export_Type
+    {
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+        public string orientation { get; set; }
+        public string background_colour { get; set; }
+        public string alphanumeric { get; set; }
+        public string alphanumeric_colour { get; set; }
+        public string shape { get; set; }
+        public string description { get; set; }
+        public string type { get; set; }
+
+        public Image_Uploads_Export_Type()
+        {
+            latitude = "00.000000";
+            longitude = "00.000000";
+            orientation = "N";
+            background_colour = "white";
+            alphanumeric = "";
+            alphanumeric_colour = "white";
+            shape = "circle";
+            description = "";
+            type = "standard";
+        }
+
+
+        public Image_Uploads_Export_Type(Image_Uploads _image_uploads)
+        {
+            latitude = _image_uploads.latitude;
+            longitude = _image_uploads.longitude;
+            orientation = _image_uploads.orientation;
+            background_colour = _image_uploads.background_colour;
+            alphanumeric = _image_uploads.alphanumeric;
+            alphanumeric_colour = _image_uploads.alphanumeric_colour;
+            shape = _image_uploads.shape;
+            description = _image_uploads.description;
+            type = _image_uploads.type;
+        }
+
     }
 
     //Image Upload Class
@@ -34,11 +74,12 @@ namespace interoperability
         public string description { get; set; }
         public string type { get; set; }
         public Bitmap image { get; set; }
+        public string id { get; set; }
 
         public Image_Uploads()
         {
-            latitude = "";
-            longitude = "";
+            latitude = "00.000000";
+            longitude = "00.000000";
             orientation = "N";
             background_colour = "white";
             alphanumeric = "";
@@ -47,6 +88,7 @@ namespace interoperability
             description = "";
             type = "standard";
             image = null;
+            id = "";
         }
     }
 
@@ -59,11 +101,11 @@ namespace interoperability
     {
         //doCommand(MAV_CMD actionid, float p1, float p2, float p3, float p4, float p5, float p6, float p7, bool requireack = true)
         public MAVLink.MAV_CMD actionid { get; set; } = MAVLink.MAV_CMD.ENUM_END;
-        public float p1 { get; set; } = 0; 
-        public float p2 { get; set; } = 0; 
-        public float p3 { get; set; } = 0; 
-        public float p4 { get; set; } = 0; 
-        public float p5 { get; set; } = 0; 
+        public float p1 { get; set; } = 0;
+        public float p2 { get; set; } = 0;
+        public float p3 { get; set; } = 0;
+        public float p4 { get; set; } = 0;
+        public float p5 { get; set; } = 0;
         public float p6 { get; set; } = 0;
         public float p7 { get; set; } = 0;
         public bool requireack { get; set; } = true;
@@ -95,7 +137,7 @@ namespace interoperability
         public Interoperability.Interop_Action action { get; set; }
         public Mavlink_Command mav_command { get; set; }
         public MAVLink.mavlink_set_position_target_local_ned_t mav_position { get; set; }
- 
+
         public Interop_Callback_Struct(Interoperability.Interop_Action _action)
         {
             action = _action;
@@ -107,7 +149,7 @@ namespace interoperability
             mav_command = _mav_command;
         }
 
-        
+
         public Interop_Callback_Struct(Interoperability.Interop_Action _action, MAVLink.mavlink_set_position_target_local_ned_t _mav_position)
         {
             action = _action;

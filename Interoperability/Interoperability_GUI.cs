@@ -126,6 +126,7 @@ namespace Interoperability_GUI_Forms
 
             Target_List.Add(new Image_Uploads());
             Image_Upload_Target_Select.SelectedIndex = 0;
+            Image_Upload_Status_Text.Text = "";
         }
 
         private void Interoperability_GUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -505,7 +506,7 @@ namespace Interoperability_GUI_Forms
         {
             this.SDA_Obstacles.BeginInvoke((MethodInvoker)delegate ()
             {
-                Console.WriteLine("In setObstacles");
+                //Console.WriteLine("In setObstacles");
                 SDA_Obstacles.Text = "";
                 String Buffer = "";
                 Buffer += "MOVING OBJECTS\r\n";
@@ -1825,11 +1826,21 @@ namespace Interoperability_GUI_Forms
         //Image Upload Code
         async private void Image_Upload_Upload_Button_Click(object sender, EventArgs e)
         {
+
+            DialogResult result;
+            result = MessageBox.Show("Are you sure you want to upload?", "Interoperability Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+
+
+
             string address = Settings["address"];
             string username = Settings["username"];
             string password = Settings["password"];
 
             CookieContainer cookies = new CookieContainer();
+            int uploaded_count = 0;
+
+            Image_Upload_Status_Text.ForeColor = Color.Orange;
+            Image_Upload_Status_Text.Text = "Connecting to Server...";
 
             try
             {
@@ -1855,17 +1866,43 @@ namespace Interoperability_GUI_Forms
                     if (!resp.IsSuccessStatusCode)
                     {
                         Console.WriteLine("Invalid Credentials");
+                        Image_Upload_Status_Text.Text = "Connecting to Server...Failed";
                         return;
 
                     }
                     else
                     {
                         Console.WriteLine("Credentials Valid");
+                        Image_Upload_Status_Text.Text = "Connecting to Server...Done";
                     }
 
 
-                    Image_Uploads_Target_ID temp_deseralizer = new Image_Uploads_Target_ID();
+                    Image_Uploads temp_deseralizer = new Image_Uploads();
+                    //Image_Uploads_List uploaded_images_list = new Image_Uploads_List();
 
+
+
+                    List<Image_Uploads> Targets = new List<Image_Uploads>();
+                    //Easiest way to get rid of accidental duplicates is to delete everything off the server, then re-upload
+                    var data = await client.GetAsync("/api/odlcs");
+                    Targets = new JavaScriptSerializer().Deserialize<List<Image_Uploads>>(data.Content.ReadAsStringAsync().Result);
+
+                    if (Targets.Count != 0 && Image_Upload_Delete_Server_Images_Checkbox.Checked == true)
+                    {
+                        foreach (Image_Uploads i in Targets)
+                        {
+                            data = await client.DeleteAsync("/api/odlcs/" + i.id.ToString());
+                            Console.WriteLine("Deleting Target ID: " + i.id.ToString());
+                            Console.WriteLine("Server Response: " + data.Content.ReadAsStringAsync().Result);
+                        }
+                    }
+
+
+
+
+
+
+                    Image_Upload_Status_Text.Text = "Connecting to Server...Done\nUploading..." + "0/" + Target_List.Count.ToString();
                     foreach (Image_Uploads i in Target_List)
                     {
 
@@ -1873,83 +1910,123 @@ namespace Interoperability_GUI_Forms
                         string thing = new JavaScriptSerializer().Serialize(i);
 
                         var content = new StringContent(thing, Encoding.UTF8, "application/json");
-                        var result = await client.PostAsync("/api/odlcs", content);
+                        var results = await client.PostAsync("/api/odlcs", content);
 
-                        Console.WriteLine("Server_info GET result: " + result.Content.ReadAsStringAsync().Result);
-                        temp_deseralizer = new JavaScriptSerializer().Deserialize<Image_Uploads_Target_ID>(result.Content.ReadAsStringAsync().Result);
+                        Console.WriteLine("Server Image Upload GET result: " + results.Content.ReadAsStringAsync().Result);
+                        temp_deseralizer = new JavaScriptSerializer().Deserialize<Image_Uploads>(results.Content.ReadAsStringAsync().Result);
 
                         Console.WriteLine("TARGET ID:" + temp_deseralizer.id.ToString());
-
-
+                        i.id = temp_deseralizer.id;
 
                         //Upload Image
+                        if (i.image != null)
+                        {
+                            //convert filestream to byte array
+                            MemoryStream stream = new MemoryStream();
+                            i.image.Save(stream, ImageFormat.Jpeg);
 
-                        //convert filestream to byte array
-                        MemoryStream stream = new MemoryStream();
-                        i.image.Save(stream, ImageFormat.Jpeg);
-
-                        byte[] fileBytes;
-                        fileBytes = stream.ToArray();
-
-
-                        //load the image byte[] into a System.Net.Http.ByteArrayContent
-                        var imageBinaryContent = new ByteArrayContent(fileBytes);
-
-                        //create a System.Net.Http.MultiPartFormDataContent
-                        ByteArrayContent content2 = new ByteArrayContent(fileBytes);
-                        content2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
-
-                        //make the POST request using the URI enpoint and the MultiPartFormDataContent
-                        result = await client.PostAsync("/api/odlcs/" + temp_deseralizer.id.ToString() + "/image", content2);
-                        Console.WriteLine(result.StatusCode.ToString());
-                        Console.WriteLine(result.Content.ReadAsStringAsync().Result);
+                            byte[] fileBytes;
+                            fileBytes = stream.ToArray();
 
 
+                            //load the image byte[] into a System.Net.Http.ByteArrayContent
+                            var imageBinaryContent = new ByteArrayContent(fileBytes);
 
+                            //create a System.Net.Http.MultiPartFormDataContent
+                            ByteArrayContent content2 = new ByteArrayContent(fileBytes);
+                            content2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+
+                            //make the POST request using the URI enpoint and the MultiPartFormDataContent
+                            results = await client.PostAsync("/api/odlcs/" + temp_deseralizer.id.ToString() + "/image", content2);
+                            Console.WriteLine(results.StatusCode.ToString());
+                            Console.WriteLine(results.Content.ReadAsStringAsync().Result);
+                        }
+
+                        uploaded_count++;
+                        Image_Upload_Status_Text.Text = "Connecting to Server...Done\nUploading..." + uploaded_count.ToString() + "/" + Target_List.Count.ToString();
                     }
+
+                    int index = Image_Upload_Target_Select.SelectedIndex;
+                    Image_Upload_Submission_ID.Text = Target_List[index].id;
 
                 }
             }
 
-            //If this exception is thrown, then the thread will end soon after. Have no way to restart manually unless I get the loop working
             catch (Exception c)
             {
                 Console.WriteLine("Error, exception thrown in Image upload thread");
                 Console.WriteLine(c.Message);
                 Console.WriteLine(c.InnerException);
+
+                Image_Upload_Status_Text.ForeColor = Color.Red;
+                Image_Upload_Status_Text.Text = "Error! " + uploaded_count.ToString() + "/" + Target_List.Count.ToString() + " targets uploaded.";
+                return;
             }
+
+            Image_Upload_Status_Text.ForeColor = Color.ForestGreen;
+            Image_Upload_Status_Text.Text = "Success! " + uploaded_count.ToString() + "/" + Target_List.Count.ToString() + " targets uploaded.";
         }
 
-        private void Image_Upload_Download_Button_Click(object sender, EventArgs e)
+        private void Image_Upload_Delete_Button_Click(object sender, EventArgs e)
         {
-            //Don't do anything here yet
+            DialogResult result;
+            result = MessageBox.Show("Are you sure you want to Delete?", "Interoperability Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+
+            if (result == DialogResult.Yes)
+            {
+
+
+                int index = Image_Upload_Target_Select.SelectedIndex;
+
+                if (Image_Upload_Target_Select.Items.Count == 1)
+                {
+                    Target_List.RemoveAt(index);
+                    Image_Upload_Target_Select.Items.RemoveAt(index);
+                    Image_Upload_Add_Target_Click(null, null);
+                }
+                else
+                {
+                    Target_List.RemoveAt(index);
+                    Image_Upload_Target_Select.Items.RemoveAt(index);
+                    if (index == 0)
+                    {
+                        Image_Upload_Target_Select.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        Image_Upload_Target_Select.SelectedIndex = index - 1;
+                    }
+
+                }
+
+            }
+
+
+
         }
 
         bool Image_Upload_Ignore = false;
 
         private void Image_Upload_Add_Target_Click(object sender, EventArgs e)
         {
-            Image_Upload_Target_Select.Items.Insert(Image_Upload_Target_Select.Items.Count, "Target" + (Image_Upload_Target_Select.Items.Count + 1).ToString());
+            Image_Upload_Target_Select.Items.Insert(Image_Upload_Target_Select.Items.Count, "Target " + (Image_Upload_Target_Select.Items.Count + 1).ToString());
             Target_List.Add(new Image_Uploads());
 
             //prevent infinite loops 
             Image_Upload_Ignore = true;
-
             Image_Upload_Target_Select.SelectedIndex = Image_Upload_Target_Select.Items.Count - 1;
-
             Image_Upload_Ignore = false;
 
-            Image_Upload_Latitude.Text = "";
-            Image_Upload_Longitude.Text = "";
+
+            Image_Upload_Latitude.Text = "00.000000";
+            Image_Upload_Longitude.Text = "00.000000";
             Image_Upload_Orientation.SelectedIndex = 0;
             Image_Upload_Shape.SelectedIndex = 0;
             Image_Upload_Type.SelectedIndex = 0;
             Image_Upload_Alphanumeric.Text = "";
             Image_Upload_Alphanumeric_Colour.SelectedIndex = 0;
             Image_Upload_Background_Colour.SelectedIndex = 0;
-
-
-
+            Image_Upload_Submission_ID.Text = "";
 
         }
 
@@ -1997,7 +2074,7 @@ namespace Interoperability_GUI_Forms
             Image_Upload_Background_Colour.SelectedIndex = Image_Upload_Colour_to_Index(Target_List[index].background_colour);
             Image_Upload_Description.Text = Target_List[index].description;
             Image_Upload_Picture.Image = Target_List[index].image;
-
+            Image_Upload_Submission_ID.Text = Target_List[index].id;
 
             if (Image_Upload_Type.SelectedIndex != 2)
             {
@@ -2007,13 +2084,6 @@ namespace Interoperability_GUI_Forms
             {
                 Image_Upload_Description.ReadOnly = false;
             }
-
-
-            // Stretches the image to fit the pictureBox.
-            /*pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            MyImage = new Bitmap(fileToDisplay);
-            pictureBox1.ClientSize = new Size(xSize, ySize);
-            pictureBox1.Image = (Image)MyImage;*/
 
         }
 
@@ -2187,10 +2257,9 @@ namespace Interoperability_GUI_Forms
 
         private void Image_Upload_Select_Image_Button_Click(object sender, EventArgs e)
         {
-            Stream myStream = null;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
-            openFileDialog1.InitialDirectory = "c:\\";
+            //openFileDialog1.InitialDirectory = "c:\\";
             openFileDialog1.Filter = "jpg files (*.jpg)|*.txt|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
@@ -2209,9 +2278,7 @@ namespace Interoperability_GUI_Forms
                 }
                 catch (Exception ex)
                 {
-
                     MessageBox.Show("Error, Invalid Image File.\n" + ex.Message, "Interoperability Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
                 }
             }
         }
@@ -2229,7 +2296,7 @@ namespace Interoperability_GUI_Forms
                 e.Handled = true;
             }
 
-            // only allow one decimal point
+            // only allow one dash
             if ((e.KeyChar == '-') && ((sender as TextBox).Text.IndexOf('-') > -1))
             {
                 e.Handled = true;
@@ -2256,6 +2323,211 @@ namespace Interoperability_GUI_Forms
             }
         }
 
+        private void Image_Upload_Target_Export_Button_Click(object sender, EventArgs e)
+        {
+            Stream myStream;
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+
+
+
+                string sourceDirectory = Path.GetDirectoryName(saveFileDialog1.FileName);
+                FileStream file;
+
+
+
+                //Interoperability.Interoperability_Mutex.ReleaseMutex();
+                string thing;
+                byte[] byteArray;
+
+                Console.WriteLine("Chosen Directory is : " + sourceDirectory);
+
+                int j = 0;
+                foreach (Image_Uploads i in Target_List)
+                {
+                    file = File.Open(sourceDirectory + "/" + j.ToString() + ".json", FileMode.OpenOrCreate);
+                    thing = new JavaScriptSerializer().Serialize(new Image_Uploads_Export_Type(i));
+                    byteArray = Encoding.UTF8.GetBytes(thing);
+                    file.Write(byteArray, 0, byteArray.Length);
+                    file.Close();
+
+
+                    if (i.image != null)
+                    {
+                        //convert filestream to byte array
+                        MemoryStream stream = new MemoryStream();
+                        i.image.Save(stream, ImageFormat.Jpeg);
+
+                        byte[] fileBytes;
+                        fileBytes = stream.ToArray();
+
+                        file = File.Open(sourceDirectory + "/" + j.ToString() + ".jpg", FileMode.OpenOrCreate);
+                        file.Write(fileBytes, 0, fileBytes.Length);
+                        file.Close();
+
+                    }
+
+                    j++;
+                }
+
+
+            }
+        }
+
+        private void Image_Upload_Folder_Import_Button_Click(object sender, EventArgs e)
+        {
+
+            OpenFileDialog _openfiledialog = new OpenFileDialog();
+            _openfiledialog.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            _openfiledialog.FilterIndex = 2;
+            _openfiledialog.RestoreDirectory = true;
+
+
+            if (_openfiledialog.ShowDialog() == DialogResult.OK)
+            {
+                string path = Path.GetDirectoryName(_openfiledialog.FileName);
+                string[] Files = Directory.GetFiles(path);
+                Array.Sort(Files);
+
+                Image_Uploads_Export_Type temp_serialize;
+
+                foreach (string i in Files)
+                {
+
+                    /*Console.WriteLine(i);
+                    Console.WriteLine(Path.GetFileName(i));
+                    Console.WriteLine(Path.GetPathRoot(i));
+                    Console.WriteLine(Path.GetFileNameWithoutExtension(i));
+                    Console.WriteLine(Path.GetDirectoryName(i));*/
+
+
+                    if (Path.GetExtension(i) == ".jpg")
+                    {
+                        //Ignore, becuase we assume the jpg always exists with the json. (Yihtang promises) 
+                    }
+                    else if (Path.GetExtension(i) == ".json")
+                    {
+                        Image_Upload_Target_Select.Items.Insert(Image_Upload_Target_Select.Items.Count, "Target " + (Image_Upload_Target_Select.Items.Count + 1).ToString());
+                        Target_List.Add(new Image_Uploads());
+
+                        //prevent infinite loops 
+                        Image_Upload_Ignore = true;
+                        Image_Upload_Target_Select.SelectedIndex = Image_Upload_Target_Select.Items.Count - 1;
+                        Image_Upload_Ignore = false;
+
+                        string fileContents;
+                        using (FileStream stream = File.Open(i, FileMode.Open))
+                        {
+
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                fileContents = reader.ReadToEnd();
+                            }
+
+                            stream.Close();
+                        }
+
+
+                        using (FileStream stream = File.Open(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".jpg", FileMode.Open))
+                        {
+                            Target_List[Target_List.Count - 1].image = new Bitmap(stream);
+                        }
+
+
+
+
+                        temp_serialize = new JavaScriptSerializer().Deserialize<Image_Uploads_Export_Type>(fileContents);
+
+
+
+                        Image_Upload_Latitude.Text = temp_serialize.latitude;
+                        Image_Upload_Longitude.Text = temp_serialize.longitude;
+                        Image_Upload_Orientation.SelectedIndex = Image_Upload_Orientation_to_Index(temp_serialize.orientation);
+                        Image_Upload_Shape.SelectedIndex = Image_Upload_Shape_to_Index(temp_serialize.shape);
+                        Image_Upload_Type.SelectedIndex = Image_Upload_Type_to_Index(temp_serialize.type);
+                        Image_Upload_Alphanumeric.Text = temp_serialize.alphanumeric;
+                        Image_Upload_Alphanumeric_Colour.SelectedIndex = Image_Upload_Colour_to_Index(temp_serialize.alphanumeric_colour);
+                        Image_Upload_Background_Colour.SelectedIndex = Image_Upload_Colour_to_Index(temp_serialize.background_colour);
+                        Image_Upload_Picture.Image = Target_List[Target_List.Count - 1].image;
+
+                    }
+
+
+
+
+                }
+
+            }
+        }
+
+        private void Image_Upload_Target_Import_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog _openfiledialog = new OpenFileDialog();
+            _openfiledialog.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
+            _openfiledialog.FilterIndex = 2;
+            _openfiledialog.RestoreDirectory = true;
+
+
+            if (_openfiledialog.ShowDialog() == DialogResult.OK)
+            {
+
+                string i = _openfiledialog.FileName;
+
+                Image_Uploads_Export_Type temp_serialize;
+
+                Image_Upload_Target_Select.Items.Insert(Image_Upload_Target_Select.Items.Count, "Target " + (Image_Upload_Target_Select.Items.Count + 1).ToString());
+                Target_List.Add(new Image_Uploads());
+
+
+                //prevent infinite loops 
+                Image_Upload_Ignore = true;
+                Image_Upload_Target_Select.SelectedIndex = Image_Upload_Target_Select.Items.Count - 1;
+                Image_Upload_Ignore = false;
+
+                string fileContents;
+                using (FileStream stream = File.Open(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".json", FileMode.Open))
+                {
+
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        fileContents = reader.ReadToEnd();
+                    }
+
+                    stream.Close();
+                }
+
+
+                using (FileStream stream = File.Open(Path.GetDirectoryName(i) + "/" + Path.GetFileNameWithoutExtension(i) + ".jpg", FileMode.Open))
+                {
+                    Target_List[Target_List.Count - 1].image = new Bitmap(stream);
+                }
+
+                temp_serialize = new JavaScriptSerializer().Deserialize<Image_Uploads_Export_Type>(fileContents);
+
+                Image_Upload_Latitude.Text = temp_serialize.latitude;
+                Image_Upload_Longitude.Text = temp_serialize.longitude;
+                Image_Upload_Orientation.SelectedIndex = Image_Upload_Orientation_to_Index(temp_serialize.orientation);
+                Image_Upload_Shape.SelectedIndex = Image_Upload_Shape_to_Index(temp_serialize.shape);
+                Image_Upload_Type.SelectedIndex = Image_Upload_Type_to_Index(temp_serialize.type);
+                Image_Upload_Alphanumeric.Text = temp_serialize.alphanumeric;
+                Image_Upload_Alphanumeric_Colour.SelectedIndex = Image_Upload_Colour_to_Index(temp_serialize.alphanumeric_colour);
+                Image_Upload_Background_Colour.SelectedIndex = Image_Upload_Colour_to_Index(temp_serialize.background_colour);
+                Image_Upload_Picture.Image = Target_List[Target_List.Count - 1].image;
+
+            }
+        }
+
+        private void Image_Upload_Picture_DoubleClick(object sender, EventArgs e)
+        {
+            Target_Crop window = new Target_Crop();
+            window.ShowDialog();
+        }
     }
 
 }

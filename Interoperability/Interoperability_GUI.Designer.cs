@@ -83,6 +83,15 @@
             this.label8 = new System.Windows.Forms.Label();
             this.Mission_Enable = new System.Windows.Forms.Button();
             this.TargetUpload_Tab = new System.Windows.Forms.TabPage();
+            this.Image_Upload_Folder_Import_Button = new System.Windows.Forms.Button();
+            this.Image_Upload_Target_Export_Button = new System.Windows.Forms.Button();
+            this.Image_Upload_Target_Import = new System.Windows.Forms.Button();
+            this.Image_Upload_Delete_Server_Images_Checkbox = new System.Windows.Forms.CheckBox();
+            this.Image_Upload_Status_Text = new System.Windows.Forms.Label();
+            this.Image_Upload_Submission_ID = new System.Windows.Forms.TextBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.Image_Upload_Select_Image_Button = new System.Windows.Forms.Button();
+            this.Image_Upload_Add_Target = new System.Windows.Forms.Button();
             this.Image_Upload_Description = new System.Windows.Forms.TextBox();
             this.label44 = new System.Windows.Forms.Label();
             this.label37 = new System.Windows.Forms.Label();
@@ -105,7 +114,7 @@
             this.Image_Upload_Picture = new System.Windows.Forms.PictureBox();
             this.label34 = new System.Windows.Forms.Label();
             this.Image_Upload_Target_Select = new System.Windows.Forms.ComboBox();
-            this.Image_Upload_Download_Button = new System.Windows.Forms.Button();
+            this.Image_Upload_Delete_Button = new System.Windows.Forms.Button();
             this.Image_Upload_Upload_Button = new System.Windows.Forms.Button();
             this.label33 = new System.Windows.Forms.Label();
             this.Callout_Tab = new System.Windows.Forms.TabPage();
@@ -206,8 +215,6 @@
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.AUVSI_Alt_Label = new System.Windows.Forms.Label();
             this.AUVSI_ARSPD_Label = new System.Windows.Forms.Label();
-            this.Image_Upload_Add_Target = new System.Windows.Forms.Button();
-            this.Image_Upload_Select_Image_Button = new System.Windows.Forms.Button();
             this.Interoperability_GUI_Tab.SuspendLayout();
             this.Telem_Tab.SuspendLayout();
             this.SDA_Tab.SuspendLayout();
@@ -319,7 +326,7 @@
             this.Interoperability_GUI_Tab.Location = new System.Drawing.Point(12, 27);
             this.Interoperability_GUI_Tab.Name = "Interoperability_GUI_Tab";
             this.Interoperability_GUI_Tab.SelectedIndex = 0;
-            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(279, 557);
+            this.Interoperability_GUI_Tab.Size = new System.Drawing.Size(279, 611);
             this.Interoperability_GUI_Tab.TabIndex = 8;
             // 
             // Telem_Tab
@@ -343,7 +350,7 @@
             this.Telem_Tab.Location = new System.Drawing.Point(4, 22);
             this.Telem_Tab.Name = "Telem_Tab";
             this.Telem_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Telem_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Telem_Tab.Size = new System.Drawing.Size(271, 585);
             this.Telem_Tab.TabIndex = 0;
             this.Telem_Tab.Text = "Telemetry ";
             this.Telem_Tab.UseVisualStyleBackColor = true;
@@ -444,7 +451,7 @@
             this.SDA_Tab.Location = new System.Drawing.Point(4, 22);
             this.SDA_Tab.Name = "SDA_Tab";
             this.SDA_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.SDA_Tab.Size = new System.Drawing.Size(271, 531);
+            this.SDA_Tab.Size = new System.Drawing.Size(271, 585);
             this.SDA_Tab.TabIndex = 1;
             this.SDA_Tab.Text = "SDA";
             this.SDA_Tab.UseVisualStyleBackColor = true;
@@ -618,7 +625,7 @@
             this.Map_Tab.Location = new System.Drawing.Point(4, 22);
             this.Map_Tab.Name = "Map_Tab";
             this.Map_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Map_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Map_Tab.Size = new System.Drawing.Size(271, 585);
             this.Map_Tab.TabIndex = 4;
             this.Map_Tab.Text = "Map Control";
             this.Map_Tab.UseVisualStyleBackColor = true;
@@ -803,6 +810,13 @@
             // 
             // TargetUpload_Tab
             // 
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Folder_Import_Button);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Target_Export_Button);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Target_Import);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Delete_Server_Images_Checkbox);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Status_Text);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Submission_ID);
+            this.TargetUpload_Tab.Controls.Add(this.label45);
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Select_Image_Button);
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Add_Target);
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Description);
@@ -827,20 +841,108 @@
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Picture);
             this.TargetUpload_Tab.Controls.Add(this.label34);
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Target_Select);
-            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Download_Button);
+            this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Delete_Button);
             this.TargetUpload_Tab.Controls.Add(this.Image_Upload_Upload_Button);
             this.TargetUpload_Tab.Controls.Add(this.label33);
             this.TargetUpload_Tab.Location = new System.Drawing.Point(4, 22);
             this.TargetUpload_Tab.Name = "TargetUpload_Tab";
             this.TargetUpload_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.TargetUpload_Tab.Size = new System.Drawing.Size(271, 531);
+            this.TargetUpload_Tab.Size = new System.Drawing.Size(271, 585);
             this.TargetUpload_Tab.TabIndex = 2;
             this.TargetUpload_Tab.Text = "Image Upload";
             this.TargetUpload_Tab.UseVisualStyleBackColor = true;
             // 
+            // Image_Upload_Folder_Import_Button
+            // 
+            this.Image_Upload_Folder_Import_Button.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Image_Upload_Folder_Import_Button.Location = new System.Drawing.Point(84, 48);
+            this.Image_Upload_Folder_Import_Button.Name = "Image_Upload_Folder_Import_Button";
+            this.Image_Upload_Folder_Import_Button.Size = new System.Drawing.Size(92, 23);
+            this.Image_Upload_Folder_Import_Button.TabIndex = 37;
+            this.Image_Upload_Folder_Import_Button.Text = "Folder Import";
+            this.Image_Upload_Folder_Import_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Folder_Import_Button.Click += new System.EventHandler(this.Image_Upload_Folder_Import_Button_Click);
+            // 
+            // Image_Upload_Target_Export_Button
+            // 
+            this.Image_Upload_Target_Export_Button.Location = new System.Drawing.Point(17, 77);
+            this.Image_Upload_Target_Export_Button.Name = "Image_Upload_Target_Export_Button";
+            this.Image_Upload_Target_Export_Button.Size = new System.Drawing.Size(57, 23);
+            this.Image_Upload_Target_Export_Button.TabIndex = 36;
+            this.Image_Upload_Target_Export_Button.Text = "Export";
+            this.Image_Upload_Target_Export_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Target_Export_Button.Click += new System.EventHandler(this.Image_Upload_Target_Export_Button_Click);
+            // 
+            // Image_Upload_Target_Import
+            // 
+            this.Image_Upload_Target_Import.Location = new System.Drawing.Point(17, 48);
+            this.Image_Upload_Target_Import.Name = "Image_Upload_Target_Import";
+            this.Image_Upload_Target_Import.Size = new System.Drawing.Size(57, 23);
+            this.Image_Upload_Target_Import.TabIndex = 35;
+            this.Image_Upload_Target_Import.Text = "Import";
+            this.Image_Upload_Target_Import.UseVisualStyleBackColor = true;
+            this.Image_Upload_Target_Import.Click += new System.EventHandler(this.Image_Upload_Target_Import_Click);
+            // 
+            // Image_Upload_Delete_Server_Images_Checkbox
+            // 
+            this.Image_Upload_Delete_Server_Images_Checkbox.AutoSize = true;
+            this.Image_Upload_Delete_Server_Images_Checkbox.Location = new System.Drawing.Point(93, 106);
+            this.Image_Upload_Delete_Server_Images_Checkbox.Name = "Image_Upload_Delete_Server_Images_Checkbox";
+            this.Image_Upload_Delete_Server_Images_Checkbox.Size = new System.Drawing.Size(90, 17);
+            this.Image_Upload_Delete_Server_Images_Checkbox.TabIndex = 34;
+            this.Image_Upload_Delete_Server_Images_Checkbox.Text = "Clean Upload";
+            this.Image_Upload_Delete_Server_Images_Checkbox.UseVisualStyleBackColor = true;
+            // 
+            // Image_Upload_Status_Text
+            // 
+            this.Image_Upload_Status_Text.AutoSize = true;
+            this.Image_Upload_Status_Text.ForeColor = System.Drawing.Color.ForestGreen;
+            this.Image_Upload_Status_Text.Location = new System.Drawing.Point(13, 419);
+            this.Image_Upload_Status_Text.Name = "Image_Upload_Status_Text";
+            this.Image_Upload_Status_Text.Size = new System.Drawing.Size(163, 13);
+            this.Image_Upload_Status_Text.TabIndex = 33;
+            this.Image_Upload_Status_Text.Text = "Success. 1/1 Image(s) Uploaded";
+            // 
+            // Image_Upload_Submission_ID
+            // 
+            this.Image_Upload_Submission_ID.Location = new System.Drawing.Point(158, 387);
+            this.Image_Upload_Submission_ID.Name = "Image_Upload_Submission_ID";
+            this.Image_Upload_Submission_ID.ReadOnly = true;
+            this.Image_Upload_Submission_ID.Size = new System.Drawing.Size(100, 20);
+            this.Image_Upload_Submission_ID.TabIndex = 32;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(14, 390);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(80, 13);
+            this.label45.TabIndex = 31;
+            this.label45.Text = "Submission ID: ";
+            // 
+            // Image_Upload_Select_Image_Button
+            // 
+            this.Image_Upload_Select_Image_Button.Location = new System.Drawing.Point(162, 441);
+            this.Image_Upload_Select_Image_Button.Name = "Image_Upload_Select_Image_Button";
+            this.Image_Upload_Select_Image_Button.Size = new System.Drawing.Size(96, 23);
+            this.Image_Upload_Select_Image_Button.TabIndex = 30;
+            this.Image_Upload_Select_Image_Button.Text = "Select Image";
+            this.Image_Upload_Select_Image_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Select_Image_Button.Click += new System.EventHandler(this.Image_Upload_Select_Image_Button_Click);
+            // 
+            // Image_Upload_Add_Target
+            // 
+            this.Image_Upload_Add_Target.Location = new System.Drawing.Point(183, 77);
+            this.Image_Upload_Add_Target.Name = "Image_Upload_Add_Target";
+            this.Image_Upload_Add_Target.Size = new System.Drawing.Size(75, 23);
+            this.Image_Upload_Add_Target.TabIndex = 29;
+            this.Image_Upload_Add_Target.Text = "Add Target";
+            this.Image_Upload_Add_Target.UseVisualStyleBackColor = true;
+            this.Image_Upload_Add_Target.Click += new System.EventHandler(this.Image_Upload_Add_Target_Click);
+            // 
             // Image_Upload_Description
             // 
-            this.Image_Upload_Description.Location = new System.Drawing.Point(158, 306);
+            this.Image_Upload_Description.Location = new System.Drawing.Point(158, 360);
             this.Image_Upload_Description.Name = "Image_Upload_Description";
             this.Image_Upload_Description.Size = new System.Drawing.Size(100, 20);
             this.Image_Upload_Description.TabIndex = 28;
@@ -849,7 +951,7 @@
             // label44
             // 
             this.label44.AutoSize = true;
-            this.label44.Location = new System.Drawing.Point(14, 306);
+            this.label44.Location = new System.Drawing.Point(14, 360);
             this.label44.Name = "label44";
             this.label44.Size = new System.Drawing.Size(60, 13);
             this.label44.TabIndex = 27;
@@ -858,7 +960,7 @@
             // label37
             // 
             this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(155, 74);
+            this.label37.Location = new System.Drawing.Point(155, 128);
             this.label37.Name = "label37";
             this.label37.Size = new System.Drawing.Size(31, 13);
             this.label37.TabIndex = 26;
@@ -872,7 +974,7 @@
             "standard",
             "off_axis",
             "emergent"});
-            this.Image_Upload_Type.Location = new System.Drawing.Point(158, 90);
+            this.Image_Upload_Type.Location = new System.Drawing.Point(158, 144);
             this.Image_Upload_Type.Name = "Image_Upload_Type";
             this.Image_Upload_Type.Size = new System.Drawing.Size(100, 21);
             this.Image_Upload_Type.TabIndex = 25;
@@ -896,7 +998,7 @@
             "octagon",
             "star",
             "cross"});
-            this.Image_Upload_Shape.Location = new System.Drawing.Point(158, 276);
+            this.Image_Upload_Shape.Location = new System.Drawing.Point(158, 330);
             this.Image_Upload_Shape.Name = "Image_Upload_Shape";
             this.Image_Upload_Shape.Size = new System.Drawing.Size(100, 21);
             this.Image_Upload_Shape.TabIndex = 24;
@@ -917,7 +1019,7 @@
             "purple",
             "brown",
             "orange"});
-            this.Image_Upload_Alphanumeric_Colour.Location = new System.Drawing.Point(158, 249);
+            this.Image_Upload_Alphanumeric_Colour.Location = new System.Drawing.Point(158, 303);
             this.Image_Upload_Alphanumeric_Colour.Name = "Image_Upload_Alphanumeric_Colour";
             this.Image_Upload_Alphanumeric_Colour.Size = new System.Drawing.Size(100, 21);
             this.Image_Upload_Alphanumeric_Colour.TabIndex = 23;
@@ -925,7 +1027,7 @@
             // 
             // Image_Upload_Alphanumeric
             // 
-            this.Image_Upload_Alphanumeric.Location = new System.Drawing.Point(158, 223);
+            this.Image_Upload_Alphanumeric.Location = new System.Drawing.Point(158, 277);
             this.Image_Upload_Alphanumeric.MaxLength = 1;
             this.Image_Upload_Alphanumeric.Name = "Image_Upload_Alphanumeric";
             this.Image_Upload_Alphanumeric.Size = new System.Drawing.Size(100, 20);
@@ -945,7 +1047,7 @@
             "SW",
             "W",
             "NW"});
-            this.Image_Upload_Orientation.Location = new System.Drawing.Point(158, 169);
+            this.Image_Upload_Orientation.Location = new System.Drawing.Point(158, 223);
             this.Image_Upload_Orientation.Name = "Image_Upload_Orientation";
             this.Image_Upload_Orientation.Size = new System.Drawing.Size(100, 21);
             this.Image_Upload_Orientation.TabIndex = 21;
@@ -953,7 +1055,7 @@
             // 
             // Image_Upload_Longitude
             // 
-            this.Image_Upload_Longitude.Location = new System.Drawing.Point(158, 143);
+            this.Image_Upload_Longitude.Location = new System.Drawing.Point(158, 197);
             this.Image_Upload_Longitude.Name = "Image_Upload_Longitude";
             this.Image_Upload_Longitude.Size = new System.Drawing.Size(100, 20);
             this.Image_Upload_Longitude.TabIndex = 20;
@@ -962,7 +1064,7 @@
             // 
             // Image_Upload_Latitude
             // 
-            this.Image_Upload_Latitude.Location = new System.Drawing.Point(158, 117);
+            this.Image_Upload_Latitude.Location = new System.Drawing.Point(158, 171);
             this.Image_Upload_Latitude.Name = "Image_Upload_Latitude";
             this.Image_Upload_Latitude.Size = new System.Drawing.Size(100, 20);
             this.Image_Upload_Latitude.TabIndex = 19;
@@ -984,7 +1086,7 @@
             "purple",
             "brown",
             "orange"});
-            this.Image_Upload_Background_Colour.Location = new System.Drawing.Point(158, 196);
+            this.Image_Upload_Background_Colour.Location = new System.Drawing.Point(158, 250);
             this.Image_Upload_Background_Colour.Name = "Image_Upload_Background_Colour";
             this.Image_Upload_Background_Colour.Size = new System.Drawing.Size(100, 21);
             this.Image_Upload_Background_Colour.TabIndex = 18;
@@ -993,7 +1095,7 @@
             // label43
             // 
             this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(13, 252);
+            this.label43.Location = new System.Drawing.Point(13, 306);
             this.label43.Name = "label43";
             this.label43.Size = new System.Drawing.Size(106, 13);
             this.label43.TabIndex = 17;
@@ -1002,7 +1104,7 @@
             // label42
             // 
             this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(13, 226);
+            this.label42.Location = new System.Drawing.Point(13, 280);
             this.label42.Name = "label42";
             this.label42.Size = new System.Drawing.Size(73, 13);
             this.label42.TabIndex = 16;
@@ -1011,7 +1113,7 @@
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(13, 200);
+            this.label41.Location = new System.Drawing.Point(13, 254);
             this.label41.Name = "label41";
             this.label41.Size = new System.Drawing.Size(98, 13);
             this.label41.TabIndex = 15;
@@ -1020,7 +1122,7 @@
             // label40
             // 
             this.label40.AutoSize = true;
-            this.label40.Location = new System.Drawing.Point(13, 146);
+            this.label40.Location = new System.Drawing.Point(13, 200);
             this.label40.Name = "label40";
             this.label40.Size = new System.Drawing.Size(54, 13);
             this.label40.TabIndex = 14;
@@ -1029,7 +1131,7 @@
             // label39
             // 
             this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(13, 120);
+            this.label39.Location = new System.Drawing.Point(13, 174);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(45, 13);
             this.label39.TabIndex = 13;
@@ -1038,7 +1140,7 @@
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(14, 279);
+            this.label38.Location = new System.Drawing.Point(14, 333);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(38, 13);
             this.label38.TabIndex = 12;
@@ -1047,7 +1149,7 @@
             // label36
             // 
             this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(13, 172);
+            this.label36.Location = new System.Drawing.Point(13, 226);
             this.label36.Name = "label36";
             this.label36.Size = new System.Drawing.Size(58, 13);
             this.label36.TabIndex = 10;
@@ -1056,7 +1158,7 @@
             // label35
             // 
             this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(14, 365);
+            this.label35.Location = new System.Drawing.Point(14, 454);
             this.label35.Name = "label35";
             this.label35.Size = new System.Drawing.Size(77, 13);
             this.label35.TabIndex = 9;
@@ -1065,17 +1167,18 @@
             // Image_Upload_Picture
             // 
             this.Image_Upload_Picture.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Image_Upload_Picture.Location = new System.Drawing.Point(16, 381);
+            this.Image_Upload_Picture.Location = new System.Drawing.Point(16, 470);
             this.Image_Upload_Picture.Name = "Image_Upload_Picture";
-            this.Image_Upload_Picture.Size = new System.Drawing.Size(242, 144);
+            this.Image_Upload_Picture.Size = new System.Drawing.Size(242, 109);
             this.Image_Upload_Picture.TabIndex = 8;
             this.Image_Upload_Picture.TabStop = false;
+            this.Image_Upload_Picture.DoubleClick += new System.EventHandler(this.Image_Upload_Picture_DoubleClick);
             // 
             // label34
             // 
             this.label34.AutoSize = true;
             this.label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label34.Location = new System.Drawing.Point(13, 74);
+            this.label34.Location = new System.Drawing.Point(12, 128);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(54, 13);
             this.label34.TabIndex = 7;
@@ -1087,30 +1190,31 @@
             this.Image_Upload_Target_Select.FormattingEnabled = true;
             this.Image_Upload_Target_Select.Items.AddRange(new object[] {
             "Target 1"});
-            this.Image_Upload_Target_Select.Location = new System.Drawing.Point(17, 90);
+            this.Image_Upload_Target_Select.Location = new System.Drawing.Point(16, 144);
             this.Image_Upload_Target_Select.Name = "Image_Upload_Target_Select";
             this.Image_Upload_Target_Select.Size = new System.Drawing.Size(121, 21);
             this.Image_Upload_Target_Select.TabIndex = 6;
             this.Image_Upload_Target_Select.SelectedIndexChanged += new System.EventHandler(this.Image_Upload_Target_Select_SelectedIndexChanged);
             // 
-            // Image_Upload_Download_Button
+            // Image_Upload_Delete_Button
             // 
-            this.Image_Upload_Download_Button.Location = new System.Drawing.Point(97, 47);
-            this.Image_Upload_Download_Button.Name = "Image_Upload_Download_Button";
-            this.Image_Upload_Download_Button.Size = new System.Drawing.Size(75, 23);
-            this.Image_Upload_Download_Button.TabIndex = 5;
-            this.Image_Upload_Download_Button.Text = "Download";
-            this.Image_Upload_Download_Button.UseVisualStyleBackColor = true;
-            this.Image_Upload_Download_Button.Click += new System.EventHandler(this.Image_Upload_Download_Button_Click);
+            this.Image_Upload_Delete_Button.Location = new System.Drawing.Point(183, 48);
+            this.Image_Upload_Delete_Button.Name = "Image_Upload_Delete_Button";
+            this.Image_Upload_Delete_Button.Size = new System.Drawing.Size(75, 23);
+            this.Image_Upload_Delete_Button.TabIndex = 5;
+            this.Image_Upload_Delete_Button.Text = "Delete Target";
+            this.Image_Upload_Delete_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Delete_Button.Click += new System.EventHandler(this.Image_Upload_Delete_Button_Click);
             // 
             // Image_Upload_Upload_Button
             // 
-            this.Image_Upload_Upload_Button.Location = new System.Drawing.Point(16, 48);
+            this.Image_Upload_Upload_Button.BackColor = System.Drawing.Color.LimeGreen;
+            this.Image_Upload_Upload_Button.Location = new System.Drawing.Point(93, 77);
             this.Image_Upload_Upload_Button.Name = "Image_Upload_Upload_Button";
             this.Image_Upload_Upload_Button.Size = new System.Drawing.Size(75, 23);
             this.Image_Upload_Upload_Button.TabIndex = 4;
             this.Image_Upload_Upload_Button.Text = "Upload";
-            this.Image_Upload_Upload_Button.UseVisualStyleBackColor = true;
+            this.Image_Upload_Upload_Button.UseVisualStyleBackColor = false;
             this.Image_Upload_Upload_Button.Click += new System.EventHandler(this.Image_Upload_Upload_Button_Click);
             // 
             // label33
@@ -1142,7 +1246,7 @@
             this.Callout_Tab.Location = new System.Drawing.Point(4, 22);
             this.Callout_Tab.Name = "Callout_Tab";
             this.Callout_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Callout_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Callout_Tab.Size = new System.Drawing.Size(271, 585);
             this.Callout_Tab.TabIndex = 5;
             this.Callout_Tab.Text = "Callouts";
             this.Callout_Tab.UseVisualStyleBackColor = true;
@@ -1295,7 +1399,7 @@
             this.Goose_Tab.Location = new System.Drawing.Point(4, 22);
             this.Goose_Tab.Name = "Goose_Tab";
             this.Goose_Tab.Padding = new System.Windows.Forms.Padding(3);
-            this.Goose_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Goose_Tab.Size = new System.Drawing.Size(271, 585);
             this.Goose_Tab.TabIndex = 6;
             this.Goose_Tab.Text = "Goose Control";
             this.Goose_Tab.UseVisualStyleBackColor = true;
@@ -1404,7 +1508,7 @@
             this.Solar_PV_Tab_Page.Location = new System.Drawing.Point(4, 22);
             this.Solar_PV_Tab_Page.Name = "Solar_PV_Tab_Page";
             this.Solar_PV_Tab_Page.Padding = new System.Windows.Forms.Padding(3);
-            this.Solar_PV_Tab_Page.Size = new System.Drawing.Size(271, 531);
+            this.Solar_PV_Tab_Page.Size = new System.Drawing.Size(271, 585);
             this.Solar_PV_Tab_Page.TabIndex = 7;
             this.Solar_PV_Tab_Page.Text = "Solar PV Control";
             this.Solar_PV_Tab_Page.UseVisualStyleBackColor = true;
@@ -1557,7 +1661,7 @@
             this.Bottle_Drop_Tab.Controls.Add(this.label28);
             this.Bottle_Drop_Tab.Location = new System.Drawing.Point(4, 22);
             this.Bottle_Drop_Tab.Name = "Bottle_Drop_Tab";
-            this.Bottle_Drop_Tab.Size = new System.Drawing.Size(271, 531);
+            this.Bottle_Drop_Tab.Size = new System.Drawing.Size(271, 585);
             this.Bottle_Drop_Tab.TabIndex = 8;
             this.Bottle_Drop_Tab.Text = "Bottle Drop";
             this.Bottle_Drop_Tab.UseVisualStyleBackColor = true;
@@ -1714,7 +1818,7 @@
             // 
             this.UAS_GPS_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.UAS_GPS_Label.AutoSize = true;
-            this.UAS_GPS_Label.Location = new System.Drawing.Point(375, 570);
+            this.UAS_GPS_Label.Location = new System.Drawing.Point(375, 624);
             this.UAS_GPS_Label.Name = "UAS_GPS_Label";
             this.UAS_GPS_Label.Size = new System.Drawing.Size(115, 13);
             this.UAS_GPS_Label.TabIndex = 9;
@@ -1724,7 +1828,7 @@
             // 
             this.UAS_Altitude_ASL_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.UAS_Altitude_ASL_Label.AutoSize = true;
-            this.UAS_Altitude_ASL_Label.Location = new System.Drawing.Point(635, 570);
+            this.UAS_Altitude_ASL_Label.Location = new System.Drawing.Point(635, 624);
             this.UAS_Altitude_ASL_Label.Name = "UAS_Altitude_ASL_Label";
             this.UAS_Altitude_ASL_Label.Size = new System.Drawing.Size(48, 13);
             this.UAS_Altitude_ASL_Label.TabIndex = 10;
@@ -1734,7 +1838,7 @@
             // 
             this.AutoPan_Checkbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AutoPan_Checkbox.AutoSize = true;
-            this.AutoPan_Checkbox.Location = new System.Drawing.Point(871, 569);
+            this.AutoPan_Checkbox.Location = new System.Drawing.Point(871, 623);
             this.AutoPan_Checkbox.Name = "AutoPan_Checkbox";
             this.AutoPan_Checkbox.Size = new System.Drawing.Size(70, 17);
             this.AutoPan_Checkbox.TabIndex = 11;
@@ -1747,7 +1851,7 @@
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(297, 570);
+            this.label13.Location = new System.Drawing.Point(297, 624);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(72, 13);
             this.label13.TabIndex = 12;
@@ -1758,7 +1862,7 @@
             this.label14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(547, 570);
+            this.label14.Location = new System.Drawing.Point(547, 624);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(82, 13);
             this.label14.TabIndex = 13;
@@ -1770,7 +1874,7 @@
             this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(700, 570);
+            this.label15.Location = new System.Drawing.Point(700, 624);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(83, 13);
             this.label15.TabIndex = 14;
@@ -1782,7 +1886,7 @@
             // 
             this.UAS_D_Altitude_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.UAS_D_Altitude_Label.AutoSize = true;
-            this.UAS_D_Altitude_Label.Location = new System.Drawing.Point(789, 570);
+            this.UAS_D_Altitude_Label.Location = new System.Drawing.Point(789, 624);
             this.UAS_D_Altitude_Label.Name = "UAS_D_Altitude_Label";
             this.UAS_D_Altitude_Label.Size = new System.Drawing.Size(48, 13);
             this.UAS_D_Altitude_Label.TabIndex = 15;
@@ -1793,7 +1897,7 @@
             this.Flight_Time_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.Flight_Time_Label.AutoSize = true;
             this.Flight_Time_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Flight_Time_Label.Location = new System.Drawing.Point(1035, 570);
+            this.Flight_Time_Label.Location = new System.Drawing.Point(1035, 624);
             this.Flight_Time_Label.Name = "Flight_Time_Label";
             this.Flight_Time_Label.Size = new System.Drawing.Size(73, 13);
             this.Flight_Time_Label.TabIndex = 17;
@@ -1846,7 +1950,7 @@
             // 
             this.FlightTimeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.FlightTimeLabel.AutoSize = true;
-            this.FlightTimeLabel.Location = new System.Drawing.Point(1114, 570);
+            this.FlightTimeLabel.Location = new System.Drawing.Point(1114, 624);
             this.FlightTimeLabel.Name = "FlightTimeLabel";
             this.FlightTimeLabel.Size = new System.Drawing.Size(49, 13);
             this.FlightTimeLabel.TabIndex = 18;
@@ -2050,7 +2154,7 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(869, 540);
+            this.gMapControl1.Size = new System.Drawing.Size(869, 594);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 0D;
             this.gMapControl1.OnMapDrag += new GMap.NET.MapDrag(this.gMapControl1_OnMapDrag);
@@ -2076,31 +2180,11 @@
             this.AUVSI_ARSPD_Label.TabIndex = 21;
             this.AUVSI_ARSPD_Label.Text = "UAS Airspeed: ";
             // 
-            // Image_Upload_Add_Target
-            // 
-            this.Image_Upload_Add_Target.Location = new System.Drawing.Point(179, 48);
-            this.Image_Upload_Add_Target.Name = "Image_Upload_Add_Target";
-            this.Image_Upload_Add_Target.Size = new System.Drawing.Size(75, 23);
-            this.Image_Upload_Add_Target.TabIndex = 29;
-            this.Image_Upload_Add_Target.Text = "Add Target";
-            this.Image_Upload_Add_Target.UseVisualStyleBackColor = true;
-            this.Image_Upload_Add_Target.Click += new System.EventHandler(this.Image_Upload_Add_Target_Click);
-            // 
-            // Image_Upload_Select_Image_Button
-            // 
-            this.Image_Upload_Select_Image_Button.Location = new System.Drawing.Point(158, 352);
-            this.Image_Upload_Select_Image_Button.Name = "Image_Upload_Select_Image_Button";
-            this.Image_Upload_Select_Image_Button.Size = new System.Drawing.Size(96, 23);
-            this.Image_Upload_Select_Image_Button.TabIndex = 30;
-            this.Image_Upload_Select_Image_Button.Text = "Select Image";
-            this.Image_Upload_Select_Image_Button.UseVisualStyleBackColor = true;
-            this.Image_Upload_Select_Image_Button.Click += new System.EventHandler(this.Image_Upload_Select_Image_Button_Click);
-            // 
             // Interoperability_GUI_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1178, 596);
+            this.ClientSize = new System.Drawing.Size(1178, 650);
             this.Controls.Add(this.AUVSI_ARSPD_Label);
             this.Controls.Add(this.AUVSI_Alt_Label);
             this.Controls.Add(this.FlightTimeLabel);
@@ -2313,7 +2397,7 @@
         private System.Windows.Forms.PictureBox Image_Upload_Picture;
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.ComboBox Image_Upload_Target_Select;
-        private System.Windows.Forms.Button Image_Upload_Download_Button;
+        private System.Windows.Forms.Button Image_Upload_Delete_Button;
         private System.Windows.Forms.Button Image_Upload_Upload_Button;
         private System.Windows.Forms.Label label33;
         private System.Windows.Forms.Label label41;
@@ -2336,5 +2420,12 @@
         private System.Windows.Forms.ComboBox Image_Upload_Type;
         private System.Windows.Forms.Button Image_Upload_Add_Target;
         private System.Windows.Forms.Button Image_Upload_Select_Image_Button;
+        private System.Windows.Forms.Label Image_Upload_Status_Text;
+        private System.Windows.Forms.TextBox Image_Upload_Submission_ID;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.CheckBox Image_Upload_Delete_Server_Images_Checkbox;
+        private System.Windows.Forms.Button Image_Upload_Folder_Import_Button;
+        private System.Windows.Forms.Button Image_Upload_Target_Export_Button;
+        private System.Windows.Forms.Button Image_Upload_Target_Import;
     }
 }
